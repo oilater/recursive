@@ -39,11 +39,11 @@ function walkAndTransform(
     let captureInjected = false;
 
     for (const stmt of node.body) {
-      // 루프 가드 + 반복마다 루프 라인 traceLine
+      // 루프: guard + body 끝에 루프 라인 trace (반복 시 while/for 라인으로 돌아가는 표시)
       if (isLoopStatement(stmt) && stmt.body?.type === "BlockStatement" && Array.isArray(stmt.body.body)) {
         const loopLine = stmt.loc?.start?.line;
-        const loopTrace = insideTracedFunc && loopLine ? [createTraceLineCall(loopLine)] : [];
-        stmt.body.body = [createGuardCall(), ...loopTrace, ...stmt.body.body];
+        const loopBackTrace = insideTracedFunc && loopLine ? [createTraceLineCall(loopLine)] : [];
+        stmt.body.body = [createGuardCall(), ...stmt.body.body, ...loopBackTrace];
       }
 
       // 추적 함수 내부: 첫 statement 전에 __captureVars 빌더 삽입
@@ -104,7 +104,8 @@ function walkAndTransform(
         }
       } else if (val.type) {
         const isFuncBody =
-          (node.type === "FunctionDeclaration" && node.id?.name === tracedFuncName) ||
+          (node.type === "FunctionDeclaration" &&
+            (node.id?.name === tracedFuncName || node.id?.name === "__entry__")) ||
           node.type === "FunctionExpression" ||
           node.type === "ArrowFunctionExpression";
         walkAndTransform(val, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc || (isFuncBody && key === "body"));
@@ -169,7 +170,34 @@ function createCaptureVarsInit(varNames: string[]): AstNode {
       start: 0,
       end: 0,
       param: { type: "Identifier", start: 0, end: 0, name: "__e" },
-      body: { type: "BlockStatement", start: 0, end: 0, body: [] },
+      body: {
+        type: "BlockStatement",
+        start: 0,
+        end: 0,
+        body: [
+          {
+            type: "ExpressionStatement",
+            start: 0,
+            end: 0,
+            expression: {
+              type: "AssignmentExpression",
+              start: 0,
+              end: 0,
+              operator: "=",
+              left: {
+                type: "MemberExpression",
+                start: 0,
+                end: 0,
+                object: { type: "Identifier", start: 0, end: 0, name: "__v" },
+                property: { type: "Identifier", start: 0, end: 0, name },
+                computed: false,
+                optional: false,
+              },
+              right: { type: "Literal", start: 0, end: 0, value: "-", raw: '"-"' },
+            },
+          },
+        ],
+      },
     },
     finalizer: null,
   }));

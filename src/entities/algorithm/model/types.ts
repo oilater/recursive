@@ -27,34 +27,20 @@ export interface StepGeneratorResult {
 
 export type Difficulty = "easy" | "medium" | "hard";
 
-export interface InputConfig {
-  type: "array" | "nk" | "single";
-  label: string;
-  defaults: Record<string, unknown>;
-  constraints: Record<string, unknown>;
-}
-
-export type StepGenerator = (input: Record<string, unknown>) => StepGeneratorResult;
-
-/**
- * 직렬화 가능한 알고리즘 메타데이터 (Server Component에서 사용 가능).
- * stepGenerator는 포함하지 않음.
- */
-export interface AlgorithmMeta {
+/** 프리셋 알고리즘 = 코드 + 기본 인자. 실행은 커스텀과 동일한 파이프라인. */
+export interface PresetAlgorithm {
   id: string;
   name: string;
   description: string;
   difficulty: Difficulty;
   code: string;
-  inputConfig: InputConfig;
-  isPremium: boolean;
+  defaultArgs: unknown[];
 }
 
-/** 홈 카드 표시용 최소 데이터 */
+/** 홈 카드 표시용 */
 export interface AlgorithmCardData {
   id: string;
   name: string;
   description: string;
   difficulty: Difficulty;
-  isPremium: boolean;
 }

@@ -61,11 +61,24 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
+/** 함수 노드 내부의 주요 변수명 추출 (선언 + 명명 함수 파라미터. 콜백 파라미터 제외) */
 function extractLocalVarNames(funcNode: AstNode): string[] {
   const names = new Set<string>();
+
+  // VariableDeclarator (const, let, var) — for-init의 루프 변수 포함
   for (const decl of collectInAst(funcNode, (n) => n.type === "VariableDeclarator" && n.id?.type === "Identifier")) {
     names.add(decl.id.name);
   }
+
+  // FunctionDeclaration 파라미터만 (명명 함수: dfs, permutation 등)
+  // ArrowFunction/FunctionExpression 파라미터는 콜백이므로 제외 (_, j 등)
+  for (const fn of collectInAst(funcNode, (n) => n.type === "FunctionDeclaration")) {
+    for (const param of fn.params ?? []) {
+      if (param.type === "Identifier" && param.name !== "_") names.add(param.name);
+      if (param.type === "AssignmentPattern" && param.left?.type === "Identifier") names.add(param.left.name);
+    }
+  }
+
   return [...names];
 }
 
@@ -162,8 +175,8 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
       entryParamNames: userFacingParams,
       recursiveFuncName: recursiveFunc?.name ?? null,
       recursiveParamNames: recursiveFunc?.params ?? [],
-      tracedFuncStartLine: entryFunc.startLine,
-      tracedFuncEndLine: entryFunc.endLine,
+      tracedFuncStartLine: recursiveFunc?.startLine ?? entryFunc.startLine,
+      tracedFuncEndLine: recursiveFunc?.endLine ?? entryFunc.endLine,
       localVarNames,
       hasRecursion: !!recursiveFunc,
       lineOffset: 1,

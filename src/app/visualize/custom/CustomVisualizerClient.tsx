@@ -71,14 +71,11 @@ export function CustomVisualizerClient() {
 
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.header}>
-        <a href="/" className={styles.backLink}>
-          ← 목록
-        </a>
+        <a href="/" className={styles.backLink}>← Recursive</a>
         {mode === "visualize" && (
           <button className={styles.backLink} onClick={handleEdit} style={{ marginLeft: "auto" }}>
-            ← 코드 편집
+            ← 편집
           </button>
         )}
       </div>
@@ -86,29 +83,25 @@ export function CustomVisualizerClient() {
       {/* Edit mode */}
       {(mode === "edit" || mode === "error") && (
         <div className={styles.editLayout}>
+          {error && <div className={styles.errorBox}>{error}</div>}
+          <div className={styles.hintBanner}>
+            💡 JS / TS 코드를 붙여넣으면 함수와 매개변수를 자동으로 인식해요. 값을 입력하고 실행해보세요!
+          </div>
           <div className={styles.editorPanel}>
-            <div className={styles.editorFullHeight}>
-              <PanelHeader title="코드" />
-              <div style={{ flex: 1, minHeight: 0 }}>
-                <CodeEditor value={code} onChange={handleCodeChange} />
-              </div>
-            </div>
+            <CodeEditor value={code} onChange={handleCodeChange} />
           </div>
           <div className={styles.argsPanel}>
-            {error && <div className={styles.errorBox}>{error}</div>}
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "flex-end" }}>
-              <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
-              <button
-                className={styles.runButton}
-                onClick={() => {
-                  const args = argFormRef.current?.getArgs() ?? [];
-                  handleExecute(args);
-                }}
-                disabled={!code.trim()}
-              >
-                실행
-              </button>
-            </div>
+            <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
+            <button
+              className={styles.runButton}
+              onClick={() => {
+                const args = argFormRef.current?.getArgs() ?? [];
+                handleExecute(args);
+              }}
+              disabled={!code.trim()}
+            >
+              ▶ 실행
+            </button>
           </div>
         </div>
       )}

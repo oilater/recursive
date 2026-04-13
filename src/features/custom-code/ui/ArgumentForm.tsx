@@ -50,7 +50,7 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
             value={values[name] || ""}
             onChange={(e) => updateField(name, e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onSubmit(buildArgs())}
-            placeholder="예: 5, [1,2,3]"
+            placeholder="값을 입력하세요"
           />
         </div>
       ))}

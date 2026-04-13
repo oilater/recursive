@@ -17,7 +17,6 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
     function highlightActiveLine() {
       if (!codeRef.current) return;
 
-      // 이전 하이라이트 모두 제거 (html이 바뀌면 DOM이 교체되므로)
       codeRef.current.querySelectorAll(".highlighted-line").forEach((el) => {
         el.classList.remove("highlighted-line");
       });

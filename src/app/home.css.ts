@@ -65,19 +65,19 @@ const cardBase = {
 export const customCard = style({
   ...cardBase,
   marginBottom: vars.space.xl,
-  background: `linear-gradient(135deg, rgba(74, 222, 128, 0.06), rgba(34, 211, 238, 0.06))`,
-  border: `1px solid rgba(74, 222, 128, 0.2)`,
+  background: `linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(99, 102, 241, 0.06))`,
+  border: `1px solid rgba(56, 189, 248, 0.2)`,
   ":hover": {
-    borderColor: "rgba(74, 222, 128, 0.5)",
+    borderColor: "rgba(56, 189, 248, 0.5)",
     transform: "translateY(-2px)",
-    boxShadow: "0 8px 24px rgba(74, 222, 128, 0.1)",
+    boxShadow: "0 8px 24px rgba(56, 189, 248, 0.1)",
   },
 });
 
 export const customCardIcon = style({
   fontSize: "20px",
   marginBottom: vars.space.sm,
-  color: "#4ade80",
+  color: "#38bdf8",
   fontFamily: vars.font.mono,
   fontWeight: "700",
 });

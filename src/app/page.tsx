@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { initializeAlgorithms } from "@/features/preset-algorithms";
-import { getFreeCardData, AlgorithmCard } from "@/entities/algorithm";
+import { getAllCardData, AlgorithmCard } from "@/entities/algorithm";
 import * as styles from "./home.css";
 
 initializeAlgorithms();
 
 export default function Home() {
-  const algorithms = getFreeCardData();
+  const algorithms = getAllCardData();
 
   return (
     <main className={styles.page}>
@@ -21,9 +21,9 @@ export default function Home() {
 
       <Link href="/visualize/custom" className={styles.customCard}>
         <div className={styles.customCardIcon}>{"</>"}</div>
-        <div className={styles.customCardTitle}>여기에 코드를 붙여넣으세요</div>
+        <div className={styles.customCardTitle}>여기에 코드를 적어보세요</div>
         <div className={styles.customCardDesc}>
-          JavaScript, TypeScript를 지원해요
+          JS / TS를 지원하고, 함수와 매개변수를 자동으로 인식해요.
         </div>
       </Link>
 

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { javascript } from "@codemirror/lang-javascript";
+import { placeholder as placeholderExt } from "@codemirror/view";
 import * as styles from "./code-editor.css";
 
 const ReactCodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
@@ -17,7 +18,10 @@ interface CodeEditorProps {
 }
 
 export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProps) {
-  const extensions = useMemo(() => [javascript({ typescript: true })], []);
+  const extensions = useMemo(
+    () => [javascript({ typescript: true }), placeholderExt("여기에 코드를 붙여넣으세요")],
+    []
+  );
 
   return (
     <div className={styles.editorRoot}>

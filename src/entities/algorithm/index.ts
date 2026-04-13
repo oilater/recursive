@@ -5,12 +5,10 @@ export type {
   TreeNode,
   StepGeneratorResult,
   Difficulty,
-  InputConfig,
-  AlgorithmMeta,
+  PresetAlgorithm,
   AlgorithmCardData,
-  StepGenerator,
 } from "./model/types";
 
-export { registerAlgorithm, getMeta, getFreeCardData, getPremiumCardData, getStepGenerator } from "./model/registry";
+export { registerAlgorithm, getPreset, getAllPresets, getAllCardData } from "./model/registry";
 
 export { AlgorithmCard } from "./ui/AlgorithmCard";

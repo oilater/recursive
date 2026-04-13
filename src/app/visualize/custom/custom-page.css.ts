@@ -33,22 +33,29 @@ export const title = style({
 
 export const editLayout = style({
   flex: 1,
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gridTemplateRows: "1fr auto",
-  gap: vars.space.sm,
-  padding: vars.space.sm,
-  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  padding: vars.space.lg,
+  maxWidth: "900px",
+  width: "100%",
+  margin: "0 auto",
+  overflow: "auto",
+  gap: vars.space.md,
 });
 
 export const editorPanel = style({
-  gridColumn: "1 / -1",
-  overflow: "hidden",
-  minHeight: 0,
+  flex: 1,
+  overflow: "auto",
+  minHeight: "300px",
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
 });
 
 export const argsPanel = style({
-  gridColumn: "1 / -1",
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.md,
+  justifyContent: "flex-end",
 });
 
 export const leftPanel = style({
@@ -116,6 +123,16 @@ export const vizRow = style({
   gap: "16px",
 });
 
+export const hintBanner = style({
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  backgroundColor: "rgba(56, 189, 248, 0.08)",
+  border: `1px solid rgba(56, 189, 248, 0.2)`,
+  borderRadius: vars.radius.md,
+  color: vars.color.textMuted,
+  fontSize: vars.fontSize.sm,
+  lineHeight: 1.5,
+});
+
 export const editorFullHeight = style({
   display: "flex",
   flexDirection: "column",
@@ -123,18 +140,17 @@ export const editorFullHeight = style({
 });
 
 export const runButton = style({
-  padding: `${vars.space.md} ${vars.space.xxl}`,
-  backgroundColor: "#4ade80",
+  padding: `${vars.space.sm} ${vars.space.xl}`,
+  backgroundColor: "#38bdf8",
   color: "#0a0a0a",
   borderRadius: vars.radius.md,
-  fontSize: vars.fontSize.md,
+  fontSize: vars.fontSize.sm,
   fontWeight: "700",
   whiteSpace: "nowrap",
   transition: "all 0.15s ease",
   flexShrink: 0,
-  alignSelf: "stretch",
   ":hover": {
-    backgroundColor: "#22c55e",
+    backgroundColor: "#0ea5e9",
   },
   selectors: {
     "&:disabled": {

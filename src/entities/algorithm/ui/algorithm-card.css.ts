@@ -19,51 +19,6 @@ export const card = style({
   },
 });
 
-export const lockedCard = style([
-  card,
-  {
-    opacity: 0.5,
-    ":hover": {
-      borderColor: vars.color.border,
-      transform: "none",
-      boxShadow: "none",
-    },
-  },
-]);
-
-export const premiumBadge = style({
-  position: "absolute",
-  top: vars.space.sm,
-  right: vars.space.sm,
-  padding: `2px ${vars.space.sm}`,
-  backgroundColor: "#f59e0b20",
-  color: "#f59e0b",
-  borderRadius: vars.radius.full,
-  fontSize: vars.fontSize.xs,
-  fontWeight: "600",
-});
-
-export const lockOverlay = style({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "rgba(15, 15, 19, 0.5)",
-  backdropFilter: "blur(2px)",
-  fontSize: "32px",
-  opacity: 0,
-  transition: "opacity 0.2s ease",
-  selectors: {
-    [`${card}:hover &, ${lockedCard}:hover &`]: {
-      opacity: 1,
-    },
-  },
-});
-
 export const name = style({
   fontSize: vars.fontSize.lg,
   fontWeight: "600",

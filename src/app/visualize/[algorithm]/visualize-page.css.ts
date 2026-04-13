@@ -19,15 +19,10 @@ export const header = style({
 });
 
 export const backLink = style({
-  display: "flex",
-  alignItems: "center",
-  gap: vars.space.xs,
   color: vars.color.textMuted,
   fontSize: vars.fontSize.sm,
   textDecoration: "none",
-  ":hover": {
-    color: vars.color.text,
-  },
+  ":hover": { color: vars.color.text },
 });
 
 export const algoTitle = style({
@@ -50,7 +45,6 @@ export const leftPanel = style({
   flexDirection: "column",
   gap: vars.space.sm,
   overflow: "hidden",
-  flexShrink: 0,
 });
 
 export const codeSection = style({
@@ -92,42 +86,4 @@ export const bottomPanel = style({
   flexDirection: "column",
   gap: vars.space.sm,
   flexShrink: 0,
-});
-
-export const lockedContainer = style({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100vh",
-  gap: vars.space.lg,
-  textAlign: "center",
-});
-
-export const lockedIcon = style({
-  fontSize: "64px",
-  opacity: 0.5,
-});
-
-export const lockedTitle = style({
-  fontSize: vars.fontSize.xl,
-  fontWeight: "600",
-});
-
-export const lockedMessage = style({
-  fontSize: vars.fontSize.md,
-  color: vars.color.textMuted,
-  maxWidth: "400px",
-});
-
-export const homeButton = style({
-  padding: `${vars.space.sm} ${vars.space.lg}`,
-  backgroundColor: vars.color.primary,
-  color: "white",
-  borderRadius: vars.radius.md,
-  fontSize: vars.fontSize.md,
-  textDecoration: "none",
-  ":hover": {
-    backgroundColor: vars.color.primaryLight,
-  },
 });

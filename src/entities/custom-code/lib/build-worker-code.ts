@@ -143,6 +143,24 @@ self.onmessage = function(e) {
 
           callStack.push({ nodeId: nodeId, node: node });
 
+          // 함수 선언부 하이라이트 (진입 표시) — 이전 step의 변수 + 파라미터 합침
+          var entryLine = Math.max(1, funcStartLine - lineOffset);
+          if (entryLine >= 1 && entryLine <= originalLineCount) {
+            var prevVars = steps.length > 0 ? Object.assign({}, steps[steps.length - 1].variables) : {};
+            for (var i = 0; i < recursiveParamNames.length; i++) {
+              prevVars[recursiveParamNames[i]] = deepClone(argsList[i]);
+            }
+            steps.push({
+              id: stepId++,
+              type: 'call',
+              codeLine: entryLine,
+              activeNodeId: nodeId,
+              activePath: getPath(callStack, nodeId),
+              variables: prevVars,
+              description: recursiveFuncName + '(' + formatArgs(argsList) + ')'
+            });
+          }
+
           var result;
           try {
             result = Reflect.apply(target, thisArg, argsList);
