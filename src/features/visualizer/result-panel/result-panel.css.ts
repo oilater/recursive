@@ -1,0 +1,73 @@
+import { style } from "@vanilla-extract/css";
+import { vars } from "@/shared/styles/theme.css";
+
+export const container = style({
+  padding: vars.space.md,
+  backgroundColor: vars.color.surface,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
+  overflow: "auto",
+  maxHeight: "200px",
+});
+
+export const title = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  marginBottom: vars.space.sm,
+  userSelect: "none",
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+});
+
+export const countBadge = style({
+  padding: `0 ${vars.space.xs}`,
+  borderRadius: vars.radius.full,
+  backgroundColor: "rgba(34, 197, 94, 0.15)",
+  color: "#22c55e",
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+});
+
+export const resultItem = style({
+  display: "inline-flex",
+  padding: `2px ${vars.space.sm}`,
+  margin: "2px",
+  backgroundColor: vars.color.surfaceAlt,
+  borderRadius: vars.radius.sm,
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  transition: "all 0.2s ease",
+});
+
+export const resultItemNew = style([
+  resultItem,
+  {
+    backgroundColor: "rgba(34, 197, 94, 0.15)",
+    outline: "1px solid #22c55e",
+  },
+]);
+
+export const finalResult = style({
+  marginTop: vars.space.sm,
+  padding: vars.space.sm,
+  backgroundColor: "rgba(99, 102, 241, 0.1)",
+  borderRadius: vars.radius.md,
+  border: "1px solid rgba(99, 102, 241, 0.3)",
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-all",
+  maxHeight: "80px",
+  overflow: "auto",
+});
+
+export const finalLabel = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.primary,
+  marginBottom: vars.space.xs,
+  fontWeight: 600,
+});
