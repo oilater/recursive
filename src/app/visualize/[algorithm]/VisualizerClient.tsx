@@ -29,12 +29,12 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
   const stepGenerator = getStepGenerator(algorithmId)!;
 
   const [input, setInput] = useState<Record<string, unknown>>(meta.inputConfig.defaults);
-  const [leftWidth, setLeftWidth] = useState(440);
+  const [leftWidth, setLeftWidth] = useState(640);
 
   const result: StepGeneratorResult = useMemo(() => stepGenerator(input), [stepGenerator, input]);
   const player = useAlgorithmPlayer(result.steps);
 
-  const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(600, w + delta)));
+  const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(800, w + delta)));
 
   const prevStep = player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined;
   const difficultyLabel = { easy: "쉬움", medium: "보통", hard: "어려움" }[meta.difficulty];
@@ -52,7 +52,7 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
       <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "8px" }}>
           {/* Col 1: 코드 */}
-          <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "500px" }}>
+          <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "800px" }}>
             <div className={styles.codeSection}>
               <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
             </div>

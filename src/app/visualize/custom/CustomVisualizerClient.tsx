@@ -7,6 +7,7 @@ import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodeP
 import { CodeEditor, ArgumentForm, executeCustomCode, analyzeCode } from "@/features/custom-code";
 import type { ArgumentFormHandle } from "@/features/custom-code";
 import { highlightCode } from "@/shared/lib/shiki";
+import { normalizeCode } from "@/shared/lib/normalize-code";
 import { PanelHeader, ResizeHandle } from "@/shared/ui";
 import * as styles from "./custom-page.css";
 
@@ -24,7 +25,7 @@ export function CustomVisualizerClient() {
   const [consoleLogs, setConsoleLogs] = useState<Array<{ text: string; stepIdx: number }>>([]);
   const [codeHtml, setCodeHtml] = useState<string>("");
   const [paramNames, setParamNames] = useState<string[]>([]);
-  const [leftWidth, setLeftWidth] = useState(440);
+  const [leftWidth, setLeftWidth] = useState(640);
   const argsRef = useRef<unknown[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
 
@@ -45,12 +46,13 @@ export function CustomVisualizerClient() {
     setMode("loading");
     setError(null);
     try {
-      const execResult = await executeCustomCode(code, args);
+      const cleanCode = normalizeCode(code);
+      const execResult = await executeCustomCode(cleanCode, args);
       setResult(execResult.result);
       setFinalReturnValue(execResult.finalReturnValue);
       setHasRecursion(execResult.analysis.hasRecursion);
       setConsoleLogs(execResult.consoleLogs ?? []);
-      const html = await highlightCode(code);
+      const html = await highlightCode(cleanCode);
       setCodeHtml(html);
       setMode("visualize");
     } catch (err) {
@@ -59,7 +61,7 @@ export function CustomVisualizerClient() {
     }
   };
 
-  const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(600, w + delta)));
+  const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(800, w + delta)));
 
   const handleEdit = () => {
     setMode("edit");
@@ -119,7 +121,7 @@ export function CustomVisualizerClient() {
         <div className={styles.vizContainer}>
           <div className={styles.vizRow}>
             {/* Col 1: 코드 */}
-            <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "500px" }}>
+            <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "800px" }}>
               <div className={styles.codeSection}>
                 <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
               </div>

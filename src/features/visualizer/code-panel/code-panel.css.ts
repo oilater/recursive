@@ -38,17 +38,14 @@ globalStyle(`${container} code`, {
 
 globalStyle(`${container} span.line`, {
   display: "block",
-  padding: `0 ${vars.space.md}`,
-  marginLeft: `-${vars.space.md}`,
-  marginRight: `-${vars.space.md}`,
+  paddingLeft: vars.space.sm,
   borderLeft: "3px solid transparent",
   lineHeight: "1.6",
   transition: "background-color 0.15s ease, border-color 0.15s ease",
 });
 
 globalStyle(`${container} span.line:empty::after`, {
-  content: "'\\200b'",
-  lineHeight: "0.5",
+  content: "'\\00a0'",
 });
 
 globalStyle(`${container} .line.highlighted-line`, {

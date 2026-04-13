@@ -53,7 +53,9 @@ function walkAndTransform(
       }
 
       // 추적 함수 내부면 매 statement 앞에 __traceLine 삽입
-      if (insideTracedFunc && stmt.loc?.start?.line) {
+      // FunctionDeclaration, EmptyStatement는 제외 (선언 자체는 실행 아님)
+      const skipTrace = stmt.type === "FunctionDeclaration" || stmt.type === "EmptyStatement";
+      if (insideTracedFunc && stmt.loc?.start?.line && !skipTrace) {
         newBody.push(createTraceLineCall(stmt.loc.start.line));
       }
 
