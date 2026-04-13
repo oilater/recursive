@@ -22,6 +22,7 @@
     "@vanilla-extract/css": "^1.20.1",
     "@vanilla-extract/dynamic": "^2.1.5",
     "@vanilla-extract/recipes": "^0.5.7",
+    "@vercel/analytics": "^2.0.1",
     "acorn": "^8.16.0",
     "astring": "^1.9.0",
     "d3-hierarchy": "^3.1.2",
