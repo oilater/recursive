@@ -1,6 +1,7 @@
 import * as acorn from "acorn";
 import { stripTypeScript } from "./strip-types";
 import type { AnalysisResult } from "./types";
+import { ENTRY_FUNC_NAME } from "./constants";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
@@ -151,7 +152,7 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
 
   const topLevelFunc = originalFunctions.length > 0 ? originalFunctions[0] : null;
   const returnRef = topLevelFunc ? `\nreturn ${topLevelFunc.name};` : "";
-  const wrappedCode = `function __entry__() {\n${strippedCode}${returnRef}\n}`;
+  const wrappedCode = `function ${ENTRY_FUNC_NAME}() {\n${strippedCode}${returnRef}\n}`;
   const wrappedAst = acorn.parse(wrappedCode, {
     ecmaVersion: 2022,
     sourceType: "script",
@@ -159,10 +160,10 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
   }) as AstNode;
   const wrappedFunctions = findAllFunctions(wrappedAst);
 
-  const entryFunc = wrappedFunctions.find((f) => f.name === "__entry__")!;
+  const entryFunc = wrappedFunctions.find((f) => f.name === ENTRY_FUNC_NAME)!;
 
   const recursiveFunc =
-    wrappedFunctions.find((f) => f.name !== "__entry__" && f.isRecursive) ?? null;
+    wrappedFunctions.find((f) => f.name !== ENTRY_FUNC_NAME && f.isRecursive) ?? null;
 
   const localVarNames = [
     ...new Set([...entryFunc.params, ...extractLocalVarNames(entryFunc.node)]),
@@ -173,7 +174,7 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
   return {
     strippedCode: wrappedCode,
     analysis: {
-      entryFuncName: "__entry__",
+      entryFuncName: ENTRY_FUNC_NAME,
       entryParamNames: userFacingParams,
       recursiveFuncName: recursiveFunc?.name ?? null,
       recursiveParamNames: recursiveFunc?.params ?? [],

@@ -1,6 +1,7 @@
 import * as acorn from "acorn";
 import { generate } from "astring";
 import type { AnalysisResult } from "./types";
+import { ENTRY_FUNC_NAME, TRACE_LINE, CAPTURE_VARS, CREATE_PROXY, GUARD } from "./constants";
 import {
   id,
   literal,
@@ -121,7 +122,7 @@ function walkAndTransform(
       } else if (val.type) {
         const isFuncBody =
           (node.type === "FunctionDeclaration" &&
-            (node.id?.name === tracedFuncName || node.id?.name === "__entry__")) ||
+            (node.id?.name === tracedFuncName || node.id?.name === ENTRY_FUNC_NAME)) ||
           node.type === "FunctionExpression" ||
           node.type === "ArrowFunctionExpression";
         walkAndTransform(
@@ -147,19 +148,19 @@ function captureVarsInit(varNames: string[]): AstNode {
   );
 
   return varDecl(
-    "__captureVars",
+    CAPTURE_VARS,
     funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
   );
 }
 
 function traceLineCall(line: number): AstNode {
-  return expr(call(id("__traceLine"), [literal(line), call(id("__captureVars"))]));
+  return expr(call(id(TRACE_LINE), [literal(line), call(id(CAPTURE_VARS))]));
 }
 
 function proxyReassignment(funcName: string): AstNode {
-  return expr(assign(id(funcName), call(id("__createProxy"), [id(funcName)])));
+  return expr(assign(id(funcName), call(id(CREATE_PROXY), [id(funcName)])));
 }
 
 function guardCall(): AstNode {
-  return expr(call(id("__guard")));
+  return expr(call(id(GUARD)));
 }

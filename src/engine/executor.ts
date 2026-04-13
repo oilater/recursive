@@ -3,10 +3,11 @@ import type { ExecuteOptions, AnalysisResult } from "./types";
 import { analyzeCode } from "./analyzer";
 import { transformCode } from "./transformer";
 import { buildWorkerCode } from "./build-worker-code";
-
-const DEFAULT_TIMEOUT_MS = 5000;
-const DEFAULT_MAX_CALLS = 5000;
-const DEFAULT_MAX_LOOP_ITERATIONS = 100000;
+import {
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_MAX_CALLS,
+  DEFAULT_MAX_LOOP_ITERATIONS,
+} from "./constants";
 
 export interface ExecuteResult {
   result: StepGeneratorResult;
