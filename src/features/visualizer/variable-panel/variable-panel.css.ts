@@ -29,15 +29,15 @@ export const row = style({
 });
 
 export const varName = style({
-  fontSize: vars.fontSize.sm,
+  fontSize: vars.fontSize.md,
   color: vars.color.textMuted,
   fontFamily: vars.font.mono,
-  minWidth: "80px",
+  minWidth: "70px",
   flexShrink: 0,
 });
 
 export const varValue = style({
-  fontSize: vars.fontSize.sm,
+  fontSize: vars.fontSize.md,
   color: vars.color.text,
   fontFamily: vars.font.mono,
   wordBreak: "break-all",

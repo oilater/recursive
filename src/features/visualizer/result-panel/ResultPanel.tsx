@@ -89,7 +89,7 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
         <>
           <div className={styles.title} style={{ color: "#4ade80" }}>Return</div>
           <div className={styles.finalResult}>
-            {typeof finalReturnValue === "object" ? JSON.stringify(finalReturnValue, null, 2) : String(finalReturnValue)}
+            {typeof finalReturnValue === "object" ? JSON.stringify(finalReturnValue) : String(finalReturnValue)}
           </div>
         </>
       )}

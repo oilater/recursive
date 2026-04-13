@@ -7,9 +7,10 @@ type AstNode = any;
 
 /**
  * 코드를 변환합니다:
- * 1. 추적 대상 함수의 매 statement 앞에 `__traceLine(line, {var1, var2, ...})` 삽입
- * 2. 재귀 함수가 있으면 선언 직후 `funcName = __createProxy(funcName)` 삽입
- * 3. 루프에 `__guard()` 삽입
+ * 1. 추적 대상 함수의 매 statement 앞에 `__traceLine(line, __captureVars())` 삽입
+ * 2. 함수 본문 선두에 `var __captureVars = __buildCapture([변수명들])` 삽입
+ * 3. 재귀 함수가 있으면 선언 직후 `funcName = __createProxy(funcName)` 삽입
+ * 4. 루프에 `__guard()` + 반복마다 루프 라인 traceLine 삽입
  */
 export function transformCode(strippedCode: string, analysis: AnalysisResult): string {
   const ast = acorn.parse(strippedCode, {
@@ -35,17 +36,25 @@ function walkAndTransform(
 
   if (Array.isArray(node.body)) {
     const newBody: AstNode[] = [];
+    let captureInjected = false;
+
     for (const stmt of node.body) {
-      // 루프 가드 + 반복마다 루프 라인 traceLine 삽입
+      // 루프 가드 + 반복마다 루프 라인 traceLine
       if (isLoopStatement(stmt) && stmt.body?.type === "BlockStatement" && Array.isArray(stmt.body.body)) {
         const loopLine = stmt.loc?.start?.line;
-        const loopTrace = insideTracedFunc && loopLine ? [createTraceLineCall(loopLine, varNames)] : [];
+        const loopTrace = insideTracedFunc && loopLine ? [createTraceLineCall(loopLine)] : [];
         stmt.body.body = [createGuardCall(), ...loopTrace, ...stmt.body.body];
+      }
+
+      // 추적 함수 내부: 첫 statement 전에 __captureVars 빌더 삽입
+      if (insideTracedFunc && !captureInjected) {
+        newBody.push(createCaptureVarsInit(varNames));
+        captureInjected = true;
       }
 
       // 추적 함수 내부면 매 statement 앞에 __traceLine 삽입
       if (insideTracedFunc && stmt.loc?.start?.line) {
-        newBody.push(createTraceLineCall(stmt.loc.start.line, varNames));
+        newBody.push(createTraceLineCall(stmt.loc.start.line));
       }
 
       newBody.push(stmt);
@@ -68,7 +77,6 @@ function walkAndTransform(
         }
       }
 
-      // 추적 함수 진입 판단
       const enteringTracedFunc =
         (stmt.type === "FunctionDeclaration" && stmt.id?.name === tracedFuncName) ||
         (stmt.type === "VariableDeclaration" &&
@@ -107,26 +115,22 @@ function isLoopStatement(node: AstNode): boolean {
   return ["ForStatement", "WhileStatement", "DoWhileStatement", "ForInStatement", "ForOfStatement"].includes(node.type);
 }
 
-/** __traceLine(lineNumber, {var1: var1, var2: var2, ...}) */
-function createTraceLineCall(line: number, varNames: string[]): AstNode {
-  const varsObject: AstNode = {
-    type: "ObjectExpression",
-    start: 0,
-    end: 0,
-    properties: varNames.map((name) => ({
-      type: "Property",
-      start: 0,
-      end: 0,
-      method: false,
-      shorthand: true,
-      computed: false,
-      key: { type: "Identifier", start: 0, end: 0, name },
-      value: { type: "Identifier", start: 0, end: 0, name },
-      kind: "init",
-    })),
-  };
-
-  return {
+/**
+ * 함수 본문 선두에 삽입하는 인라인 캡처 함수:
+ *
+ * var __captureVars = function() {
+ *   var __v = {};
+ *   try { __v.r = r; } catch(e) {}
+ *   try { __v.c = c; } catch(e) {}
+ *   try { __v.memo = memo; } catch(e) {}
+ *   return __v;
+ * };
+ *
+ * 클로저 스코프에서 실행되므로 모든 로컬 변수에 접근 가능.
+ * 선언 전 변수는 try-catch로 개별 처리되어 나머지에 영향 없음.
+ */
+function createCaptureVarsInit(varNames: string[]): AstNode {
+  const tryBlocks: AstNode[] = varNames.map((name) => ({
     type: "TryStatement",
     start: 0,
     end: 0,
@@ -140,12 +144,20 @@ function createTraceLineCall(line: number, varNames: string[]): AstNode {
           start: 0,
           end: 0,
           expression: {
-            type: "CallExpression",
+            type: "AssignmentExpression",
             start: 0,
             end: 0,
-            callee: { type: "Identifier", start: 0, end: 0, name: "__traceLine" },
-            arguments: [{ type: "Literal", start: 0, end: 0, value: line, raw: String(line) }, varsObject],
-            optional: false,
+            operator: "=",
+            left: {
+              type: "MemberExpression",
+              start: 0,
+              end: 0,
+              object: { type: "Identifier", start: 0, end: 0, name: "__v" },
+              property: { type: "Identifier", start: 0, end: 0, name },
+              computed: false,
+              optional: false,
+            },
+            right: { type: "Identifier", start: 0, end: 0, name },
           },
         },
       ],
@@ -154,10 +166,92 @@ function createTraceLineCall(line: number, varNames: string[]): AstNode {
       type: "CatchClause",
       start: 0,
       end: 0,
-      param: null,
+      param: { type: "Identifier", start: 0, end: 0, name: "__e" },
       body: { type: "BlockStatement", start: 0, end: 0, body: [] },
     },
     finalizer: null,
+  }));
+
+  const funcBody: AstNode = {
+    type: "BlockStatement",
+    start: 0,
+    end: 0,
+    body: [
+      {
+        type: "VariableDeclaration",
+        start: 0,
+        end: 0,
+        kind: "var",
+        declarations: [
+          {
+            type: "VariableDeclarator",
+            start: 0,
+            end: 0,
+            id: { type: "Identifier", start: 0, end: 0, name: "__v" },
+            init: { type: "ObjectExpression", start: 0, end: 0, properties: [] },
+          },
+        ],
+      },
+      ...tryBlocks,
+      {
+        type: "ReturnStatement",
+        start: 0,
+        end: 0,
+        argument: { type: "Identifier", start: 0, end: 0, name: "__v" },
+      },
+    ],
+  };
+
+  return {
+    type: "VariableDeclaration",
+    start: 0,
+    end: 0,
+    kind: "var",
+    declarations: [
+      {
+        type: "VariableDeclarator",
+        start: 0,
+        end: 0,
+        id: { type: "Identifier", start: 0, end: 0, name: "__captureVars" },
+        init: {
+          type: "FunctionExpression",
+          start: 0,
+          end: 0,
+          id: null,
+          params: [],
+          body: funcBody,
+          generator: false,
+          async: false,
+        },
+      },
+    ],
+  };
+}
+
+/** __traceLine(lineNumber, __captureVars()) */
+function createTraceLineCall(line: number): AstNode {
+  return {
+    type: "ExpressionStatement",
+    start: 0,
+    end: 0,
+    expression: {
+      type: "CallExpression",
+      start: 0,
+      end: 0,
+      callee: { type: "Identifier", start: 0, end: 0, name: "__traceLine" },
+      arguments: [
+        { type: "Literal", start: 0, end: 0, value: line, raw: String(line) },
+        {
+          type: "CallExpression",
+          start: 0,
+          end: 0,
+          callee: { type: "Identifier", start: 0, end: 0, name: "__captureVars" },
+          arguments: [],
+          optional: false,
+        },
+      ],
+      optional: false,
+    },
   };
 }
 

@@ -33,23 +33,13 @@ function renderValue(value: unknown, changed: boolean): React.ReactNode {
       );
 
     if (Array.isArray(value[0])) {
+      // 일반 2D 배열: 각 행을 문자열로 표시
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "2px", ...changeStyle }}>
-          {(value as number[][]).map((row, i) => (
-            <div key={i} className={styles.arrayContainer}>
-              {row.map((cell, j) => (
-                <span
-                  key={j}
-                  className={styles.arrayItem}
-                  style={{
-                    backgroundColor: cell === 1 ? "#fbbf24" : undefined,
-                    color: cell === 1 ? "#1a1a24" : undefined,
-                  }}
-                >
-                  {cell === 1 ? "♛" : "·"}
-                </span>
-              ))}
-            </div>
+          {(value as unknown[][]).map((row, i) => (
+            <span key={i} className={styles.arrayItem} style={{ width: "auto" }}>
+              [{Array.isArray(row) ? row.join(", ") : String(row)}]
+            </span>
           ))}
         </div>
       );

@@ -74,7 +74,6 @@ export function CustomVisualizerClient() {
         <a href="/" className={styles.backLink}>
           ← 목록
         </a>
-        <span className={styles.title}>플레이그라운드</span>
         {mode === "visualize" && (
           <button className={styles.backLink} onClick={handleEdit} style={{ marginLeft: "auto" }}>
             ← 코드 편집

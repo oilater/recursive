@@ -11,7 +11,6 @@ import {
   StepperControls,
   VariablePanel,
   InputForm,
-  BoardView,
   CallStack,
   ResultPanel,
 } from "@/features/visualizer";
@@ -38,8 +37,6 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
   const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(600, w + delta)));
 
   const prevStep = player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined;
-  const isNQueen = meta.id === "n-queen";
-  const boardN = (input.n as number) ?? 4;
   const difficultyLabel = { easy: "쉬움", medium: "보통", hard: "어려움" }[meta.difficulty];
 
   return (
@@ -67,11 +64,7 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
           <div className={styles.middlePanel}>
             <CallStack currentStep={player.currentStep} tree={result.tree} />
             <div className={styles.variableSection}>
-              {isNQueen ? (
-                <BoardView currentStep={player.currentStep} n={boardN} />
-              ) : (
-                <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
-              )}
+              <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
             </div>
             <ResultPanel steps={result.steps} currentIndex={player.currentIndex} />
           </div>

@@ -6,7 +6,7 @@ import * as styles from "./home.css";
 initializeAlgorithms();
 
 export default function Home() {
-  const algorithms = getFreeCardData().filter((a) => a.id !== "n-queen");
+  const algorithms = getFreeCardData();
 
   return (
     <main className={styles.page}>

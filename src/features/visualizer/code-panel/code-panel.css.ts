@@ -8,7 +8,7 @@ export const container = style({
   backgroundColor: "#0d1117",
   borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.border}`,
-  fontSize: "12px",
+  fontSize: "14px",
 });
 
 export const header = style({
@@ -28,12 +28,12 @@ globalStyle(`${container} pre`, {
   margin: 0,
   padding: `0 ${vars.space.md}`,
   background: "transparent !important",
-  lineHeight: "1.5",
+  lineHeight: "1.6",
 });
 
 globalStyle(`${container} code`, {
   display: "block",
-  lineHeight: "1.5",
+  lineHeight: "1.6",
 });
 
 globalStyle(`${container} span.line`, {
@@ -42,7 +42,7 @@ globalStyle(`${container} span.line`, {
   marginLeft: `-${vars.space.md}`,
   marginRight: `-${vars.space.md}`,
   borderLeft: "3px solid transparent",
-  lineHeight: "1.5",
+  lineHeight: "1.6",
   transition: "background-color 0.15s ease, border-color 0.15s ease",
 });
 

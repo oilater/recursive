@@ -45,6 +45,7 @@ self.onmessage = function(e) {
 
     function deepClone(val) {
       if (val === null || val === undefined) return val;
+      if (typeof val === 'function') return '[Function: ' + (val.name || 'anonymous') + ']';
       if (typeof val !== 'object') return val;
       if (Array.isArray(val)) return val.map(deepClone);
       try { return JSON.parse(JSON.stringify(val)); } catch(e) { return String(val); }
