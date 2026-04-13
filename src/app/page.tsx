@@ -72,7 +72,7 @@ export default function Home() {
             이슈 & 건의
           </a>
         </div>
-        <p style={{ fontSize: "12px", color: "#475569" }}>© 2026 Recursive. All rights reserved.</p>
+        <p style={{ fontSize: "12px", color: "#475569" }}>© 2026 Seonghyeon Kim. All rights reserved.</p>
       </footer>
     </main>
   );
