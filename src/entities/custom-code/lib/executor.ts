@@ -62,6 +62,7 @@ export async function executeCustomCode(code: string, args: unknown[], options: 
       funcEndLine: analysis.tracedFuncEndLine,
       lineOffset: analysis.lineOffset,
       userTopLevelFuncName: analysis.userTopLevelFuncName,
+      originalLineCount: code.split("\n").length,
     });
   });
 }

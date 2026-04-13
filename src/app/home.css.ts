@@ -15,19 +15,20 @@ export const hero = style({
 });
 
 export const title = style({
-  fontSize: "48px",
+  fontSize: "56px",
   fontWeight: "800",
-  letterSpacing: "-0.02em",
+  letterSpacing: "-0.03em",
   marginBottom: vars.space.md,
-  background: "linear-gradient(135deg, #4ade80, #22d3ee)",
+  background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
+  filter: "drop-shadow(0 0 30px rgba(74, 222, 128, 0.15))",
 });
 
 export const subtitle = style({
-  fontSize: vars.fontSize.md,
+  fontSize: vars.fontSize.lg,
   color: vars.color.textMuted,
-  maxWidth: "480px",
+  maxWidth: "520px",
   margin: "0 auto",
   lineHeight: 1.7,
 });

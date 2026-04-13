@@ -13,13 +13,15 @@ export default function Home() {
       <div className={styles.hero}>
         <h1 className={styles.title}>Recursive</h1>
         <p className={styles.subtitle}>
-          알고리즘의 실행 흐름을 시각화하고, 한 줄씩 따라가며 학습하세요.
+          알고리즘 코드를 붙여넣기만 하면 실행 흐름을 볼 수 있어요.
+          <br />
+          재귀라면 호출 트리까지 한눈에 확인할 수 있어요.
         </p>
       </div>
 
       <Link href="/visualize/custom" className={styles.customCard}>
         <div className={styles.customCardIcon}>{"</>"}</div>
-        <div className={styles.customCardTitle}>플레이그라운드</div>
+        <div className={styles.customCardTitle}>여기에 코드를 붙여넣으세요</div>
         <div className={styles.customCardDesc}>
           JavaScript, TypeScript를 지원해요
         </div>

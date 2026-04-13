@@ -135,12 +135,10 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
 
   const originalFunctions = findAllFunctions(originalAst);
 
-  // 항상 __entry__로 래핑. 사용자 함수가 있으면 마지막에 호출.
+  // 항상 __entry__로 래핑. 사용자 함수가 있으면 참조만 반환 (호출은 Worker가 외부에서).
   const topLevelFunc = originalFunctions.length > 0 ? originalFunctions[0] : null;
-  const funcCallLine = topLevelFunc
-    ? `\nreturn ${topLevelFunc.name}.apply(null, __args);`
-    : "";
-  const wrappedCode = `function __entry__() {\n${strippedCode}${funcCallLine}\n}`;
+  const returnRef = topLevelFunc ? `\nreturn ${topLevelFunc.name};` : "";
+  const wrappedCode = `function __entry__() {\n${strippedCode}${returnRef}\n}`;
   const wrappedAst = acorn.parse(wrappedCode, { ecmaVersion: 2022, sourceType: "script", locations: true }) as AstNode;
   const wrappedFunctions = findAllFunctions(wrappedAst);
 

@@ -5,9 +5,11 @@ import type { TreeNode, Step } from "@/entities/algorithm";
 import { computeTreeLayout, type PositionedNode } from "@/shared/lib/tree-layout";
 import * as styles from "./tree-view.css";
 
-const NODE_W = 90;
+const NODE_MIN_W = 80;
 const NODE_H = 36;
 const NODE_RX = 8;
+const CHAR_WIDTH = 6.5; // 대략적인 글자 너비 (monospace 8-9px 기준)
+const NODE_PAD = 20; // 좌우 패딩
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   idle: { bg: "#1e293b", text: "#94a3b8", border: "#475569" },
@@ -88,9 +90,10 @@ export function TreeView({ tree, currentStep }: TreeViewProps) {
           const isActive = status === "active";
           const colors = STATUS_COLORS[status] || STATUS_COLORS.idle;
           const inPath = activePathSet.has(node.data.id);
-          const w = isActive ? NODE_W + 6 : NODE_W;
+          const textLen = Math.max(node.data.label.length, node.data.args.length);
+          const baseW = Math.max(NODE_MIN_W, textLen * CHAR_WIDTH + NODE_PAD);
+          const w = isActive ? baseW + 6 : baseW;
           const h = isActive ? NODE_H + 4 : NODE_H;
-          const truncatedArgs = node.data.args.length > 18 ? node.data.args.slice(0, 16) + ".." : node.data.args;
 
           return (
             <g
@@ -121,7 +124,7 @@ export function TreeView({ tree, currentStep }: TreeViewProps) {
                 {node.data.label}
               </text>
               <text className={styles.nodeText} dy="1em" fontSize="8px" fill="#94a3b8">
-                {truncatedArgs}
+                {node.data.args}
               </text>
             </g>
           );

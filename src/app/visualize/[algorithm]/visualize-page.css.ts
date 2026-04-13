@@ -64,13 +64,14 @@ export const middlePanel = style({
   flexDirection: "column",
   gap: vars.space.sm,
   overflow: "auto",
-  width: "280px",
-  flexShrink: 0,
+  flex: 2,
+  minWidth: 0,
 });
 
 export const variableSection = style({
-  flex: "0 0 auto",
+  flex: 1,
   overflow: "auto",
+  minHeight: 0,
 });
 
 export const rightPanel = style({

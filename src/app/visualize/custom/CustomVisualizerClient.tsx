@@ -8,7 +8,7 @@ import { CodeEditor, ArgumentForm, executeCustomCode, analyzeCode } from "@/feat
 import type { ArgumentFormHandle } from "@/features/custom-code";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
-import { PanelHeader, ResizeHandle } from "@/shared/ui";
+import { PanelHeader } from "@/shared/ui";
 import * as styles from "./custom-page.css";
 
 const DEFAULT_CODE = "";
@@ -25,7 +25,7 @@ export function CustomVisualizerClient() {
   const [consoleLogs, setConsoleLogs] = useState<Array<{ text: string; stepIdx: number }>>([]);
   const [codeHtml, setCodeHtml] = useState<string>("");
   const [paramNames, setParamNames] = useState<string[]>([]);
-  const [leftWidth, setLeftWidth] = useState(640);
+  const [leftWidth, setLeftWidth] = useState(0);
   const argsRef = useRef<unknown[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
 
@@ -120,16 +120,14 @@ export function CustomVisualizerClient() {
       {mode === "visualize" && result && (
         <div className={styles.vizContainer}>
           <div className={styles.vizRow}>
-            {/* Col 1: 코드 */}
-            <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "800px" }}>
+            {/* Col 1: 코드 (flex 3) */}
+            <div className={styles.leftPanel} style={{ flex: 3, minWidth: 0 }}>
               <div className={styles.codeSection}>
                 <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
               </div>
             </div>
 
-            <ResizeHandle direction="horizontal" onResize={handleResize} />
-
-            {/* Col 2: 상태 */}
+            {/* Col 2: 상태 (flex 2) */}
             <div className={styles.middlePanel}>
               {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
               <div className={styles.variableSection}>
@@ -146,9 +144,9 @@ export function CustomVisualizerClient() {
               />
             </div>
 
-            {/* Col 3: 트리 (재귀가 있을 때만) */}
+            {/* Col 3: 트리 (flex 2, 재귀가 있을 때만) */}
             {hasRecursion && (
-              <div className={styles.rightPanel} style={{ flex: 1 }}>
+              <div className={styles.rightPanel} style={{ flex: 2, minWidth: 0 }}>
                 <div className={styles.treeSection}>
                   <TreeView tree={result.tree} currentStep={player.currentStep} />
                 </div>

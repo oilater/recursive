@@ -31,14 +31,28 @@ export interface TreeLayoutResult {
   bounds: TreeBounds;
 }
 
-const NODE_WIDTH = 110;
+const CHAR_WIDTH = 6.5;
+const NODE_PAD = 24;
+const MIN_NODE_WIDTH = 90;
 const NODE_HEIGHT = 70;
+
+function estimateMaxNodeWidth(root: TreeNode): number {
+  let maxLen = 0;
+  function walk(node: TreeNode) {
+    const len = Math.max(node.label.length, node.args.length);
+    if (len > maxLen) maxLen = len;
+    node.children.forEach(walk);
+  }
+  walk(root);
+  return Math.max(MIN_NODE_WIDTH, maxLen * CHAR_WIDTH + NODE_PAD);
+}
 
 export function computeTreeLayout(root: TreeNode): TreeLayoutResult {
   const rootHierarchy = hierarchy(root, (d) => d.children);
+  const nodeWidth = estimateMaxNodeWidth(root) + 16;
 
   const treeLayout = tree<TreeNode>()
-    .nodeSize([NODE_WIDTH, NODE_HEIGHT])
+    .nodeSize([nodeWidth, NODE_HEIGHT])
     .separation((a, b) => (a.parent === b.parent ? 1 : 1.2));
 
   treeLayout(rootHierarchy);

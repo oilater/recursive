@@ -14,7 +14,7 @@ import {
   CallStack,
   ResultPanel,
 } from "@/features/visualizer";
-import { Badge, ResizeHandle } from "@/shared/ui";
+import { Badge } from "@/shared/ui";
 import * as styles from "./visualize-page.css";
 
 initializeAlgorithms();
@@ -29,7 +29,7 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
   const stepGenerator = getStepGenerator(algorithmId)!;
 
   const [input, setInput] = useState<Record<string, unknown>>(meta.inputConfig.defaults);
-  const [leftWidth, setLeftWidth] = useState(640);
+  const [leftWidth, setLeftWidth] = useState(0);
 
   const result: StepGeneratorResult = useMemo(() => stepGenerator(input), [stepGenerator, input]);
   const player = useAlgorithmPlayer(result.steps);
@@ -50,17 +50,15 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
       </div>
 
       <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "8px" }}>
-          {/* Col 1: 코드 */}
-          <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "800px" }}>
+        <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "16px" }}>
+          {/* Col 1: 코드 (flex 3) */}
+          <div className={styles.leftPanel} style={{ flex: 3, minWidth: 0 }}>
             <div className={styles.codeSection}>
               <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
             </div>
           </div>
 
-          <ResizeHandle direction="horizontal" onResize={handleResize} />
-
-          {/* Col 2: 상태 (콜스택 + 변수 + 결과) */}
+          {/* Col 2: 상태 (flex 2) */}
           <div className={styles.middlePanel}>
             <CallStack currentStep={player.currentStep} tree={result.tree} />
             <div className={styles.variableSection}>
@@ -69,8 +67,8 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
             <ResultPanel steps={result.steps} currentIndex={player.currentIndex} />
           </div>
 
-          {/* Col 3: 트리 */}
-          <div className={styles.rightPanel} style={{ flex: 1, minWidth: 0 }}>
+          {/* Col 3: 트리 (flex 2) */}
+          <div className={styles.rightPanel} style={{ flex: 2, minWidth: 0 }}>
             <div className={styles.treeSection}>
               <TreeView tree={result.tree} currentStep={player.currentStep} />
             </div>

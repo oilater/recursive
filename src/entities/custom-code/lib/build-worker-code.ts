@@ -25,6 +25,7 @@ self.onmessage = function(e) {
   var funcStartLine = data.funcStartLine || 1;
   var funcEndLine = data.funcEndLine || 1;
   var lineOffset = data.lineOffset || 0;
+  var userFunc = data.userTopLevelFuncName;
 
   try {
     var steps = [];
@@ -34,10 +35,9 @@ self.onmessage = function(e) {
     var loopCount = 0;
     var callStack = [];
 
-    // 트리 루트 (재귀 있을 때만 의미 있음)
     var rootNode = {
       id: 'node-' + nodeIdCounter++,
-      label: hasRecursion ? (recursiveFuncName || entryFuncName) : entryFuncName,
+      label: userFunc || entryFuncName,
       args: formatArgs(args),
       children: [],
       status: 'completed'
@@ -83,8 +83,15 @@ self.onmessage = function(e) {
       }
     }
 
+    // 원본 코드의 라인 수 (래핑 전)
+    var originalLineCount = data.originalLineCount || 9999;
+
     // ── 라인 추적 (모든 코드에서 동작) ──
     function __traceLine(line, varsSnapshot) {
+      var correctedLine = line - lineOffset;
+      // 원본 코드 범위 밖이면 무시 (삽입된 코드)
+      if (correctedLine < 1 || correctedLine > originalLineCount) return;
+
       var currentNodeId = callStack.length > 0 ? callStack[callStack.length - 1].nodeId : rootNode.id;
       var activePath = callStack.length > 0 ? getPath(callStack, currentNodeId) : [rootNode.id];
 
@@ -100,15 +107,15 @@ self.onmessage = function(e) {
       steps.push({
         id: stepId++,
         type: 'call',
-        codeLine: Math.max(1, line - lineOffset),
+        codeLine: correctedLine,
         activeNodeId: currentNodeId,
         activePath: activePath.slice(),
         variables: variables,
-        description: '라인 ' + Math.max(1, line - lineOffset) + ' 실행'
+        description: '라인 ' + correctedLine + ' 실행'
       });
     }
 
-    // ── 재귀 Proxy (재귀가 있을 때만 사용) ──
+    // ── 재귀 Proxy: 트리 빌드 + callStack 관리만. 코드 라인 step은 __traceLine이 담당. ──
     function __createProxy(originalFunc) {
       if (!hasRecursion) return originalFunc;
 
@@ -128,28 +135,11 @@ self.onmessage = function(e) {
             status: 'idle'
           };
 
-          // 부모 연결
           if (callStack.length === 0) {
             rootNode.children.push(node);
           } else {
             callStack[callStack.length - 1].node.children.push(node);
           }
-
-          var activePath = getPath(callStack, nodeId);
-          var variables = {};
-          for (var i = 0; i < recursiveParamNames.length; i++) {
-            variables[recursiveParamNames[i]] = deepClone(argsList[i]);
-          }
-
-          steps.push({
-            id: stepId++,
-            type: 'call',
-            codeLine: Math.max(1, funcStartLine - lineOffset),
-            activeNodeId: nodeId,
-            activePath: activePath.slice(),
-            variables: variables,
-            description: recursiveFuncName + '(' + formatArgs(argsList) + ') 호출'
-          });
 
           callStack.push({ nodeId: nodeId, node: node });
 
@@ -164,21 +154,6 @@ self.onmessage = function(e) {
 
           node.status = 'completed';
           callStack.pop();
-
-          var returnPath = getPath(callStack, nodeId);
-          var returnVars = Object.assign({}, variables);
-          returnVars['returnValue'] = deepClone(result);
-
-          steps.push({
-            id: stepId++,
-            type: 'return',
-            codeLine: Math.max(1, funcEndLine - lineOffset),
-            activeNodeId: nodeId,
-            activePath: returnPath,
-            variables: returnVars,
-            description: recursiveFuncName + '(' + formatArgs(argsList) + ') → ' + (result !== undefined ? (typeof result === 'object' ? JSON.stringify(result) : String(result)) : 'undefined')
-          });
-
           return result;
         }
       });
@@ -197,8 +172,12 @@ self.onmessage = function(e) {
       info: function() { fakeConsole.log.apply(null, arguments); }
     };
 
-    // 항상 __entry__() 호출. 사용자 함수 호출은 __entry__ 안에 이미 삽입됨.
-    var runCode = transformedCode + '\\nreturn __entry__();\\n';
+    var runCode;
+    if (userFunc) {
+      runCode = transformedCode + '\\nvar __fn = __entry__();\\nreturn __fn.apply(null, __args);\\n';
+    } else {
+      runCode = transformedCode + '\\nreturn __entry__();\\n';
+    }
     var runFn = new Function('__guard', '__createProxy', '__traceLine', '__args', 'console', runCode);
     var finalReturnValue = runFn(__guard, __createProxy, __traceLine, args, fakeConsole);
 

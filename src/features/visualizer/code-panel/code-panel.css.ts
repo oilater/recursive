@@ -9,6 +9,7 @@ export const container = style({
   borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.border}`,
   fontSize: "14px",
+  lineHeight: 1.6,
 });
 
 export const header = style({
@@ -24,28 +25,31 @@ export const codeWrapper = style({
   padding: `${vars.space.xs} 0`,
 });
 
+// Shiki 출력 초기화: pre, code, span 모두 여백 제거
 globalStyle(`${container} pre`, {
   margin: 0,
-  padding: `0 ${vars.space.md}`,
+  padding: 0,
   background: "transparent !important",
-  lineHeight: "1.6",
 });
 
 globalStyle(`${container} code`, {
   display: "block",
-  lineHeight: "1.6",
+  padding: `0 ${vars.space.sm}`,
+  fontSize: 0, // span 사이 \n 텍스트 노드의 공간 제거
+});
+
+globalStyle(`${container} span`, {
+  margin: 0,
+  padding: 0,
 });
 
 globalStyle(`${container} span.line`, {
   display: "block",
   paddingLeft: vars.space.sm,
   borderLeft: "3px solid transparent",
-  lineHeight: "1.6",
+  fontSize: "14px", // code의 fontSize:0에서 복원
+  lineHeight: 1.5,
   transition: "background-color 0.15s ease, border-color 0.15s ease",
-});
-
-globalStyle(`${container} span.line:empty::after`, {
-  content: "'\\00a0'",
 });
 
 globalStyle(`${container} .line.highlighted-line`, {
