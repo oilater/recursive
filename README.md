@@ -4,112 +4,46 @@
 
 **Track your algorithms, line by line.**
 
-Recursive is a browser-based algorithm visualizer that lets you paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization for recursive functions.
+Paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
 [Try it out →](https://recursive-visualizer.vercel.app)
 
 ## Features
 
-### Playground
-Paste any JS/TS code and hit run. Recursive automatically detects functions, parameters, and execution flow.
+- **Line-by-line execution** — See which line is running at each step
+- **Variable tracking** — Watch variables change in real time, with diff highlighting
+- **Call tree** — Recursive functions are visualized as an interactive tree
+- **Console output** — `console.log` output appears step by step
+- **TypeScript support** — Types are stripped automatically
+- **No setup needed** — Paste code, enter arguments, hit run
 
-- **Line-by-line tracking** — Every statement is highlighted as it executes
-- **Variable snapshots** — See how variables change at each step, with change highlighting
-- **Console capture** — `console.log` output appears step by step
-- **TypeScript support** — Types are stripped automatically via sucrase
+## Usage
 
-### Recursive function support
-When your code contains recursion, Recursive builds a **call tree** in real time.
+1. Go to the [playground](https://recursive-visualizer.vercel.app/visualize/custom)
+2. Paste your code (function or bare code — both work)
+3. Enter arguments if your function needs them
+4. Click **▶ Run**
+5. Step through with the controls or hit play
 
-- **Call tree visualization** — SVG tree with dynamic node sizing via d3-hierarchy
-- **Call stack panel** — See the current recursion depth and stack frames
-- **Works with nested recursion** — e.g. `function solve() { function dfs() { ... dfs() ... } }`
-
-### Preset algorithms
-Built-in presets for common algorithms with default arguments:
-
-- **Permutations** — nPr with backtracking
-- **Combinations** — nCr with DFS
-- **Subsets** — Power set generation
-
-Each preset runs through the same pipeline as custom code — no separate implementation.
-
-## How it works
-
-```
-User code
-  ↓
-[1] Strip TypeScript types (sucrase)
-  ↓
-[2] Parse AST (acorn) → detect functions, recursion, local variables
-  ↓
-[3] Transform AST (astring)
-    - Insert __traceLine(line, __captureVars()) before each statement
-    - Insert __createProxy(func) after recursive function declarations
-    - Insert __guard() in loops (infinite loop protection)
-  ↓
-[4] Execute in Web Worker (sandboxed)
-    - __traceLine → creates Step with line number + variable snapshot
-    - Proxy apply trap → builds TreeNode call tree
-    - console.log → captured per step
-  ↓
-[5] Returns { steps: Step[], tree: TreeNode }
-  ↓
-[6] Visualization
-    - CodePanel: Shiki syntax highlighting + active line highlight
-    - TreeView: d3-hierarchy layout + SVG rendering
-    - VariablePanel: variable state with change detection
-    - StepperControls: play/pause/step/speed
-    - CallStack: current recursion depth
-    - ResultPanel: collected results + console output
-```
-
-### Single pipeline
-Presets and custom code use the exact same execution pipeline (`executeCustomCode`). A preset is just `{ code, defaultArgs }` — no separate step generators.
-
-### Safety
-- Web Worker isolation (no DOM access)
-- `fetch`, `XMLHttpRequest`, `importScripts` removed
-- 5s timeout, 5000 call limit, 100k loop iteration limit
+Preset algorithms (permutations, combinations, subsets) are also available from the home page.
 
 ## Tech stack
 
-- **Next.js 16** (App Router) + **TypeScript**
-- **Vanilla-Extract** — zero-runtime CSS-in-TS
-- **d3-hierarchy** — tree layout calculation
-- **Shiki** — syntax highlighting
-- **acorn** + **astring** — AST parsing and code generation
-- **sucrase** — TypeScript type stripping
-- **CodeMirror 6** — code editor
-- **es-toolkit** — utility functions
-- **Vitest** — testing
-
-## Project structure
-
-Domain-centric flat structure — each folder is a self-contained domain.
-
-```
-src/
-├── app/              # Pages (Next.js routing)
-├── engine/           # Code tracing engine (analyzer, transformer, executor, worker)
-├── algorithm/        # Preset definitions, types, registry, card UI
-├── visualizer/       # Visualization components (TreeView, CodePanel, Stepper, etc.)
-├── editor/           # Code input (CodeMirror editor, argument form)
-├── player/           # Playback hook (useAlgorithmPlayer)
-└── shared/           # Styles, UI primitives, utilities
-```
+Next.js · TypeScript · Vanilla-Extract · acorn · Shiki · d3-hierarchy · CodeMirror · Web Workers
 
 ## Development
 
 ```bash
 pnpm install
-pnpm dev          # dev server
-pnpm build        # production build
-pnpm test         # vitest
+pnpm dev
+pnpm test
 pnpm fix          # oxlint + oxfmt
-pnpm analyze      # bundle analyzer
 ```
 
 ## Contributing
 
 Bug reports and feature requests → [GitHub Issues](https://github.com/oilater/recursive/issues)
+
+## License
+
+MIT
