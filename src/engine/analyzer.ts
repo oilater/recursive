@@ -7,36 +7,30 @@ type AstNode = any;
 
 // ── AST 유틸 ──
 
-function findInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode | null {
-  if (!node || typeof node !== "object") return null;
-  if (predicate(node)) return node;
+function walkAst(node: AstNode, visitor: (n: AstNode) => boolean | void): void {
+  if (!node || typeof node !== "object") return;
+  if (visitor(node) === true) return; // true = stop
   for (const key of Object.keys(node)) {
     if (["type", "start", "end", "loc"].includes(key)) continue;
     const val = node[key];
     if (!val || typeof val !== "object") continue;
     for (const child of Array.isArray(val) ? val : [val]) {
-      if (!child?.type) continue;
-      const found = findInAst(child, predicate);
-      if (found) return found;
+      if (child?.type) walkAst(child, visitor);
     }
   }
-  return null;
+}
+
+function findInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode | null {
+  let result: AstNode | null = null;
+  walkAst(node, (n) => {
+    if (predicate(n)) { result = n; return true; }
+  });
+  return result;
 }
 
 function collectInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode[] {
   const results: AstNode[] = [];
-  (function walk(n: AstNode) {
-    if (!n || typeof n !== "object") return;
-    if (predicate(n)) results.push(n);
-    for (const key of Object.keys(n)) {
-      if (["type", "start", "end", "loc"].includes(key)) continue;
-      const val = n[key];
-      if (!val || typeof val !== "object") continue;
-      for (const child of Array.isArray(val) ? val : [val]) {
-        if (child?.type) walk(child);
-      }
-    }
-  })(node);
+  walkAst(node, (n) => { if (predicate(n)) results.push(n); });
   return results;
 }
 

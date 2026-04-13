@@ -1,20 +1,17 @@
 import * as acorn from "acorn";
 import { generate } from "astring";
 import type { AnalysisResult } from "./types";
+import { id, literal, call, assign, member, expr, block, varDecl, tryCatch, ret, funcExpr, obj } from "./ast-builders";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
-export function transformCode(strippedCode: string, analysis: AnalysisResult): string {
-  const ast = acorn.parse(strippedCode, {
-    ecmaVersion: 2022,
-    sourceType: "script",
-    locations: true,
-  }) as AstNode;
+const LOOP_TYPES = ["ForStatement", "WhileStatement", "DoWhileStatement", "ForInStatement", "ForOfStatement"];
 
+export function transformCode(strippedCode: string, analysis: AnalysisResult): string {
+  const ast = acorn.parse(strippedCode, { ecmaVersion: 2022, sourceType: "script", locations: true }) as AstNode;
   const tracedFuncName = analysis.recursiveFuncName ?? analysis.entryFuncName;
   walkAndTransform(ast, tracedFuncName, analysis.recursiveFuncName, analysis.localVarNames, false);
-
   return generate(ast);
 }
 
@@ -32,32 +29,27 @@ function walkAndTransform(
     let captureInjected = false;
 
     for (const stmt of node.body) {
-      // 루프: guard + body 끝에 루프 라인 trace (반복 시 while/for 라인으로 돌아가는 표시)
-      if (isLoopStatement(stmt) && stmt.body?.type === "BlockStatement" && Array.isArray(stmt.body.body)) {
+      if (isLoop(stmt) && stmt.body?.type === "BlockStatement" && Array.isArray(stmt.body.body)) {
         const loopLine = stmt.loc?.start?.line;
-        const loopBackTrace = insideTracedFunc && loopLine ? [createTraceLineCall(loopLine)] : [];
-        stmt.body.body = [createGuardCall(), ...stmt.body.body, ...loopBackTrace];
+        const loopBackTrace = insideTracedFunc && loopLine ? [traceLineCall(loopLine)] : [];
+        stmt.body.body = [guardCall(), ...stmt.body.body, ...loopBackTrace];
       }
 
-      // 추적 함수 내부: 첫 statement 전에 __captureVars 빌더 삽입
       if (insideTracedFunc && !captureInjected) {
-        newBody.push(createCaptureVarsInit(varNames));
+        newBody.push(captureVarsInit(varNames));
         captureInjected = true;
       }
 
-      // 추적 함수 내부면 매 statement 앞에 __traceLine 삽입
-      // FunctionDeclaration, EmptyStatement는 제외 (선언 자체는 실행 아님)
       const skipTrace = stmt.type === "FunctionDeclaration" || stmt.type === "EmptyStatement";
       if (insideTracedFunc && stmt.loc?.start?.line && !skipTrace) {
-        newBody.push(createTraceLineCall(stmt.loc.start.line));
+        newBody.push(traceLineCall(stmt.loc.start.line));
       }
 
       newBody.push(stmt);
 
-      // 재귀 함수면 프록시 삽입
       if (recursiveFuncName) {
         if (stmt.type === "FunctionDeclaration" && stmt.id?.name === recursiveFuncName) {
-          newBody.push(createProxyReassignment(recursiveFuncName));
+          newBody.push(proxyReassignment(recursiveFuncName));
         }
         if (stmt.type === "VariableDeclaration" && stmt.declarations) {
           for (const decl of stmt.declarations) {
@@ -66,7 +58,7 @@ function walkAndTransform(
               decl.init &&
               (decl.init.type === "FunctionExpression" || decl.init.type === "ArrowFunctionExpression")
             ) {
-              newBody.push(createProxyReassignment(recursiveFuncName));
+              newBody.push(proxyReassignment(recursiveFuncName));
             }
           }
         }
@@ -107,197 +99,30 @@ function walkAndTransform(
   }
 }
 
-function isLoopStatement(node: AstNode): boolean {
-  return ["ForStatement", "WhileStatement", "DoWhileStatement", "ForInStatement", "ForOfStatement"].includes(node.type);
+const isLoop = (node: AstNode): boolean => LOOP_TYPES.includes(node.type);
+
+function captureVarsInit(varNames: string[]): AstNode {
+  const tryBlocks = varNames.map((name) =>
+    tryCatch(
+      [expr(assign(member(id("__v"), id(name)), id(name)))],
+      [expr(assign(member(id("__v"), id(name)), literal("-")))]
+    )
+  );
+
+  return varDecl(
+    "__captureVars",
+    funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))]))
+  );
 }
 
-function createCaptureVarsInit(varNames: string[]): AstNode {
-  const tryBlocks: AstNode[] = varNames.map((name) => ({
-    type: "TryStatement",
-    start: 0,
-    end: 0,
-    block: {
-      type: "BlockStatement",
-      start: 0,
-      end: 0,
-      body: [
-        {
-          type: "ExpressionStatement",
-          start: 0,
-          end: 0,
-          expression: {
-            type: "AssignmentExpression",
-            start: 0,
-            end: 0,
-            operator: "=",
-            left: {
-              type: "MemberExpression",
-              start: 0,
-              end: 0,
-              object: { type: "Identifier", start: 0, end: 0, name: "__v" },
-              property: { type: "Identifier", start: 0, end: 0, name },
-              computed: false,
-              optional: false,
-            },
-            right: { type: "Identifier", start: 0, end: 0, name },
-          },
-        },
-      ],
-    },
-    handler: {
-      type: "CatchClause",
-      start: 0,
-      end: 0,
-      param: { type: "Identifier", start: 0, end: 0, name: "__e" },
-      body: {
-        type: "BlockStatement",
-        start: 0,
-        end: 0,
-        body: [
-          {
-            type: "ExpressionStatement",
-            start: 0,
-            end: 0,
-            expression: {
-              type: "AssignmentExpression",
-              start: 0,
-              end: 0,
-              operator: "=",
-              left: {
-                type: "MemberExpression",
-                start: 0,
-                end: 0,
-                object: { type: "Identifier", start: 0, end: 0, name: "__v" },
-                property: { type: "Identifier", start: 0, end: 0, name },
-                computed: false,
-                optional: false,
-              },
-              right: { type: "Literal", start: 0, end: 0, value: "-", raw: '"-"' },
-            },
-          },
-        ],
-      },
-    },
-    finalizer: null,
-  }));
-
-  const funcBody: AstNode = {
-    type: "BlockStatement",
-    start: 0,
-    end: 0,
-    body: [
-      {
-        type: "VariableDeclaration",
-        start: 0,
-        end: 0,
-        kind: "var",
-        declarations: [
-          {
-            type: "VariableDeclarator",
-            start: 0,
-            end: 0,
-            id: { type: "Identifier", start: 0, end: 0, name: "__v" },
-            init: { type: "ObjectExpression", start: 0, end: 0, properties: [] },
-          },
-        ],
-      },
-      ...tryBlocks,
-      {
-        type: "ReturnStatement",
-        start: 0,
-        end: 0,
-        argument: { type: "Identifier", start: 0, end: 0, name: "__v" },
-      },
-    ],
-  };
-
-  return {
-    type: "VariableDeclaration",
-    start: 0,
-    end: 0,
-    kind: "var",
-    declarations: [
-      {
-        type: "VariableDeclarator",
-        start: 0,
-        end: 0,
-        id: { type: "Identifier", start: 0, end: 0, name: "__captureVars" },
-        init: {
-          type: "FunctionExpression",
-          start: 0,
-          end: 0,
-          id: null,
-          params: [],
-          body: funcBody,
-          generator: false,
-          async: false,
-        },
-      },
-    ],
-  };
+function traceLineCall(line: number): AstNode {
+  return expr(call(id("__traceLine"), [literal(line), call(id("__captureVars"))]));
 }
 
-function createTraceLineCall(line: number): AstNode {
-  return {
-    type: "ExpressionStatement",
-    start: 0,
-    end: 0,
-    expression: {
-      type: "CallExpression",
-      start: 0,
-      end: 0,
-      callee: { type: "Identifier", start: 0, end: 0, name: "__traceLine" },
-      arguments: [
-        { type: "Literal", start: 0, end: 0, value: line, raw: String(line) },
-        {
-          type: "CallExpression",
-          start: 0,
-          end: 0,
-          callee: { type: "Identifier", start: 0, end: 0, name: "__captureVars" },
-          arguments: [],
-          optional: false,
-        },
-      ],
-      optional: false,
-    },
-  };
+function proxyReassignment(funcName: string): AstNode {
+  return expr(assign(id(funcName), call(id("__createProxy"), [id(funcName)])));
 }
 
-function createProxyReassignment(funcName: string): AstNode {
-  return {
-    type: "ExpressionStatement",
-    start: 0,
-    end: 0,
-    expression: {
-      type: "AssignmentExpression",
-      start: 0,
-      end: 0,
-      operator: "=",
-      left: { type: "Identifier", start: 0, end: 0, name: funcName },
-      right: {
-        type: "CallExpression",
-        start: 0,
-        end: 0,
-        callee: { type: "Identifier", start: 0, end: 0, name: "__createProxy" },
-        arguments: [{ type: "Identifier", start: 0, end: 0, name: funcName }],
-        optional: false,
-      },
-    },
-  };
-}
-
-function createGuardCall(): AstNode {
-  return {
-    type: "ExpressionStatement",
-    start: 0,
-    end: 0,
-    expression: {
-      type: "CallExpression",
-      start: 0,
-      end: 0,
-      callee: { type: "Identifier", start: 0, end: 0, name: "__guard" },
-      arguments: [],
-      optional: false,
-    },
-  };
+function guardCall(): AstNode {
+  return expr(call(id("__guard")));
 }
