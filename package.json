@@ -11,7 +11,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "fix": "pnpm lint && pnpm format",
-    "analyze": "ANALYZE=true next build --webpack"
+    "analyze": "ANALYZE=true next build --webpack",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
@@ -39,6 +41,7 @@
     "@vanilla-extract/next-plugin": "^2.5.2",
     "oxlint": "^1.60.0",
     "prettier": "^3.8.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   }
 }
