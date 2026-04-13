@@ -36,7 +36,7 @@ export const subtitle = style({
 export const sectionTitle = style({
   fontSize: vars.fontSize.lg,
   fontWeight: "600",
-  marginBottom: vars.space.md,
+  marginBottom: vars.space.xs,
   color: vars.color.text,
 });
 
