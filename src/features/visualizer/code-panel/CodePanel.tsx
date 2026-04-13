@@ -17,13 +17,11 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
     function highlightActiveLine() {
       if (!codeRef.current) return;
 
-      // 이전 라인 해제
-      if (prevLineRef.current !== undefined) {
-        const prevEl = codeRef.current.querySelector(`[data-line="${prevLineRef.current}"]`);
-        prevEl?.classList.remove("highlighted-line");
-      }
+      // 이전 하이라이트 모두 제거 (html이 바뀌면 DOM이 교체되므로)
+      codeRef.current.querySelectorAll(".highlighted-line").forEach((el) => {
+        el.classList.remove("highlighted-line");
+      });
 
-      // 새 라인 하이라이트
       if (activeLine !== undefined) {
         const currEl = codeRef.current.querySelector(`[data-line="${activeLine}"]`);
         currEl?.classList.add("highlighted-line");
@@ -32,7 +30,7 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
 
       prevLineRef.current = activeLine;
     },
-    [activeLine]
+    [activeLine, html]
   );
 
   return (

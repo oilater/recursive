@@ -65,9 +65,25 @@ export const finalResult = style({
   overflow: "auto",
 });
 
-export const finalLabel = style({
+export const consoleBox = style({
+  padding: vars.space.sm,
+  backgroundColor: "#0d1117",
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
   fontSize: vars.fontSize.xs,
-  color: vars.color.primary,
-  marginBottom: vars.space.xs,
-  fontWeight: 600,
+  fontFamily: vars.font.mono,
+  maxHeight: "120px",
+  overflow: "auto",
+  marginBottom: vars.space.sm,
+});
+
+export const consoleLine = style({
+  color: "#e2e8f0",
+  lineHeight: "1.5",
+  selectors: {
+    "&::before": {
+      content: "'> '",
+      color: "#64748b",
+    },
+  },
 });

@@ -60,14 +60,22 @@ export const leftPanel = style({
 });
 
 export const codeSection = style({
-  flex: "1 1 60%",
+  flex: 1,
   overflow: "hidden",
   minHeight: 0,
 });
 
+export const middlePanel = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.space.sm,
+  overflow: "auto",
+  width: "280px",
+  flexShrink: 0,
+});
+
 export const variableSection = style({
   flex: "0 0 auto",
-  maxHeight: "40%",
   overflow: "auto",
 });
 
@@ -111,6 +119,28 @@ export const editorFullHeight = style({
   display: "flex",
   flexDirection: "column",
   height: "100%",
+});
+
+export const runButton = style({
+  padding: `${vars.space.md} ${vars.space.xxl}`,
+  backgroundColor: "#4ade80",
+  color: "#0a0a0a",
+  borderRadius: vars.radius.md,
+  fontSize: vars.fontSize.md,
+  fontWeight: "700",
+  whiteSpace: "nowrap",
+  transition: "all 0.15s ease",
+  flexShrink: 0,
+  alignSelf: "stretch",
+  ":hover": {
+    backgroundColor: "#22c55e",
+  },
+  selectors: {
+    "&:disabled": {
+      opacity: 0.3,
+      cursor: "not-allowed",
+    },
+  },
 });
 
 export const errorBox = style({

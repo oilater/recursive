@@ -30,7 +30,7 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
   const stepGenerator = getStepGenerator(algorithmId)!;
 
   const [input, setInput] = useState<Record<string, unknown>>(meta.inputConfig.defaults);
-  const [leftWidth, setLeftWidth] = useState(380);
+  const [leftWidth, setLeftWidth] = useState(440);
 
   const result: StepGeneratorResult = useMemo(() => stepGenerator(input), [stepGenerator, input]);
   const player = useAlgorithmPlayer(result.steps);
@@ -53,12 +53,18 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
       </div>
 
       <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: 0 }}>
-          {/* Left */}
-          <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "280px", maxWidth: "600px" }}>
+        <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "8px" }}>
+          {/* Col 1: 코드 */}
+          <div className={styles.leftPanel} style={{ width: `${leftWidth}px`, minWidth: "240px", maxWidth: "500px" }}>
             <div className={styles.codeSection}>
-              <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} title={`${meta.name} - 코드`} />
+              <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
             </div>
+          </div>
+
+          <ResizeHandle direction="horizontal" onResize={handleResize} />
+
+          {/* Col 2: 상태 (콜스택 + 변수 + 결과) */}
+          <div className={styles.middlePanel}>
             <CallStack currentStep={player.currentStep} tree={result.tree} />
             <div className={styles.variableSection}>
               {isNQueen ? (
@@ -67,17 +73,14 @@ export function VisualizerClient({ algorithmId, codeHtml }: VisualizerClientProp
                 <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
               )}
             </div>
+            <ResultPanel steps={result.steps} currentIndex={player.currentIndex} />
           </div>
 
-          {/* Resize Handle */}
-          <ResizeHandle direction="horizontal" onResize={handleResize} />
-
-          {/* Right */}
+          {/* Col 3: 트리 */}
           <div className={styles.rightPanel} style={{ flex: 1, minWidth: 0 }}>
             <div className={styles.treeSection}>
               <TreeView tree={result.tree} currentStep={player.currentStep} />
             </div>
-            <ResultPanel steps={result.steps} currentIndex={player.currentIndex} />
           </div>
         </div>
 

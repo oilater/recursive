@@ -60,7 +60,7 @@ export function CallStack({ currentStep, tree }: CallStackProps) {
       {frames.map((frame, i) => {
         const isTop = i === frames.length - 1;
         return (
-          <div key={frame.nodeId} className={isTop ? styles.frameActive : styles.frame}>
+          <div key={i} className={isTop ? styles.frameActive : styles.frame}>
             {Array.from({ length: frame.depth }).map((_, j) => (
               <span key={j} className={styles.frameIndent} />
             ))}

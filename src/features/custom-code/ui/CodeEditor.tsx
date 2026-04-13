@@ -20,21 +20,24 @@ export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProp
   const extensions = useMemo(() => [javascript({ typescript: true })], []);
 
   return (
-    <ReactCodeMirror
-      value={value}
-      onChange={onChange}
-      readOnly={readOnly}
-      height="100%"
-      theme="dark"
-      extensions={extensions}
-      basicSetup={{
-        lineNumbers: true,
-        foldGutter: false,
-        highlightActiveLine: !readOnly,
-        bracketMatching: true,
-        closeBrackets: true,
-        autocompletion: false,
-      }}
-    />
+    <div className={styles.editorRoot}>
+      <ReactCodeMirror
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        autoFocus={!readOnly}
+        height="100%"
+        theme="dark"
+        extensions={extensions}
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: false,
+          highlightActiveLine: !readOnly,
+          bracketMatching: true,
+          closeBrackets: true,
+          autocompletion: false,
+        }}
+      />
+    </div>
   );
 }
