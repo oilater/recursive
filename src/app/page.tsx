@@ -34,6 +34,7 @@ export default function Home() {
             <AlgorithmCard key={algo.id} algorithm={algo} />
           ))}
         </div>
+        <p style={{ fontSize: "13px", color: "#475569", marginTop: "8px" }}>더 많은 알고리즘이 곧 업데이트될 예정이에요 ✨</p>
       </section>
       <footer
         style={{

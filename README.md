@@ -1,5 +1,7 @@
 # Recursive
 
+[한국어](./README.ko.md) | English
+
 **Track your algorithms, line by line.**
 
 Recursive is a browser-based algorithm visualizer that lets you paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization for recursive functions.
@@ -104,7 +106,7 @@ pnpm install
 pnpm dev          # dev server
 pnpm build        # production build
 pnpm test         # vitest
-pnpm fix          # oxlint + prettier
+pnpm fix          # oxlint + oxfmt
 pnpm analyze      # bundle analyzer
 ```
 
