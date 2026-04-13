@@ -1,7 +1,7 @@
-import type { StepGeneratorResult } from "@/entities/algorithm/model/types";
-import type { ExecuteOptions, AnalysisResult } from "../model/types";
-import { analyzeCode } from "../model/analyzer";
-import { transformCode } from "../model/transformer";
+import type { StepGeneratorResult } from "@/algorithm/types";
+import type { ExecuteOptions, AnalysisResult } from "./types";
+import { analyzeCode } from "./analyzer";
+import { transformCode } from "./transformer";
 import { buildWorkerCode } from "./build-worker-code";
 
 const DEFAULT_TIMEOUT_MS = 5000;

@@ -1,5 +1,5 @@
-import { registerAlgorithm } from "@/entities/algorithm";
-import type { PresetAlgorithm } from "@/entities/algorithm";
+import { registerAlgorithm } from "./registry";
+import type { PresetAlgorithm } from "./types";
 
 const presets: PresetAlgorithm[] = [
   {

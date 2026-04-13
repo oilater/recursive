@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Step } from "@/entities/algorithm";
+import type { Step } from "@/algorithm";
 import * as styles from "./result-panel.css";
 
 interface ConsoleLogEntry {

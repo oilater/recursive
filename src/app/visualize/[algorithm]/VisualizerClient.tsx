@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { StepGeneratorResult, PresetAlgorithm } from "@/entities/algorithm";
-import { useAlgorithmPlayer } from "@/features/player";
-import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/features/visualizer";
-import { executeCustomCode, analyzeCode, ArgumentForm } from "@/features/custom-code";
-import type { ArgumentFormHandle } from "@/features/custom-code";
+import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
+import { useAlgorithmPlayer } from "@/player";
+import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/visualizer";
+import { ArgumentForm } from "@/editor";
+import { executeCustomCode, analyzeCode } from "@/engine";
+import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { Badge } from "@/shared/ui";
 import * as styles from "./visualize-page.css";

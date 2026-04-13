@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { initializeAlgorithms } from "@/features/preset-algorithms";
-import { getPreset } from "@/entities/algorithm";
+import { initializeAlgorithms } from "@/algorithm";
+import { getPreset } from "@/algorithm";
 import { VisualizerClient } from "./VisualizerClient";
 
 initializeAlgorithms();

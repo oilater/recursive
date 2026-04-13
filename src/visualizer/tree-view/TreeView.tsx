@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useEffect, useState } from "react";
-import type { TreeNode, Step } from "@/entities/algorithm";
+import type { TreeNode, Step } from "@/algorithm";
 import { computeTreeLayout, type PositionedNode } from "@/shared/lib/tree-layout";
 import * as styles from "./tree-view.css";
 

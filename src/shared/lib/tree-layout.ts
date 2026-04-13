@@ -1,5 +1,5 @@
 import { hierarchy, tree } from "d3-hierarchy";
-import type { TreeNode } from "@/entities/algorithm";
+import type { TreeNode } from "@/algorithm";
 
 export interface PositionedNode {
   x: number;

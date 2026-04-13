@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { AlgorithmCardData } from "../model/types";
+import type { AlgorithmCardData } from "./types";
 import { Badge } from "@/shared/ui";
 import * as styles from "./algorithm-card.css";
 

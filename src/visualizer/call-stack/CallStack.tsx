@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Step, TreeNode } from "@/entities/algorithm";
+import type { Step, TreeNode } from "@/algorithm";
 import { Badge } from "@/shared/ui";
 import { EmptyState } from "@/shared/ui";
 import * as styles from "./call-stack.css";

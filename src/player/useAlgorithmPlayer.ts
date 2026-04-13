@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import type { Step } from "@/entities/algorithm";
+import type { Step } from "@/algorithm";
 
 export type Speed = 0.5 | 1 | 2 | 4;
 

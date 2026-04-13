@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import type { AlgorithmPlayer, Speed } from "@/features/player";
+import type { AlgorithmPlayer, Speed } from "@/player";
 import { Badge } from "@/shared/ui";
 import * as styles from "./stepper.css";
 

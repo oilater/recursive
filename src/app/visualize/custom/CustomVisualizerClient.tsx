@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import type { StepGeneratorResult } from "@/entities/algorithm";
-import { useAlgorithmPlayer } from "@/features/player";
-import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/features/visualizer";
-import { CodeEditor, ArgumentForm, executeCustomCode, analyzeCode } from "@/features/custom-code";
-import type { ArgumentFormHandle } from "@/features/custom-code";
+import type { StepGeneratorResult } from "@/algorithm";
+import { useAlgorithmPlayer } from "@/player";
+import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/visualizer";
+import { CodeEditor, ArgumentForm } from "@/editor";
+import { executeCustomCode, analyzeCode } from "@/engine";
+import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { PanelHeader } from "@/shared/ui";

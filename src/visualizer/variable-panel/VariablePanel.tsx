@@ -1,6 +1,6 @@
 "use client";
 
-import type { Step } from "@/entities/algorithm";
+import type { Step } from "@/algorithm";
 import { omit } from "es-toolkit";
 import { EmptyState } from "@/shared/ui";
 import * as styles from "./variable-panel.css";

@@ -1,4 +1,4 @@
-import type { StepGeneratorResult } from "@/entities/algorithm/model/types";
+import type { StepGeneratorResult } from "@/algorithm/types";
 
 export interface ExecuteSuccessResponse {
   type: "success";

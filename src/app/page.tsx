@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { initializeAlgorithms } from "@/features/preset-algorithms";
-import { getAllCardData, AlgorithmCard } from "@/entities/algorithm";
+import { initializeAlgorithms } from "@/algorithm";
+import { getAllCardData, AlgorithmCard } from "@/algorithm";
 import * as styles from "./home.css";
 
 initializeAlgorithms();
