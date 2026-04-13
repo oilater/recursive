@@ -82,23 +82,19 @@ Presets and custom code use the exact same execution pipeline (`executeCustomCod
 - **es-toolkit** — utility functions
 - **Vitest** — testing
 
-## Project structure (FSD)
+## Project structure
+
+Domain-centric flat structure — each folder is a self-contained domain.
 
 ```
 src/
-├── app/                          # Pages (Next.js routing)
-├── entities/
-│   ├── algorithm/                # Preset data + types + card UI
-│   └── custom-code/              # AST analyzer, transformer, worker executor
-├── features/
-│   ├── preset-algorithms/        # Preset definitions (code + defaultArgs)
-│   ├── custom-code/              # Code editor + argument form UI
-│   ├── player/                   # Playback hook (useAlgorithmPlayer)
-│   └── visualizer/               # TreeView, CodePanel, Stepper, VariablePanel, etc.
-└── shared/
-    ├── lib/                      # Utilities (validate, normalize-code, shiki, tree-layout)
-    ├── ui/                       # Badge, PanelHeader, EmptyState
-    └── styles/                   # Theme + global styles
+├── app/              # Pages (Next.js routing)
+├── engine/           # Code tracing engine (analyzer, transformer, executor, worker)
+├── algorithm/        # Preset definitions, types, registry, card UI
+├── visualizer/       # Visualization components (TreeView, CodePanel, Stepper, etc.)
+├── editor/           # Code input (CodeMirror editor, argument form)
+├── player/           # Playback hook (useAlgorithmPlayer)
+└── shared/           # Styles, UI primitives, utilities
 ```
 
 ## Development

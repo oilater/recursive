@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useReducer, useEffect, useRef } from "react";
 import type { Step } from "@/algorithm";
 
 export type Speed = 0.5 | 1 | 2 | 4;
@@ -25,105 +25,99 @@ export interface AlgorithmPlayer {
   reset: () => void;
 }
 
+interface State {
+  currentIndex: number;
+  isPlaying: boolean;
+  speed: Speed;
+}
+
+type Action =
+  | { type: "STEP_FORWARD"; max: number }
+  | { type: "STEP_BACKWARD" }
+  | { type: "JUMP_TO"; index: number; max: number }
+  | { type: "JUMP_TO_START" }
+  | { type: "JUMP_TO_END"; max: number }
+  | { type: "PLAY" }
+  | { type: "PAUSE" }
+  | { type: "TOGGLE_PLAY" }
+  | { type: "SET_SPEED"; speed: Speed }
+  | { type: "RESET" }
+  | { type: "AUTO_STEP"; max: number };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "STEP_FORWARD":
+      return { ...state, currentIndex: Math.min(state.currentIndex + 1, action.max) };
+    case "STEP_BACKWARD":
+      return { ...state, currentIndex: Math.max(state.currentIndex - 1, 0) };
+    case "JUMP_TO":
+      return { ...state, currentIndex: Math.max(0, Math.min(action.index, action.max)) };
+    case "JUMP_TO_START":
+      return { ...state, currentIndex: 0 };
+    case "JUMP_TO_END":
+      return { ...state, currentIndex: action.max };
+    case "PLAY":
+      return { ...state, isPlaying: true };
+    case "PAUSE":
+      return { ...state, isPlaying: false };
+    case "TOGGLE_PLAY":
+      return { ...state, isPlaying: !state.isPlaying };
+    case "SET_SPEED":
+      return { ...state, speed: action.speed };
+    case "RESET":
+      return { currentIndex: 0, isPlaying: false, speed: state.speed };
+    case "AUTO_STEP":
+      if (state.currentIndex >= action.max) return { ...state, isPlaying: false };
+      return { ...state, currentIndex: state.currentIndex + 1 };
+  }
+}
+
+const initialState: State = { currentIndex: 0, isPlaying: false, speed: 1 };
+
 export function useAlgorithmPlayer(steps: Step[]): AlgorithmPlayer {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState<Speed>(1);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const stepsRef = useRef(steps);
 
-  useEffect(
-    function syncStepsRef() {
-      stepsRef.current = steps;
-    },
-    [steps]
-  );
+  useEffect(function syncStepsRef() {
+    stepsRef.current = steps;
+  }, [steps]);
 
   const totalSteps = steps.length;
-  const currentStep = steps[currentIndex];
-  const isAtStart = currentIndex === 0;
-  const isAtEnd = currentIndex >= totalSteps - 1;
+  const lastIndex = Math.max(0, totalSteps - 1);
 
-  const stepForward = useCallback((): void => {
-    setCurrentIndex((i) => Math.min(i + 1, stepsRef.current.length - 1));
-  }, []);
-
-  const stepBackward = useCallback((): void => {
-    setCurrentIndex((i) => Math.max(i - 1, 0));
-  }, []);
-
-  const jumpTo = useCallback(
-    (index: number): void => {
-      setCurrentIndex(Math.max(0, Math.min(index, totalSteps - 1)));
-    },
-    [totalSteps]
-  );
-
-  const jumpToStart = useCallback((): void => {
-    setCurrentIndex(0);
-  }, []);
-
-  const jumpToEnd = useCallback((): void => {
-    setCurrentIndex(Math.max(0, totalSteps - 1));
+  useEffect(function resetOnStepsChange() {
+    dispatch({ type: "RESET" });
   }, [totalSteps]);
 
-  const play = useCallback((): void => setIsPlaying(true), []);
-  const pause = useCallback((): void => setIsPlaying(false), []);
-  const togglePlay = useCallback((): void => setIsPlaying((p) => !p), []);
+  useEffect(function autoPlayInterval() {
+    if (!state.isPlaying || totalSteps === 0) return;
 
-  const reset = useCallback((): void => {
-    setCurrentIndex(0);
-    setIsPlaying(false);
-  }, []);
+    const interval = setInterval(() => {
+      dispatch({ type: "AUTO_STEP", max: stepsRef.current.length - 1 });
+    }, 800 / state.speed);
 
-  useEffect(
-    function autoPlayInterval() {
-      if (!isPlaying || totalSteps === 0) return;
+    return function cleanup() {
+      clearInterval(interval);
+    };
+  }, [state.isPlaying, state.speed, totalSteps]);
 
-      const interval = setInterval(() => {
-        setCurrentIndex((i) => {
-          if (i >= stepsRef.current.length - 1) {
-            setIsPlaying(false);
-            return i;
-          }
-          return i + 1;
-        });
-      }, 800 / speed);
-
-      return function cleanup() {
-        clearInterval(interval);
-      };
-    },
-    [isPlaying, speed, totalSteps]
-  );
-
-  useEffect(
-    function resetOnStepsChange() {
-      setCurrentIndex(0);
-      setIsPlaying(false);
-    },
-    [totalSteps]
-  );
-
-  return useMemo(
-    (): AlgorithmPlayer => ({
-      currentIndex,
-      currentStep,
-      totalSteps,
-      isPlaying,
-      speed,
-      isAtStart,
-      isAtEnd,
-      stepForward,
-      stepBackward,
-      jumpTo,
-      jumpToStart,
-      jumpToEnd,
-      play,
-      pause,
-      togglePlay,
-      setSpeed,
-      reset,
-    }),
-    [currentIndex, currentStep, totalSteps, isPlaying, speed, isAtStart, isAtEnd]
-  );
+  return {
+    currentIndex: state.currentIndex,
+    currentStep: steps[state.currentIndex],
+    totalSteps,
+    isPlaying: state.isPlaying,
+    speed: state.speed,
+    isAtStart: state.currentIndex === 0,
+    isAtEnd: state.currentIndex >= lastIndex,
+    stepForward: () => dispatch({ type: "STEP_FORWARD", max: lastIndex }),
+    stepBackward: () => dispatch({ type: "STEP_BACKWARD" }),
+    jumpTo: (index: number) => dispatch({ type: "JUMP_TO", index, max: lastIndex }),
+    jumpToStart: () => dispatch({ type: "JUMP_TO_START" }),
+    jumpToEnd: () => dispatch({ type: "JUMP_TO_END", max: lastIndex }),
+    play: () => dispatch({ type: "PLAY" }),
+    pause: () => dispatch({ type: "PAUSE" }),
+    togglePlay: () => dispatch({ type: "TOGGLE_PLAY" }),
+    setSpeed: (speed: Speed) => dispatch({ type: "SET_SPEED", speed }),
+    reset: () => dispatch({ type: "RESET" }),
+  };
 }
