@@ -11,20 +11,18 @@ export const card = style({
   textDecoration: "none",
   color: vars.color.text,
   transition: "all 0.2s ease",
-  position: "relative",
-  overflow: "hidden",
   cursor: "pointer",
   ":hover": {
-    borderColor: vars.color.primary,
+    borderColor: "rgba(74, 222, 128, 0.4)",
     transform: "translateY(-2px)",
-    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.15)",
+    boxShadow: "0 8px 24px rgba(74, 222, 128, 0.08)",
   },
 });
 
 export const lockedCard = style([
   card,
   {
-    opacity: 0.6,
+    opacity: 0.5,
     ":hover": {
       borderColor: vars.color.border,
       transform: "none",
@@ -75,7 +73,6 @@ export const name = style({
 export const description = style({
   fontSize: vars.fontSize.sm,
   color: vars.color.textMuted,
-  marginBottom: vars.space.md,
   lineHeight: 1.5,
 });
 
@@ -84,4 +81,5 @@ export const footer = style({
   alignItems: "center",
   gap: vars.space.sm,
   marginTop: "auto",
+  paddingTop: vars.space.sm,
 });

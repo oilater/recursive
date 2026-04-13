@@ -9,8 +9,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "재귀 시각화 - Recursion Visualizer",
-  description: "재귀 알고리즘의 호출 흐름을 시각적으로 학습하세요",
+  title: "Recursive — Track Your Algorithms",
+  description: "알고리즘의 실행 흐름을 시각화하고, 한 줄씩 따라가며 학습하세요",
 };
 
 export default function RootLayout({
