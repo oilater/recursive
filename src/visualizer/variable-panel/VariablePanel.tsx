@@ -58,7 +58,10 @@ function renderValue(value: unknown, changed: boolean): React.ReactNode {
 
   if (typeof value === "boolean") {
     return (
-      <span className={styles.varValue} style={{ color: value ? "#22c55e" : "#ef4444", ...changeStyle }}>
+      <span
+        className={styles.varValue}
+        style={{ color: value ? "#22c55e" : "#ef4444", ...changeStyle }}
+      >
         {String(value)}
       </span>
     );
@@ -94,7 +97,11 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
           <div key={key} className={changed ? styles.rowChanged : styles.row}>
             <span className={styles.varName}>
               {key}
-              {changed && <span style={{ color: "#fbbf24", marginLeft: "4px", fontSize: "9px" }}>changed</span>}
+              {changed && (
+                <span style={{ color: "#fbbf24", marginLeft: "4px", fontSize: "9px" }}>
+                  changed
+                </span>
+              )}
             </span>
             {renderValue(value, changed)}
           </div>

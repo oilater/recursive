@@ -16,7 +16,12 @@ interface ResultPanelProps {
   consoleLogs?: ConsoleLogEntry[];
 }
 
-export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs }: ResultPanelProps) {
+export function ResultPanel({
+  steps,
+  currentIndex,
+  finalReturnValue,
+  consoleLogs,
+}: ResultPanelProps) {
   // 프리셋: "결과에 [...] 추가" 패턴
   const allPresetResults = useMemo(() => {
     const results: { value: string; stepIdx: number }[] = [];
@@ -34,13 +39,13 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
 
   const visiblePresetResults = useMemo(
     () => allPresetResults.filter((r) => r.stepIdx <= currentIndex),
-    [allPresetResults, currentIndex]
+    [allPresetResults, currentIndex],
   );
 
   const hasPresetResults = visiblePresetResults.length > 0;
   const visibleLogs = useMemo(
     () => (consoleLogs ?? []).filter((log) => log.stepIdx <= currentIndex),
-    [consoleLogs, currentIndex]
+    [consoleLogs, currentIndex],
   );
   const hasLogs = visibleLogs.length > 0;
   const isComplete = currentIndex >= steps.length - 1;
@@ -50,7 +55,9 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
     return null;
   }
 
-  const latestIdx = hasPresetResults ? visiblePresetResults[visiblePresetResults.length - 1].stepIdx : -1;
+  const latestIdx = hasPresetResults
+    ? visiblePresetResults[visiblePresetResults.length - 1].stepIdx
+    : -1;
 
   return (
     <div className={styles.container}>
@@ -62,7 +69,10 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "8px" }}>
             {visiblePresetResults.map((r, i) => (
-              <span key={i} className={r.stepIdx === latestIdx ? styles.resultItemNew : styles.resultItem}>
+              <span
+                key={i}
+                className={r.stepIdx === latestIdx ? styles.resultItemNew : styles.resultItem}
+              >
                 {r.value}
               </span>
             ))}
@@ -73,7 +83,9 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
       {/* Console 출력 */}
       {hasLogs && (
         <>
-          <div className={styles.title} style={{ color: "#94a3b8" }}>Console</div>
+          <div className={styles.title} style={{ color: "#94a3b8" }}>
+            Console
+          </div>
           <div className={styles.consoleBox}>
             {visibleLogs.map((log, i) => (
               <div key={i} className={styles.consoleLine}>
@@ -87,9 +99,13 @@ export function ResultPanel({ steps, currentIndex, finalReturnValue, consoleLogs
       {/* Return 값 */}
       {hasReturn && (
         <>
-          <div className={styles.title} style={{ color: "#4ade80" }}>Return</div>
+          <div className={styles.title} style={{ color: "#4ade80" }}>
+            Return
+          </div>
           <div className={styles.finalResult}>
-            {typeof finalReturnValue === "object" ? JSON.stringify(finalReturnValue) : String(finalReturnValue)}
+            {typeof finalReturnValue === "object"
+              ? JSON.stringify(finalReturnValue)
+              : String(finalReturnValue)}
           </div>
         </>
       )}

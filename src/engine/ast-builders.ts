@@ -46,4 +46,11 @@ export const funcExpr = (params: AstNode[], body: AstNode) =>
 export const obj = (properties: AstNode[] = []) => n("ObjectExpression", { properties });
 
 export const shorthandProp = (name: string) =>
-  n("Property", { method: false, shorthand: true, computed: false, key: id(name), value: id(name), kind: "init" });
+  n("Property", {
+    method: false,
+    shorthand: true,
+    computed: false,
+    key: id(name),
+    value: id(name),
+    kind: "init",
+  });

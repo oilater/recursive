@@ -29,13 +29,17 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
 
       prevLineRef.current = activeLine;
     },
-    [activeLine, html]
+    [activeLine, html],
   );
 
   return (
     <div className={styles.container}>
       {title && <div className={styles.header}>{title}</div>}
-      <div ref={codeRef} className={styles.codeWrapper} dangerouslySetInnerHTML={{ __html: html }} />
+      <div
+        ref={codeRef}
+        className={styles.codeWrapper}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     </div>
   );
 }

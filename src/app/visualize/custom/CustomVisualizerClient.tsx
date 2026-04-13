@@ -3,7 +3,14 @@
 import { useState, useRef } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
 import { useAlgorithmPlayer } from "@/player";
-import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/visualizer";
+import {
+  TreeView,
+  StepperControls,
+  VariablePanel,
+  CallStack,
+  ResultPanel,
+  CodePanel,
+} from "@/visualizer";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
@@ -37,8 +44,7 @@ export function CustomVisualizerClient() {
     try {
       const { analysis } = analyzeCode(newCode);
       setParamNames(analysis.entryParamNames);
-    } catch {
-    }
+    } catch {}
   };
 
   const handleExecute = async (args: unknown[]) => {
@@ -61,7 +67,8 @@ export function CustomVisualizerClient() {
     }
   };
 
-  const handleResize = (delta: number) => setLeftWidth((w) => Math.max(280, Math.min(800, w + delta)));
+  const handleResize = (delta: number) =>
+    setLeftWidth((w) => Math.max(280, Math.min(800, w + delta)));
 
   const handleEdit = () => {
     setMode("edit");
@@ -72,7 +79,9 @@ export function CustomVisualizerClient() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <a href="/" className={styles.backLink}>← Recursive</a>
+        <a href="/" className={styles.backLink}>
+          ← Recursive
+        </a>
         {mode === "visualize" && (
           <button className={styles.backLink} onClick={handleEdit} style={{ marginLeft: "auto" }}>
             ← 편집
@@ -85,7 +94,8 @@ export function CustomVisualizerClient() {
         <div className={styles.editLayout}>
           {error && <div className={styles.errorBox}>{error}</div>}
           <div className={styles.hintBanner}>
-            💡 JS / TS 코드를 붙여넣으면 함수와 매개변수를 자동으로 인식해요. 값을 입력하고 실행해보세요!
+            💡 JS / TS 코드를 붙여넣으면 함수와 매개변수를 자동으로 인식해요. 값을 입력하고
+            실행해보세요!
           </div>
           <div className={styles.editorPanel}>
             <CodeEditor value={code} onChange={handleCodeChange} />
@@ -126,7 +136,9 @@ export function CustomVisualizerClient() {
               <div className={styles.variableSection}>
                 <VariablePanel
                   currentStep={player.currentStep}
-                  prevStep={player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined}
+                  prevStep={
+                    player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined
+                  }
                 />
               </div>
               <ResultPanel

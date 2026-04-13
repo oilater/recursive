@@ -38,7 +38,7 @@ export function ResizeHandle({ direction, onResize }: ResizeHandleProps) {
       document.body.style.cursor = direction === "horizontal" ? "col-resize" : "row-resize";
       document.body.style.userSelect = "none";
     },
-    [direction, onResize]
+    [direction, onResize],
   );
 
   const isHorizontal = direction === "horizontal";

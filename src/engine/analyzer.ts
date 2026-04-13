@@ -23,14 +23,19 @@ function walkAst(node: AstNode, visitor: (n: AstNode) => boolean | void): void {
 function findInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode | null {
   let result: AstNode | null = null;
   walkAst(node, (n) => {
-    if (predicate(n)) { result = n; return true; }
+    if (predicate(n)) {
+      result = n;
+      return true;
+    }
   });
   return result;
 }
 
 function collectInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode[] {
   const results: AstNode[] = [];
-  walkAst(node, (n) => { if (predicate(n)) results.push(n); });
+  walkAst(node, (n) => {
+    if (predicate(n)) results.push(n);
+  });
   return results;
 }
 
@@ -59,14 +64,18 @@ function extractParamNames(params: AstNode[]): string[] {
 function extractLocalVarNames(funcNode: AstNode): string[] {
   const names = new Set<string>();
 
-  for (const decl of collectInAst(funcNode, (n) => n.type === "VariableDeclarator" && n.id?.type === "Identifier")) {
+  for (const decl of collectInAst(
+    funcNode,
+    (n) => n.type === "VariableDeclarator" && n.id?.type === "Identifier",
+  )) {
     names.add(decl.id.name);
   }
 
   for (const fn of collectInAst(funcNode, (n) => n.type === "FunctionDeclaration")) {
     for (const param of fn.params ?? []) {
       if (param.type === "Identifier" && param.name !== "_") names.add(param.name);
-      if (param.type === "AssignmentPattern" && param.left?.type === "Identifier") names.add(param.left.name);
+      if (param.type === "AssignmentPattern" && param.left?.type === "Identifier")
+        names.add(param.left.name);
     }
   }
 
@@ -83,7 +92,10 @@ function findAllFunctions(ast: AstNode): FuncInfo[] {
       params: extractParamNames(node.params),
       startLine: lineOf(node),
       endLine: node.loc?.end?.line ?? 0,
-      isRecursive: !!findInAst(node.body, (n) => n.type === "CallExpression" && n.callee?.name === name),
+      isRecursive: !!findInAst(
+        node.body,
+        (n) => n.type === "CallExpression" && n.callee?.name === name,
+      ),
       node,
     });
   }
@@ -94,7 +106,7 @@ function findAllFunctions(ast: AstNode): FuncInfo[] {
       n.type === "VariableDeclarator" &&
       n.id?.type === "Identifier" &&
       n.init &&
-      (n.init.type === "FunctionExpression" || n.init.type === "ArrowFunctionExpression")
+      (n.init.type === "FunctionExpression" || n.init.type === "ArrowFunctionExpression"),
   )) {
     const name = decl.id.name;
     const funcNode = decl.init;
@@ -103,7 +115,10 @@ function findAllFunctions(ast: AstNode): FuncInfo[] {
       params: extractParamNames(funcNode.params),
       startLine: lineOf(decl),
       endLine: decl.loc?.end?.line ?? 0,
-      isRecursive: !!findInAst(funcNode.body, (n) => n.type === "CallExpression" && n.callee?.name === name),
+      isRecursive: !!findInAst(
+        funcNode.body,
+        (n) => n.type === "CallExpression" && n.callee?.name === name,
+      ),
       node: funcNode,
     });
   }
@@ -123,7 +138,11 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
 
   let originalAst: AstNode;
   try {
-    originalAst = acorn.parse(strippedCode, { ecmaVersion: 2022, sourceType: "script", locations: true });
+    originalAst = acorn.parse(strippedCode, {
+      ecmaVersion: 2022,
+      sourceType: "script",
+      locations: true,
+    });
   } catch (e: unknown) {
     throw new Error(`구문 오류: ${e instanceof Error ? e.message : String(e)}`);
   }
@@ -133,12 +152,17 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
   const topLevelFunc = originalFunctions.length > 0 ? originalFunctions[0] : null;
   const returnRef = topLevelFunc ? `\nreturn ${topLevelFunc.name};` : "";
   const wrappedCode = `function __entry__() {\n${strippedCode}${returnRef}\n}`;
-  const wrappedAst = acorn.parse(wrappedCode, { ecmaVersion: 2022, sourceType: "script", locations: true }) as AstNode;
+  const wrappedAst = acorn.parse(wrappedCode, {
+    ecmaVersion: 2022,
+    sourceType: "script",
+    locations: true,
+  }) as AstNode;
   const wrappedFunctions = findAllFunctions(wrappedAst);
 
   const entryFunc = wrappedFunctions.find((f) => f.name === "__entry__")!;
 
-  const recursiveFunc = wrappedFunctions.find((f) => f.name !== "__entry__" && f.isRecursive) ?? null;
+  const recursiveFunc =
+    wrappedFunctions.find((f) => f.name !== "__entry__" && f.isRecursive) ?? null;
 
   const localVarNames = [
     ...new Set([...entryFunc.params, ...extractLocalVarNames(entryFunc.node)]),

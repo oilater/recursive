@@ -35,19 +35,43 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <footer style={{ textAlign: "center", paddingTop: "32px", paddingBottom: "16px" }}>
-        <p style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.6 }}>
-          버그 제보나 기능 건의는{" "}
+      <footer
+        style={{
+          textAlign: "center",
+          paddingTop: "48px",
+          paddingBottom: "24px",
+          borderTop: "1px solid #1e293b",
+          marginTop: "32px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "16px",
+            marginBottom: "12px",
+            fontSize: "13px",
+          }}
+        >
+          <a
+            href="https://github.com/oilater/recursive"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#64748b" }}
+          >
+            GitHub
+          </a>
+          <span style={{ color: "#334155" }}>·</span>
           <a
             href="https://github.com/oilater/recursive/issues"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#4ade80" }}
+            style={{ color: "#64748b" }}
           >
-            GitHub Issues
+            이슈 & 건의
           </a>
-          에 남겨주세요
-        </p>
+        </div>
+        <p style={{ fontSize: "12px", color: "#475569" }}>© 2026 Recursive. All rights reserved.</p>
       </footer>
     </main>
   );

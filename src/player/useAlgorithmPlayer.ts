@@ -78,28 +78,37 @@ export function useAlgorithmPlayer(steps: Step[]): AlgorithmPlayer {
   const [state, dispatch] = useReducer(reducer, initialState);
   const stepsRef = useRef(steps);
 
-  useEffect(function syncStepsRef() {
-    stepsRef.current = steps;
-  }, [steps]);
+  useEffect(
+    function syncStepsRef() {
+      stepsRef.current = steps;
+    },
+    [steps],
+  );
 
   const totalSteps = steps.length;
   const lastIndex = Math.max(0, totalSteps - 1);
 
-  useEffect(function resetOnStepsChange() {
-    dispatch({ type: "RESET" });
-  }, [totalSteps]);
+  useEffect(
+    function resetOnStepsChange() {
+      dispatch({ type: "RESET" });
+    },
+    [totalSteps],
+  );
 
-  useEffect(function autoPlayInterval() {
-    if (!state.isPlaying || totalSteps === 0) return;
+  useEffect(
+    function autoPlayInterval() {
+      if (!state.isPlaying || totalSteps === 0) return;
 
-    const interval = setInterval(() => {
-      dispatch({ type: "AUTO_STEP", max: stepsRef.current.length - 1 });
-    }, 800 / state.speed);
+      const interval = setInterval(() => {
+        dispatch({ type: "AUTO_STEP", max: stepsRef.current.length - 1 });
+      }, 800 / state.speed);
 
-    return function cleanup() {
-      clearInterval(interval);
-    };
-  }, [state.isPlaying, state.speed, totalSteps]);
+      return function cleanup() {
+        clearInterval(interval);
+      };
+    },
+    [state.isPlaying, state.speed, totalSteps],
+  );
 
   return {
     currentIndex: state.currentIndex,

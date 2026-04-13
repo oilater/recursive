@@ -41,14 +41,16 @@ export function TreeView({ tree, currentStep }: TreeViewProps) {
           const el = containerRef.current;
           const viewWidth = Math.max(400, Math.min(layout.bounds.width, el.clientWidth));
           const viewHeight = Math.max(300, Math.min(layout.bounds.height, el.clientHeight));
-          setViewBox(`${activeNode.x - viewWidth / 2} ${activeNode.y - viewHeight / 2} ${viewWidth} ${viewHeight}`);
+          setViewBox(
+            `${activeNode.x - viewWidth / 2} ${activeNode.y - viewHeight / 2} ${viewWidth} ${viewHeight}`,
+          );
           return;
         }
       }
       const { bounds } = layout;
       setViewBox(`${bounds.minX} ${bounds.minY} ${bounds.width} ${bounds.height}`);
     },
-    [activeNodeId, layout, nodeById]
+    [activeNodeId, layout, nodeById],
   );
 
   const getNodeStatus = (node: PositionedNode): string => {

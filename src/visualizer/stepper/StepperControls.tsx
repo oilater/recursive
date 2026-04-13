@@ -37,7 +37,7 @@ export function StepperControls({ player }: StepperControlsProps) {
       const index = Math.round(ratio * (totalSteps - 1));
       player.jumpTo(index);
     },
-    [totalSteps, player]
+    [totalSteps, player],
   );
 
   return (
@@ -68,19 +68,43 @@ export function StepperControls({ player }: StepperControlsProps) {
 
       {/* Transport controls */}
       <div className={styles.controls}>
-        <button className={styles.controlButton} onClick={jumpToStart} data-disabled={isAtStart} title="처음으로">
+        <button
+          className={styles.controlButton}
+          onClick={jumpToStart}
+          data-disabled={isAtStart}
+          title="처음으로"
+        >
           ⏮
         </button>
-        <button className={styles.controlButton} onClick={stepBackward} data-disabled={isAtStart} title="한 단계 뒤로">
+        <button
+          className={styles.controlButton}
+          onClick={stepBackward}
+          data-disabled={isAtStart}
+          title="한 단계 뒤로"
+        >
           ◀
         </button>
-        <button className={styles.playButton} onClick={togglePlay} title={isPlaying ? "일시정지" : "재생"}>
+        <button
+          className={styles.playButton}
+          onClick={togglePlay}
+          title={isPlaying ? "일시정지" : "재생"}
+        >
           {isPlaying ? "⏸" : "▶"}
         </button>
-        <button className={styles.controlButton} onClick={stepForward} data-disabled={isAtEnd} title="한 단계 앞으로">
+        <button
+          className={styles.controlButton}
+          onClick={stepForward}
+          data-disabled={isAtEnd}
+          title="한 단계 앞으로"
+        >
           ▶
         </button>
-        <button className={styles.controlButton} onClick={jumpToEnd} data-disabled={isAtEnd} title="끝으로">
+        <button
+          className={styles.controlButton}
+          onClick={jumpToEnd}
+          data-disabled={isAtEnd}
+          title="끝으로"
+        >
           ⏭
         </button>
       </div>
@@ -88,7 +112,12 @@ export function StepperControls({ player }: StepperControlsProps) {
       {/* Speed controls */}
       <div className={styles.speedControls}>
         {SPEEDS.map((s) => (
-          <button key={s} className={styles.speedButton} data-active={speed === s} onClick={() => setSpeed(s)}>
+          <button
+            key={s}
+            className={styles.speedButton}
+            data-active={speed === s}
+            onClick={() => setSpeed(s)}
+          >
             {s}x
           </button>
         ))}

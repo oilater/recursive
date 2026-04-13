@@ -1,15 +1,38 @@
 import * as acorn from "acorn";
 import { generate } from "astring";
 import type { AnalysisResult } from "./types";
-import { id, literal, call, assign, member, expr, block, varDecl, tryCatch, ret, funcExpr, obj } from "./ast-builders";
+import {
+  id,
+  literal,
+  call,
+  assign,
+  member,
+  expr,
+  block,
+  varDecl,
+  tryCatch,
+  ret,
+  funcExpr,
+  obj,
+} from "./ast-builders";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
-const LOOP_TYPES = ["ForStatement", "WhileStatement", "DoWhileStatement", "ForInStatement", "ForOfStatement"];
+const LOOP_TYPES = [
+  "ForStatement",
+  "WhileStatement",
+  "DoWhileStatement",
+  "ForInStatement",
+  "ForOfStatement",
+];
 
 export function transformCode(strippedCode: string, analysis: AnalysisResult): string {
-  const ast = acorn.parse(strippedCode, { ecmaVersion: 2022, sourceType: "script", locations: true }) as AstNode;
+  const ast = acorn.parse(strippedCode, {
+    ecmaVersion: 2022,
+    sourceType: "script",
+    locations: true,
+  }) as AstNode;
   const tracedFuncName = analysis.recursiveFuncName ?? analysis.entryFuncName;
   walkAndTransform(ast, tracedFuncName, analysis.recursiveFuncName, analysis.localVarNames, false);
   return generate(ast);
@@ -20,7 +43,7 @@ function walkAndTransform(
   tracedFuncName: string,
   recursiveFuncName: string | null,
   varNames: string[],
-  insideTracedFunc: boolean
+  insideTracedFunc: boolean,
 ): void {
   if (!node || typeof node !== "object") return;
 
@@ -56,7 +79,8 @@ function walkAndTransform(
             if (
               decl.id?.name === recursiveFuncName &&
               decl.init &&
-              (decl.init.type === "FunctionExpression" || decl.init.type === "ArrowFunctionExpression")
+              (decl.init.type === "FunctionExpression" ||
+                decl.init.type === "ArrowFunctionExpression")
             ) {
               newBody.push(proxyReassignment(recursiveFuncName));
             }
@@ -70,10 +94,16 @@ function walkAndTransform(
           stmt.declarations?.some(
             (d: AstNode) =>
               d.id?.name === tracedFuncName &&
-              (d.init?.type === "FunctionExpression" || d.init?.type === "ArrowFunctionExpression")
+              (d.init?.type === "FunctionExpression" || d.init?.type === "ArrowFunctionExpression"),
           ));
 
-      walkAndTransform(stmt, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc || !!enteringTracedFunc);
+      walkAndTransform(
+        stmt,
+        tracedFuncName,
+        recursiveFuncName,
+        varNames,
+        insideTracedFunc || !!enteringTracedFunc,
+      );
     }
     node.body = newBody;
     return;
@@ -85,7 +115,8 @@ function walkAndTransform(
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {
         for (const item of val) {
-          if (item?.type) walkAndTransform(item, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc);
+          if (item?.type)
+            walkAndTransform(item, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc);
         }
       } else if (val.type) {
         const isFuncBody =
@@ -93,7 +124,13 @@ function walkAndTransform(
             (node.id?.name === tracedFuncName || node.id?.name === "__entry__")) ||
           node.type === "FunctionExpression" ||
           node.type === "ArrowFunctionExpression";
-        walkAndTransform(val, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc || (isFuncBody && key === "body"));
+        walkAndTransform(
+          val,
+          tracedFuncName,
+          recursiveFuncName,
+          varNames,
+          insideTracedFunc || (isFuncBody && key === "body"),
+        );
       }
     }
   }
@@ -105,13 +142,13 @@ function captureVarsInit(varNames: string[]): AstNode {
   const tryBlocks = varNames.map((name) =>
     tryCatch(
       [expr(assign(member(id("__v"), id(name)), id(name)))],
-      [expr(assign(member(id("__v"), id(name)), literal("-")))]
-    )
+      [expr(assign(member(id("__v"), id(name)), literal("-")))],
+    ),
   );
 
   return varDecl(
     "__captureVars",
-    funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))]))
+    funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
   );
 }
 

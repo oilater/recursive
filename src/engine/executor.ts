@@ -15,8 +15,16 @@ export interface ExecuteResult {
   consoleLogs?: Array<{ text: string; stepIdx: number }>;
 }
 
-export async function executeCustomCode(code: string, args: unknown[], options: ExecuteOptions = {}): Promise<ExecuteResult> {
-  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxCalls = DEFAULT_MAX_CALLS, maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS } = options;
+export async function executeCustomCode(
+  code: string,
+  args: unknown[],
+  options: ExecuteOptions = {},
+): Promise<ExecuteResult> {
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxCalls = DEFAULT_MAX_CALLS,
+    maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS,
+  } = options;
 
   const { analysis, strippedCode } = analyzeCode(code);
   const transformedCode = transformCode(strippedCode, analysis);
@@ -37,7 +45,12 @@ export async function executeCustomCode(code: string, args: unknown[], options: 
       worker.terminate();
       const response = e.data;
       if (response.type === "success") {
-        resolve({ result: response.result, analysis, finalReturnValue: response.finalReturnValue, consoleLogs: response.consoleLogs });
+        resolve({
+          result: response.result,
+          analysis,
+          finalReturnValue: response.finalReturnValue,
+          consoleLogs: response.consoleLogs,
+        });
       } else {
         reject(new Error(response.message));
       }

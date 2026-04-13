@@ -20,7 +20,7 @@ interface CodeEditorProps {
 export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProps) {
   const extensions = useMemo(
     () => [javascript({ typescript: true }), placeholderExt("여기에 코드를 붙여넣으세요")],
-    []
+    [],
   );
 
   return (

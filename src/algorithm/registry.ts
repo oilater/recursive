@@ -7,7 +7,8 @@ export function registerAlgorithm(preset: PresetAlgorithm): void {
   algorithms.push(preset);
 }
 
-export const getPreset = (id: string): PresetAlgorithm | undefined => algorithms.find((a) => a.id === id);
+export const getPreset = (id: string): PresetAlgorithm | undefined =>
+  algorithms.find((a) => a.id === id);
 
 export const getAllPresets = (): PresetAlgorithm[] => [...algorithms];
 

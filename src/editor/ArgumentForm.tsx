@@ -15,7 +15,7 @@ interface ArgumentFormProps {
 
 export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(function ArgumentForm(
   { paramNames, onSubmit },
-  ref
+  ref,
 ) {
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};

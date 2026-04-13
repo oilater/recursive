@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { useAlgorithmPlayer } from "@/player";
-import { TreeView, StepperControls, VariablePanel, CallStack, ResultPanel, CodePanel } from "@/visualizer";
+import {
+  TreeView,
+  StepperControls,
+  VariablePanel,
+  CallStack,
+  ResultPanel,
+  CodePanel,
+} from "@/visualizer";
 import { ArgumentForm } from "@/editor";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
@@ -26,17 +33,17 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   const argFormRef = useRef<ArgumentFormHandle>(null);
 
   const player = useAlgorithmPlayer(result?.steps ?? []);
-  const prevStep = player.currentIndex > 0 ? (result?.steps[player.currentIndex - 1] ?? undefined) : undefined;
+  const prevStep =
+    player.currentIndex > 0 ? (result?.steps[player.currentIndex - 1] ?? undefined) : undefined;
 
   useEffect(
     function analyzePresetParams() {
       try {
         const { analysis } = analyzeCode(preset.code);
         setParamNames(analysis.entryParamNames);
-      } catch {
-      }
+      } catch {}
     },
-    [preset.code]
+    [preset.code],
   );
 
   const runCode = async (args: unknown[]) => {
@@ -58,14 +65,16 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     function executeInitial() {
       runCode(preset.defaultArgs);
     },
-    [preset]
+    [preset],
   );
 
   if (error) {
     return (
       <div className={styles.page}>
         <div className={styles.header}>
-          <a href="/" className={styles.backLink}>← 목록</a>
+          <a href="/" className={styles.backLink}>
+            ← 목록
+          </a>
           <span className={styles.algoTitle}>{preset.name}</span>
         </div>
         <div style={{ padding: "32px", color: "#ef4444" }}>{error}</div>
@@ -77,7 +86,9 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     return (
       <div className={styles.page}>
         <div className={styles.header}>
-          <a href="/" className={styles.backLink}>← 목록</a>
+          <a href="/" className={styles.backLink}>
+            ← 목록
+          </a>
           <span className={styles.algoTitle}>{preset.name}</span>
         </div>
         <div style={{ padding: "32px", color: "#94a3b8" }}>실행 중...</div>
@@ -88,7 +99,9 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <a href="/" className={styles.backLink}>← 목록</a>
+        <a href="/" className={styles.backLink}>
+          ← 목록
+        </a>
         <span className={styles.algoTitle}>{preset.name}</span>
         <Badge variant={preset.difficulty}>{difficultyLabels[preset.difficulty]}</Badge>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
