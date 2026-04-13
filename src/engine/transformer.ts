@@ -5,13 +5,6 @@ import type { AnalysisResult } from "./types";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
-/**
- * 코드를 변환합니다:
- * 1. 추적 대상 함수의 매 statement 앞에 `__traceLine(line, __captureVars())` 삽입
- * 2. 함수 본문 선두에 `var __captureVars = __buildCapture([변수명들])` 삽입
- * 3. 재귀 함수가 있으면 선언 직후 `funcName = __createProxy(funcName)` 삽입
- * 4. 루프에 `__guard()` + 반복마다 루프 라인 traceLine 삽입
- */
 export function transformCode(strippedCode: string, analysis: AnalysisResult): string {
   const ast = acorn.parse(strippedCode, {
     ecmaVersion: 2022,
@@ -118,20 +111,6 @@ function isLoopStatement(node: AstNode): boolean {
   return ["ForStatement", "WhileStatement", "DoWhileStatement", "ForInStatement", "ForOfStatement"].includes(node.type);
 }
 
-/**
- * 함수 본문 선두에 삽입하는 인라인 캡처 함수:
- *
- * var __captureVars = function() {
- *   var __v = {};
- *   try { __v.r = r; } catch(e) {}
- *   try { __v.c = c; } catch(e) {}
- *   try { __v.memo = memo; } catch(e) {}
- *   return __v;
- * };
- *
- * 클로저 스코프에서 실행되므로 모든 로컬 변수에 접근 가능.
- * 선언 전 변수는 try-catch로 개별 처리되어 나머지에 영향 없음.
- */
 function createCaptureVarsInit(varNames: string[]): AstNode {
   const tryBlocks: AstNode[] = varNames.map((name) => ({
     type: "TryStatement",
@@ -258,7 +237,6 @@ function createCaptureVarsInit(varNames: string[]): AstNode {
   };
 }
 
-/** __traceLine(lineNumber, __captureVars()) */
 function createTraceLineCall(line: number): AstNode {
   return {
     type: "ExpressionStatement",

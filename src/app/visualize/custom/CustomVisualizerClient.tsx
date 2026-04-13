@@ -38,7 +38,6 @@ export function CustomVisualizerClient() {
       const { analysis } = analyzeCode(newCode);
       setParamNames(analysis.entryParamNames);
     } catch {
-      // 편집 중에는 파싱 에러 무시
     }
   };
 

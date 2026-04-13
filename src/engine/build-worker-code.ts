@@ -1,10 +1,3 @@
-/**
- * 범용 코드 추적 Worker.
- *
- * 두 가지 추적 레이어:
- * 1. __traceLine(line, vars) — 모든 코드에서 라인 단위 실행 추적 + 변수 스냅샷
- * 2. __createProxy (선택) — 재귀 함수가 있을 때만 호출 트리 빌드
- */
 export function buildWorkerCode(): string {
   return `
 'use strict';

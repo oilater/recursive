@@ -65,13 +65,10 @@ function extractParamNames(params: AstNode[]): string[] {
 function extractLocalVarNames(funcNode: AstNode): string[] {
   const names = new Set<string>();
 
-  // VariableDeclarator (const, let, var) — for-init의 루프 변수 포함
   for (const decl of collectInAst(funcNode, (n) => n.type === "VariableDeclarator" && n.id?.type === "Identifier")) {
     names.add(decl.id.name);
   }
 
-  // FunctionDeclaration 파라미터만 (명명 함수: dfs, permutation 등)
-  // ArrowFunction/FunctionExpression 파라미터는 콜백이므로 제외 (_, j 등)
   for (const fn of collectInAst(funcNode, (n) => n.type === "FunctionDeclaration")) {
     for (const param of fn.params ?? []) {
       if (param.type === "Identifier" && param.name !== "_") names.add(param.name);
@@ -127,18 +124,9 @@ export interface AnalyzeCodeResult {
   strippedCode: string;
 }
 
-/**
- * 모든 코드를 항상 `function __entry__() { ... }` 로 래핑합니다.
- * - 함수가 없는 코드 → 그냥 래핑
- * - 최상위 함수가 있는 코드 → 래핑 후 마지막에 호출 안 함 (Worker가 __entry__ 호출)
- * - 중첩 재귀 (exist → backtrack) → 래핑 후 Worker가 __entry__ 호출
- *
- * lineOffset=1 고정 (래핑으로 1줄 밀림). Shiki는 원본 코드로 HTML 생성.
- */
 export function analyzeCode(code: string): AnalyzeCodeResult {
   const strippedCode = stripTypeScript(code);
 
-  // 원본 코드 먼저 파싱하여 함수 정보 수집
   let originalAst: AstNode;
   try {
     originalAst = acorn.parse(strippedCode, { ecmaVersion: 2022, sourceType: "script", locations: true });
@@ -148,20 +136,16 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
 
   const originalFunctions = findAllFunctions(originalAst);
 
-  // 항상 __entry__로 래핑. 사용자 함수가 있으면 참조만 반환 (호출은 Worker가 외부에서).
   const topLevelFunc = originalFunctions.length > 0 ? originalFunctions[0] : null;
   const returnRef = topLevelFunc ? `\nreturn ${topLevelFunc.name};` : "";
   const wrappedCode = `function __entry__() {\n${strippedCode}${returnRef}\n}`;
   const wrappedAst = acorn.parse(wrappedCode, { ecmaVersion: 2022, sourceType: "script", locations: true }) as AstNode;
   const wrappedFunctions = findAllFunctions(wrappedAst);
 
-  // __entry__ 함수 정보
   const entryFunc = wrappedFunctions.find((f) => f.name === "__entry__")!;
 
-  // 재귀 함수 탐지 (__entry__ 제외)
   const recursiveFunc = wrappedFunctions.find((f) => f.name !== "__entry__" && f.isRecursive) ?? null;
 
-  // 추적 대상 = __entry__ (모든 코드를 포함)
   const localVarNames = [
     ...new Set([...entryFunc.params, ...extractLocalVarNames(entryFunc.node)]),
   ];

@@ -28,14 +28,12 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   const player = useAlgorithmPlayer(result?.steps ?? []);
   const prevStep = player.currentIndex > 0 ? (result?.steps[player.currentIndex - 1] ?? undefined) : undefined;
 
-  // 초기 파라미터 분석
   useEffect(
     function analyzePresetParams() {
       try {
         const { analysis } = analyzeCode(preset.code);
         setParamNames(analysis.entryParamNames);
       } catch {
-        // ignore
       }
     },
     [preset.code]
@@ -56,7 +54,6 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     }
   };
 
-  // 초기 실행
   useEffect(
     function executeInitial() {
       runCode(preset.defaultArgs);

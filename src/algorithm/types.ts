@@ -27,7 +27,6 @@ export interface StepGeneratorResult {
 
 export type Difficulty = "easy" | "medium" | "hard";
 
-/** 프리셋 알고리즘 = 코드 + 기본 인자. 실행은 커스텀과 동일한 파이프라인. */
 export interface PresetAlgorithm {
   id: string;
   name: string;
@@ -37,7 +36,6 @@ export interface PresetAlgorithm {
   defaultArgs: unknown[];
 }
 
-/** 홈 카드 표시용 */
 export interface AlgorithmCardData {
   id: string;
   name: string;
