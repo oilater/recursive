@@ -12,47 +12,32 @@ export interface ExecuteResult {
   result: StepGeneratorResult;
   analysis: AnalysisResult;
   finalReturnValue?: unknown;
+  consoleLogs?: Array<{ text: string; stepIdx: number }>;
 }
 
-export async function executeCustomCode(
-  code: string,
-  args: unknown[],
-  options: ExecuteOptions = {}
-): Promise<ExecuteResult> {
-  const {
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    maxCalls = DEFAULT_MAX_CALLS,
-    maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS,
-  } = options;
+export async function executeCustomCode(code: string, args: unknown[], options: ExecuteOptions = {}): Promise<ExecuteResult> {
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, maxCalls = DEFAULT_MAX_CALLS, maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS } = options;
 
-  // 1. 코드 분석 (TS 타입 제거 포함)
   const { analysis, strippedCode } = analyzeCode(code);
-
-  // 2. AST 변환 (재귀 호출 교체, 루프 가드 삽입)
   const transformedCode = transformCode(strippedCode, analysis);
 
-  // 3. Worker 생성 및 실행
   return new Promise<ExecuteResult>((resolve, reject) => {
-    const workerScript = buildWorkerCode();
-    const blob = new Blob([workerScript], { type: "application/javascript" });
+    const blob = new Blob([buildWorkerCode()], { type: "application/javascript" });
     const url = URL.createObjectURL(blob);
     const worker = new Worker(url);
     URL.revokeObjectURL(url);
 
     const timer = setTimeout(() => {
       worker.terminate();
-      reject(
-        new Error(`실행 시간이 ${timeoutMs / 1000}초를 초과했습니다. 무한 루프나 과도한 재귀가 있는지 확인해주세요.`)
-      );
+      reject(new Error(`실행 시간이 ${timeoutMs / 1000}초를 초과했습니다.`));
     }, timeoutMs);
 
     worker.onmessage = (e) => {
       clearTimeout(timer);
       worker.terminate();
-
       const response = e.data;
       if (response.type === "success") {
-        resolve({ result: response.result, analysis, finalReturnValue: response.finalReturnValue });
+        resolve({ result: response.result, analysis, finalReturnValue: response.finalReturnValue, consoleLogs: response.consoleLogs });
       } else {
         reject(new Error(response.message));
       }
@@ -66,14 +51,17 @@ export async function executeCustomCode(
 
     worker.postMessage({
       transformedCode,
-      recursiveFuncName: analysis.recursiveFuncName,
       entryFuncName: analysis.entryFuncName,
-      args,
+      hasRecursion: analysis.hasRecursion,
+      recursiveFuncName: analysis.recursiveFuncName,
       recursiveParamNames: analysis.recursiveParamNames,
+      args,
       maxCalls,
       maxLoopIterations,
-      funcStartLine: analysis.recursiveStartLine,
-      funcEndLine: analysis.recursiveEndLine,
+      funcStartLine: analysis.tracedFuncStartLine,
+      funcEndLine: analysis.tracedFuncEndLine,
+      lineOffset: analysis.lineOffset,
+      userTopLevelFuncName: analysis.userTopLevelFuncName,
     });
   });
 }

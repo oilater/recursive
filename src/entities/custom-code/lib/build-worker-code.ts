@@ -1,16 +1,13 @@
 /**
- * Worker 내부에서 실행될 코드를 문자열로 생성합니다.
+ * 범용 코드 추적 Worker.
  *
- * 중첩 재귀 지원:
- * - entryFuncName이 있으면 (예: exist → backtrack)
- *   루트 노드 = exist(...), backtrack 호출들은 자식 노드
- * - entryFuncName이 없으면 (예: fibonacci)
- *   첫 호출이 루트 노드가 됨
+ * 두 가지 추적 레이어:
+ * 1. __traceLine(line, vars) — 모든 코드에서 라인 단위 실행 추적 + 변수 스냅샷
+ * 2. __createProxy (선택) — 재귀 함수가 있을 때만 호출 트리 빌드
  */
 export function buildWorkerCode(): string {
   return `
 'use strict';
-
 self.fetch = undefined;
 self.XMLHttpRequest = undefined;
 self.importScripts = undefined;
@@ -18,17 +15,16 @@ self.importScripts = undefined;
 self.onmessage = function(e) {
   var data = e.data;
   var transformedCode = data.transformedCode;
-  var recursiveFuncName = data.recursiveFuncName;
   var entryFuncName = data.entryFuncName;
   var args = data.args;
+  var hasRecursion = data.hasRecursion;
+  var recursiveFuncName = data.recursiveFuncName;
   var recursiveParamNames = data.recursiveParamNames || [];
   var maxCalls = data.maxCalls || 5000;
   var maxLoopIterations = data.maxLoopIterations || 100000;
   var funcStartLine = data.funcStartLine || 1;
   var funcEndLine = data.funcEndLine || 1;
-  var hasEntry = !!entryFuncName;
-
-  var callFuncName = entryFuncName || recursiveFuncName;
+  var lineOffset = data.lineOffset || 0;
 
   try {
     var steps = [];
@@ -37,34 +33,20 @@ self.onmessage = function(e) {
     var callCount = 0;
     var loopCount = 0;
     var callStack = [];
-    var firstTopLevelCall = true;
 
-    // 루트 노드 설정
-    var rootNode;
-    if (hasEntry) {
-      // 중첩 패턴: 진입 함수가 루트
-      rootNode = {
-        id: 'node-' + nodeIdCounter++,
-        label: entryFuncName,
-        args: formatArgs(args),
-        children: [],
-        status: 'completed'
-      };
-    } else {
-      // 단일 패턴: 첫 재귀 호출이 루트 (나중에 교체됨)
-      rootNode = {
-        id: 'node-0',
-        label: recursiveFuncName,
-        args: '',
-        children: [],
-        status: 'idle'
-      };
-      nodeIdCounter++;
-    }
+    // 트리 루트 (재귀 있을 때만 의미 있음)
+    var rootNode = {
+      id: 'node-' + nodeIdCounter++,
+      label: hasRecursion ? (recursiveFuncName || entryFuncName) : entryFuncName,
+      args: formatArgs(args),
+      children: [],
+      status: 'completed'
+    };
 
     function deepClone(val) {
       if (val === null || val === undefined) return val;
-      if (typeof val === 'number' || typeof val === 'string' || typeof val === 'boolean') return val;
+      if (typeof val !== 'object') return val;
+      if (Array.isArray(val)) return val.map(deepClone);
       try { return JSON.parse(JSON.stringify(val)); } catch(e) { return String(val); }
     }
 
@@ -74,7 +56,6 @@ self.onmessage = function(e) {
         if (a === null) return 'null';
         if (Array.isArray(a)) {
           if (a.length > 8) return '[' + a.slice(0, 3).join(',') + ',...(' + a.length + ')]';
-          // 2D array
           if (a.length > 0 && Array.isArray(a[0])) return '[[...]](' + a.length + 'x' + a[0].length + ')';
           return '[' + a.join(',') + ']';
         }
@@ -88,9 +69,9 @@ self.onmessage = function(e) {
 
     function getPath(stack, nodeId) {
       var path = [];
-      if (hasEntry) path.push(rootNode.id);
+      if (hasRecursion && rootNode.children.length > 0) path.push(rootNode.id);
       for (var i = 0; i < stack.length; i++) path.push(stack[i].nodeId);
-      path.push(nodeId);
+      if (nodeId) path.push(nodeId);
       return path;
     }
 
@@ -101,12 +82,40 @@ self.onmessage = function(e) {
       }
     }
 
+    // ── 라인 추적 (모든 코드에서 동작) ──
+    function __traceLine(line, varsSnapshot) {
+      var currentNodeId = callStack.length > 0 ? callStack[callStack.length - 1].nodeId : rootNode.id;
+      var activePath = callStack.length > 0 ? getPath(callStack, currentNodeId) : [rootNode.id];
+
+      var variables = {};
+      if (varsSnapshot) {
+        for (var k in varsSnapshot) {
+          if (varsSnapshot.hasOwnProperty(k)) {
+            variables[k] = deepClone(varsSnapshot[k]);
+          }
+        }
+      }
+
+      steps.push({
+        id: stepId++,
+        type: 'call',
+        codeLine: Math.max(1, line - lineOffset),
+        activeNodeId: currentNodeId,
+        activePath: activePath.slice(),
+        variables: variables,
+        description: '라인 ' + Math.max(1, line - lineOffset) + ' 실행'
+      });
+    }
+
+    // ── 재귀 Proxy (재귀가 있을 때만 사용) ──
     function __createProxy(originalFunc) {
+      if (!hasRecursion) return originalFunc;
+
       return new Proxy(originalFunc, {
         apply: function(target, thisArg, argsList) {
           callCount++;
           if (callCount > maxCalls) {
-            throw new Error('재귀 호출 횟수가 ' + maxCalls + '회를 초과했습니다. 종료 조건을 확인해주세요.');
+            throw new Error('재귀 호출 횟수가 ' + maxCalls + '회를 초과했습니다.');
           }
 
           var nodeId = 'node-' + nodeIdCounter++;
@@ -118,29 +127,14 @@ self.onmessage = function(e) {
             status: 'idle'
           };
 
-          // 부모-자식 연결
+          // 부모 연결
           if (callStack.length === 0) {
-            if (hasEntry) {
-              // 중첩 패턴: 루트(진입 함수)의 자식으로 추가
-              rootNode.children.push(node);
-            } else if (firstTopLevelCall) {
-              // 단일 패턴: 첫 호출이 루트 노드를 교체
-              rootNode.id = nodeId;
-              rootNode.label = node.label;
-              rootNode.args = node.args;
-              node = rootNode;
-              firstTopLevelCall = false;
-            } else {
-              // 단일 패턴인데 여러 번 호출? (보통 없지만 안전장치)
-              rootNode.children.push(node);
-            }
+            rootNode.children.push(node);
           } else {
             callStack[callStack.length - 1].node.children.push(node);
           }
 
           var activePath = getPath(callStack, nodeId);
-
-          // 변수 스냅샷
           var variables = {};
           for (var i = 0; i < recursiveParamNames.length; i++) {
             variables[recursiveParamNames[i]] = deepClone(argsList[i]);
@@ -149,10 +143,10 @@ self.onmessage = function(e) {
           steps.push({
             id: stepId++,
             type: 'call',
-            codeLine: funcStartLine,
+            codeLine: Math.max(1, funcStartLine - lineOffset),
             activeNodeId: nodeId,
             activePath: activePath.slice(),
-            variables: Object.assign({}, variables),
+            variables: variables,
             description: recursiveFuncName + '(' + formatArgs(argsList) + ') 호출'
           });
 
@@ -171,14 +165,13 @@ self.onmessage = function(e) {
           callStack.pop();
 
           var returnPath = getPath(callStack, nodeId);
-
           var returnVars = Object.assign({}, variables);
           returnVars['returnValue'] = deepClone(result);
 
           steps.push({
             id: stepId++,
             type: 'return',
-            codeLine: funcEndLine,
+            codeLine: Math.max(1, funcEndLine - lineOffset),
             activeNodeId: nodeId,
             activePath: returnPath,
             variables: returnVars,
@@ -190,14 +183,29 @@ self.onmessage = function(e) {
       });
     }
 
-    var runCode = transformedCode + '\\nvar __result = ' + callFuncName + '.apply(null, __args);\\nreturn __result;\\n';
-    var runFn = new Function('__guard', '__createProxy', '__args', runCode);
-    var finalReturnValue = runFn(__guard, __createProxy, args);
+    // console.log 캡처 — 각 로그를 직전 stepId에 연결
+    var consoleLogs = [];
+    var fakeConsole = {
+      log: function() {
+        var args = Array.prototype.slice.call(arguments);
+        var text = args.map(function(a) { return typeof a === 'object' ? JSON.stringify(a) : String(a); }).join(' ');
+        consoleLogs.push({ text: text, stepIdx: stepId - 1 });
+      },
+      warn: function() { fakeConsole.log.apply(null, arguments); },
+      error: function() { fakeConsole.log.apply(null, arguments); },
+      info: function() { fakeConsole.log.apply(null, arguments); }
+    };
+
+    // 항상 __entry__() 호출. 사용자 함수 호출은 __entry__ 안에 이미 삽입됨.
+    var runCode = transformedCode + '\\nreturn __entry__();\\n';
+    var runFn = new Function('__guard', '__createProxy', '__traceLine', '__args', 'console', runCode);
+    var finalReturnValue = runFn(__guard, __createProxy, __traceLine, args, fakeConsole);
 
     self.postMessage({
       type: 'success',
       result: { steps: steps, tree: rootNode },
-      finalReturnValue: deepClone(finalReturnValue)
+      finalReturnValue: deepClone(finalReturnValue),
+      consoleLogs: consoleLogs
     });
 
   } catch(err) {
