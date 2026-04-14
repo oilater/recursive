@@ -78,8 +78,8 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   if (!currentStep) {
     return (
       <div className={styles.container}>
-        <div className={styles.title}>변수 상태</div>
-        <EmptyState message="스텝을 실행하면 변수 상태가 표시됩니다" />
+        <div className={styles.title}>Variables</div>
+        <EmptyState message="스텝을 실행하면 Variables가 표시됩니다" />
       </div>
     );
   }
@@ -90,7 +90,7 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>변수 상태</div>
+      <div className={styles.title}>Variables</div>
       {entries.map(([key, value]) => {
         const changed = prevStep !== undefined && didChange(prevVars[key], value);
         return (

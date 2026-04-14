@@ -104,7 +104,7 @@ self.onmessage = function(e) {
         activeNodeId: currentNodeId,
         activePath: activePath.slice(),
         variables: variables,
-        description: '라인 ' + correctedLine + ' 실행'
+        description: ''
       });
     }
 

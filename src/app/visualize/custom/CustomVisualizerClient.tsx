@@ -83,8 +83,20 @@ export function CustomVisualizerClient() {
           ← Recursive
         </a>
         {mode === "visualize" && (
-          <button className={styles.backLink} onClick={handleEdit} style={{ marginLeft: "auto" }}>
-            ← 편집
+          <button
+            onClick={handleEdit}
+            style={{
+              marginLeft: "auto",
+              padding: "4px 12px",
+              backgroundColor: "transparent",
+              color: "#94a3b8",
+              border: "1px solid #334155",
+              borderRadius: "6px",
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            Edit
           </button>
         )}
       </div>

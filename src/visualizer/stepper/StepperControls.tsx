@@ -45,14 +45,18 @@ export function StepperControls({ player }: StepperControlsProps) {
       {/* Step description with CALL/RETURN badge */}
       <div className={styles.description}>
         {currentStep ? (
-          <>
-            <Badge variant={currentStep.type === "call" ? "call" : "return"}>
-              {currentStep.type === "call" ? "CALL" : "RETURN"}
-            </Badge>
-            <span style={{ marginLeft: "8px" }}>{currentStep.description}</span>
-          </>
+          currentStep.description ? (
+            <>
+              <Badge variant={currentStep.type === "call" ? "call" : "return"}>
+                {currentStep.type === "call" ? "CALL" : "RETURN"}
+              </Badge>
+              <span style={{ marginLeft: "8px" }}>{currentStep.description}</span>
+            </>
+          ) : (
+            <span style={{ color: "#64748b" }}>Line {currentStep.codeLine}</span>
+          )
         ) : (
-          "시작하려면 재생 버튼을 누르세요"
+          "Press play to start"
         )}
       </div>
 

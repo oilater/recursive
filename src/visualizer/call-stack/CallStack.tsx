@@ -42,8 +42,8 @@ export function CallStack({ currentStep, tree }: CallStackProps) {
   if (!currentStep) {
     return (
       <div className={styles.container}>
-        <div className={styles.title}>콜스택</div>
-        <EmptyState message="스텝을 실행하면 콜스택이 표시됩니다" />
+        <div className={styles.title}>Call Stack</div>
+        <EmptyState message="스텝을 실행하면 Call Stack이 표시됩니다" />
       </div>
     );
   }
@@ -51,7 +51,7 @@ export function CallStack({ currentStep, tree }: CallStackProps) {
   return (
     <div className={styles.container}>
       <div className={styles.title}>
-        콜스택
+        Call Stack
         <span className={styles.depthBadge}>depth: {frames.length - 1}</span>
         <Badge variant={currentStep.type === "return" ? "return" : "call"}>
           {currentStep.type === "return" ? "RETURN" : "CALL"}

@@ -65,7 +65,7 @@ export function ResultPanel({
       {hasPresetResults && (
         <>
           <div className={styles.title}>
-            결과 <span className={styles.countBadge}>{visiblePresetResults.length}개</span>
+            Results <span className={styles.countBadge}>{visiblePresetResults.length}items</span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "8px" }}>
             {visiblePresetResults.map((r, i) => (
