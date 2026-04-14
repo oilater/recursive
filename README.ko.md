@@ -6,7 +6,7 @@
 
 JavaScript / TypeScript 코드를 붙여넣으면 실행 흐름을 단계별로 보여줍니다. 재귀 함수는 호출 트리까지 시각화합니다.
 
-[사용해보기 →](https://recursive-visualizer.vercel.app)
+[![사용해보기](https://img.shields.io/badge/%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive-ochre.vercel.app)
 
 ## 기능
 
@@ -19,7 +19,7 @@ JavaScript / TypeScript 코드를 붙여넣으면 실행 흐름을 단계별로 
 
 ## 사용 방법
 
-1. [플레이그라운드](https://recursive-visualizer.vercel.app/visualize/custom)에 접속합니다
+1. [플레이그라운드](https://recursive-ochre.vercel.app/visualize/custom)에 접속합니다
 2. 코드를 붙여넣습니다 (함수 또는 일반 코드 모두 가능)
 3. 함수에 인자가 필요하면 입력합니다
 4. **▶ 실행**을 클릭합니다

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://recursive-visualizer.vercel.app";
+const BASE_URL = "https://recursive-ochre.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

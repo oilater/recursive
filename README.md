@@ -6,7 +6,7 @@
 
 Paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
-[Try it out →](https://recursive-visualizer.vercel.app)
+[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive-ochre.vercel.app)
 
 ## Features
 
@@ -19,7 +19,7 @@ Paste any JavaScript or TypeScript code and watch it execute step by step — wi
 
 ## Usage
 
-1. Go to the [playground](https://recursive-visualizer.vercel.app/visualize/custom)
+1. Go to the [playground](https://recursive-ochre.vercel.app/visualize/custom)
 2. Paste your code (function or bare code — both work)
 3. Enter arguments if your function needs them
 4. Click **▶ Run**

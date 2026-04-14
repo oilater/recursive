@@ -9,7 +9,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://recursive-visualizer.vercel.app";
+const SITE_URL = "https://recursive-ochre.vercel.app";
 const SITE_NAME = "Recursive";
 const SITE_DESCRIPTION =
   "코드를 붙여넣기만 하면 실행 흐름을 한 줄씩 따라갈 수 있어요. 재귀라면 호출 트리까지 한눈에. JS / TS 지원.";
