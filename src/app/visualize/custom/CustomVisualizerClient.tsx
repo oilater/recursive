@@ -17,6 +17,7 @@ import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { PanelHeader } from "@/shared/ui";
+import { trackEvent } from "@/shared/lib/posthog";
 import * as styles from "./custom-page.css";
 
 const DEFAULT_CODE = "";
@@ -61,6 +62,12 @@ export function CustomVisualizerClient() {
       const html = await highlightCode(cleanCode);
       setCodeHtml(html);
       setMode("visualize");
+      trackEvent("code_executed", {
+        source: "playground",
+        code: cleanCode.slice(0, 500),
+        hasRecursion: execResult.analysis.hasRecursion,
+        stepCount: execResult.result.steps.length,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setMode("error");

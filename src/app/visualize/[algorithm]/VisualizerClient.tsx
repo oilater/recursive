@@ -14,6 +14,7 @@ import {
 import { ArgumentForm } from "@/editor";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
+import { trackEvent } from "@/shared/lib/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
 import { Badge } from "@/shared/ui";
 import * as styles from "./visualize-page.css";
@@ -56,6 +57,12 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
       setResult(execResult.result);
       setHasRecursion(execResult.analysis.hasRecursion);
       setCodeHtml(html);
+      trackEvent("code_executed", {
+        source: "preset",
+        presetId: preset.id,
+        args: JSON.stringify(args),
+        stepCount: execResult.result.steps.length,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }

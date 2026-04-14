@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Geist_Mono } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
+import { PostHogProvider } from "@/shared/lib/PostHogProvider";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -68,7 +69,9 @@ export default function RootLayout({
   return (
     <html lang="ko" className={geistMono.variable}>
       <body>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
         <Analytics />
       </body>
     </html>
