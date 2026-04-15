@@ -1,21 +1,10 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
+import { panelContainer, panelTitle } from "@/shared/styles/panel.css";
 
-export const container = style({
-  padding: vars.space.md,
-  backgroundColor: vars.color.surface,
-  borderRadius: vars.radius.lg,
-  border: `1px solid ${vars.color.border}`,
-  overflow: "auto",
-});
+export const container = panelContainer;
 
-export const title = style({
-  fontSize: vars.fontSize.xs,
-  color: vars.color.textMuted,
-  fontFamily: vars.font.mono,
-  marginBottom: vars.space.sm,
-  userSelect: "none",
-});
+export const title = panelTitle;
 
 export const row = style({
   display: "flex",

@@ -68,7 +68,7 @@ export const homeCard = style({
   transition: "all 0.2s ease",
   cursor: "pointer",
   ":hover": {
-    borderColor: vars.color.textMuted,
+    borderColor: "#4ade80",
     transform: "translateY(-2px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
   },

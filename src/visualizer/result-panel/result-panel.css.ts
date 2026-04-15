@@ -1,25 +1,10 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
+import { panelContainer, panelTitleWithBadge } from "@/shared/styles/panel.css";
 
-export const container = style({
-  padding: vars.space.md,
-  backgroundColor: vars.color.surface,
-  borderRadius: vars.radius.lg,
-  border: `1px solid ${vars.color.border}`,
-  overflow: "auto",
-  maxHeight: "200px",
-});
+export const container = style([panelContainer, { maxHeight: "200px" }]);
 
-export const title = style({
-  fontSize: vars.fontSize.xs,
-  color: vars.color.textMuted,
-  fontFamily: vars.font.mono,
-  marginBottom: vars.space.sm,
-  userSelect: "none",
-  display: "flex",
-  alignItems: "center",
-  gap: vars.space.xs,
-});
+export const title = panelTitleWithBadge;
 
 export const countBadge = style({
   padding: `0 ${vars.space.xs}`,

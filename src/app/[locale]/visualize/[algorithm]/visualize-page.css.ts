@@ -1,33 +1,17 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 
-export const page = style({
-  display: "flex",
-  flexDirection: "column",
-  height: "100vh",
-  overflow: "hidden",
-});
-
-export const header = style({
-  display: "flex",
-  alignItems: "center",
-  gap: vars.space.md,
-  padding: `${vars.space.sm} ${vars.space.lg}`,
-  borderBottom: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.surface,
-  flexShrink: 0,
-});
-
-export const backLink = style({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "4px",
-  color: vars.color.textMuted,
-  fontSize: vars.fontSize.sm,
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-  ":hover": { color: vars.color.text },
-});
+export {
+  page,
+  backLink,
+  leftPanel,
+  codeSection,
+  middlePanel,
+  variableSection,
+  rightPanel,
+  treeSection,
+  bottomPanel,
+} from "@/shared/styles/visualizer-layout.css";
 
 export const algoTitle = style({
   fontSize: vars.fontSize.md,
@@ -42,52 +26,4 @@ export const mainContent = style({
   overflow: "hidden",
   padding: vars.space.sm,
   gap: vars.space.sm,
-});
-
-export const leftPanel = style({
-  display: "flex",
-  flexDirection: "column",
-  gap: vars.space.sm,
-  overflow: "hidden",
-});
-
-export const codeSection = style({
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-});
-
-export const middlePanel = style({
-  display: "flex",
-  flexDirection: "column",
-  gap: vars.space.sm,
-  overflow: "auto",
-  flex: 2,
-  minWidth: 0,
-});
-
-export const variableSection = style({
-  flex: 1,
-  overflow: "auto",
-  minHeight: 0,
-});
-
-export const rightPanel = style({
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-  gap: vars.space.sm,
-});
-
-export const treeSection = style({
-  flex: 1,
-  overflow: "hidden",
-  minHeight: 0,
-});
-
-export const bottomPanel = style({
-  display: "flex",
-  flexDirection: "column",
-  gap: vars.space.sm,
-  flexShrink: 0,
 });
