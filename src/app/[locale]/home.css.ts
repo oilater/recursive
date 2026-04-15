@@ -11,7 +11,8 @@ export const page = style({
 export const hero = style({
   textAlign: "center",
   marginBottom: vars.space.xxl,
-  paddingTop: vars.space.lg,
+  paddingTop: vars.space.xxl,
+  paddingBottom: vars.space.lg,
 });
 
 export const title = style({
@@ -19,6 +20,7 @@ export const title = style({
   fontWeight: "800",
   letterSpacing: "-0.03em",
   marginBottom: vars.space.xs,
+  fontFamily: "var(--font-plus-jakarta), sans-serif",
   background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
