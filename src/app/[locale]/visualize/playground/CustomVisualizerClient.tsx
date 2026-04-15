@@ -109,22 +109,26 @@ export function CustomVisualizerClient() {
       {(mode === "edit" || mode === "error") && (
         <div className={styles.editLayout}>
           {error && <div className={styles.errorBox}>{error}</div>}
-          <div className={styles.hintBanner}>{t("custom.hint")}</div>
-          <div className={styles.editorPanel}>
-            <CodeEditor value={code} onChange={handleCodeChange} />
-          </div>
-          <div className={styles.argsPanel}>
-            <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
-            <button
-              className={styles.runButton}
-              onClick={() => {
-                const args = argFormRef.current?.getArgs() ?? [];
-                handleExecute(args);
-              }}
-              disabled={!code.trim()}
-            >
-              {t("custom.run")}
-            </button>
+          <div className={styles.editorCard}>
+            <div className={styles.editorToolbar}>
+              <span className={styles.toolbarLabel}>JavaScript / TypeScript</span>
+              <div className={styles.toolbarRight}>
+                <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
+                <button
+                  className={styles.runButton}
+                  onClick={() => {
+                    const args = argFormRef.current?.getArgs() ?? [];
+                    handleExecute(args);
+                  }}
+                  disabled={!code.trim()}
+                >
+                  {t("custom.run")}
+                </button>
+              </div>
+            </div>
+            <div className={styles.editorBody}>
+              <CodeEditor value={code} onChange={handleCodeChange} />
+            </div>
           </div>
         </div>
       )}

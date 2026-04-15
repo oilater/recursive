@@ -17,59 +17,59 @@ export const editLayout = style({
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  padding: vars.space.lg,
-  maxWidth: "900px",
-  width: "100%",
-  margin: "0 auto",
-  overflow: "auto",
-  gap: vars.space.md,
-});
-
-export const editorPanel = style({
-  flex: 1,
-  overflow: "auto",
-  minHeight: "300px",
-  borderRadius: vars.radius.lg,
-  border: `1px solid ${vars.color.border}`,
-});
-
-export const argsPanel = style({
-  display: "flex",
   alignItems: "center",
-  gap: vars.space.md,
-  justifyContent: "flex-end",
+  justifyContent: "center",
+  padding: vars.space.lg,
+  overflow: "auto",
 });
 
-export const vizContainer = style({
+// ── Editor card ──
+
+export const editorCard = style({
   display: "flex",
   flexDirection: "column",
+  width: "100%",
+  maxWidth: "960px",
   flex: 1,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bg,
   overflow: "hidden",
-  padding: vars.space.sm,
-  gap: vars.space.sm,
 });
 
-export const vizRow = style({
+export const editorToolbar = style({
   display: "flex",
-  flex: 1,
-  overflow: "hidden",
-  gap: "16px",
+  alignItems: "center",
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.surface,
 });
 
-export const hintBanner = style({
-  padding: `${vars.space.sm} ${vars.space.md}`,
-  backgroundColor: "rgba(56, 189, 248, 0.08)",
-  border: `1px solid rgba(56, 189, 248, 0.2)`,
-  borderRadius: vars.radius.md,
+export const toolbarLabel = style({
+  fontSize: vars.fontSize.xs,
   color: vars.color.textMuted,
-  fontSize: vars.fontSize.sm,
-  lineHeight: 1.5,
+  fontFamily: vars.font.mono,
 });
+
+export const toolbarRight = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginLeft: "auto",
+});
+
+export const editorBody = style({
+  flex: 1,
+  overflow: "auto",
+  minHeight: 0,
+});
+
+// ── Buttons ──
 
 export const runButton = style({
   padding: `${vars.space.sm} ${vars.space.xl}`,
-  backgroundColor: "#38bdf8",
-  color: "#0a0a0a",
+  backgroundColor: vars.color.accent,
+  color: vars.color.accentText,
   borderRadius: vars.radius.md,
   fontSize: vars.fontSize.sm,
   fontWeight: "700",
@@ -77,7 +77,7 @@ export const runButton = style({
   transition: "all 0.15s ease",
   flexShrink: 0,
   ":hover": {
-    backgroundColor: "#0ea5e9",
+    backgroundColor: vars.color.accentHover,
   },
   selectors: {
     "&:disabled": {
@@ -85,28 +85,6 @@ export const runButton = style({
       cursor: "not-allowed",
     },
   },
-});
-
-export const errorBox = style({
-  padding: vars.space.md,
-  backgroundColor: "#ef444420",
-  border: `1px solid ${vars.color.error}`,
-  borderRadius: vars.radius.md,
-  color: vars.color.error,
-  fontSize: vars.fontSize.sm,
-  fontFamily: vars.font.mono,
-  whiteSpace: "pre-wrap",
-  wordBreak: "break-word",
-});
-
-export const loadingOverlay = style({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100%",
-  gap: vars.space.sm,
-  color: vars.color.textMuted,
-  fontSize: vars.fontSize.lg,
 });
 
 export const editButton = style({
@@ -122,4 +100,48 @@ export const editButton = style({
     color: vars.color.text,
     borderColor: vars.color.text,
   },
+});
+
+// ── Viz layout ──
+
+export const vizContainer = style({
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  overflow: "hidden",
+  padding: vars.space.sm,
+  gap: vars.space.sm,
+});
+
+export const vizRow = style({
+  display: "flex",
+  flex: 1,
+  overflow: "hidden",
+  gap: vars.space.md,
+});
+
+// ── Feedback ──
+
+export const errorBox = style({
+  padding: vars.space.md,
+  backgroundColor: "#ef444420",
+  border: `1px solid ${vars.color.error}`,
+  borderRadius: vars.radius.md,
+  color: vars.color.error,
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-word",
+  maxWidth: "960px",
+  width: "100%",
+});
+
+export const loadingOverlay = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  gap: vars.space.sm,
+  color: vars.color.textMuted,
+  fontSize: vars.fontSize.lg,
 });

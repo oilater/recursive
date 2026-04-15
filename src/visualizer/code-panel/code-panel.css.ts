@@ -34,7 +34,9 @@ globalStyle(`${container} pre`, {
 globalStyle(`${container} code`, {
   display: "block",
   padding: `0 ${vars.space.sm}`,
-  fontSize: 0, // span 사이 \n 텍스트 노드의 공간 제거
+  fontSize: 0,
+  fontVariantLigatures: "none",
+  fontFeatureSettings: "'liga' 0, 'calt' 0",
 });
 
 globalStyle(`${container} span`, {

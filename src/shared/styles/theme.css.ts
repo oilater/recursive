@@ -133,6 +133,6 @@ createGlobalTheme(":root", vars, {
   },
   font: {
     body: "'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif",
-    mono: "'Geist Mono', 'Fira Code', monospace",
+    mono: "'Geist Mono', monospace",
   },
 });

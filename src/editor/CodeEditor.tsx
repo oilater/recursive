@@ -3,8 +3,10 @@
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { javascript } from "@codemirror/lang-javascript";
 import { placeholder as placeholderExt } from "@codemirror/view";
+
 import * as styles from "./code-editor.css";
 
 const ReactCodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
@@ -33,7 +35,7 @@ export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProp
         readOnly={readOnly}
         autoFocus={!readOnly}
         height="100%"
-        theme="dark"
+        theme={tokyoNight}
         extensions={extensions}
         basicSetup={{
           lineNumbers: true,
