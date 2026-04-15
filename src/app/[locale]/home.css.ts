@@ -18,7 +18,7 @@ export const title = style({
   fontSize: "56px",
   fontWeight: "800",
   letterSpacing: "-0.03em",
-  marginBottom: vars.space.md,
+  marginBottom: vars.space.xs,
   background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -28,13 +28,13 @@ export const title = style({
 export const subtitle = style({
   fontSize: vars.fontSize.lg,
   color: vars.color.textMuted,
-  maxWidth: "520px",
   margin: "0 auto",
   lineHeight: 1.7,
+  whiteSpace: "nowrap",
 });
 
 export const sectionTitle = style({
-  fontSize: vars.fontSize.lg,
+  fontSize: vars.fontSize.xl,
   fontWeight: "600",
   marginBottom: vars.space.xs,
   color: vars.color.text,

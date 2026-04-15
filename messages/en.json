@@ -1,0 +1,66 @@
+{
+  "home": {
+    "subtitle": "Visualize your code line by line and learn algorithms intuitively.",
+    "playground": "Playground",
+    "playgroundDesc": "Paste your algorithm code and watch the execution flow. Recursive calls are visualized as a tree.",
+    "customCardTitle": "Write your code here",
+    "customCardDesc": "Supports JS / TS. Functions and parameters are detected automatically.",
+    "comingSoon": "More algorithms coming soon ✨",
+    "issues": "Issues & Feedback",
+    "sorting": "Sorting",
+    "sortingSub": "Sorting",
+    "recursion": "Recursion & Backtracking",
+    "recursionSub": "Recursion & Backtracking"
+  },
+  "visualizer": {
+    "backToList": "← List",
+    "running": "Running...",
+    "apply": "Apply",
+    "pressPlay": "Press play to start",
+    "jumpToStart": "Jump to start",
+    "stepBackward": "Step backward",
+    "play": "Play",
+    "pause": "Pause",
+    "stepForward": "Step forward",
+    "jumpToEnd": "Jump to end",
+    "callStackEmpty": "Run a step to see the Call Stack",
+    "variablesEmpty": "Run a step to see Variables"
+  },
+  "custom": {
+    "hint": "💡 Paste JS / TS code and we'll detect functions and parameters automatically. Enter values and run!",
+    "run": "▶ Run",
+    "running": "Running..."
+  },
+  "editor": {
+    "loading": "Loading editor...",
+    "placeholder": "Paste your code here",
+    "inputPlaceholder": "Enter value"
+  },
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "algorithm": {
+    "bubble-sort": {
+      "name": "Bubble Sort",
+      "description": "Sorts by comparing adjacent elements"
+    },
+    "permutations": {
+      "name": "Permutations",
+      "description": "Select r items from n in order"
+    },
+    "combinations": {
+      "name": "Combinations",
+      "description": "Select r items from n without order"
+    },
+    "subsets": {
+      "name": "Subsets",
+      "description": "Find all subsets of the given array"
+    }
+  },
+  "metadata": {
+    "title": "Recursive — Track Your Algorithms",
+    "description": "Paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization."
+  }
+}
