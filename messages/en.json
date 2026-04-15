@@ -2,7 +2,7 @@
   "home": {
     "subtitle": "Visualize your code line by line and learn algorithms intuitively.",
     "playground": "Playground",
-    "playgroundDesc": "Paste your algorithm code and watch the execution flow. Recursive calls are visualized as a tree.",
+    "playgroundDesc": "Paste algorithm code or write your own.",
     "customCardTitle": "Write your code here",
     "customCardDesc": "Supports JS / TS. Functions and parameters are detected automatically.",
     "comingSoon": "More algorithms coming soon ✨",

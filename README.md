@@ -10,12 +10,11 @@ Paste any JavaScript or TypeScript code and watch it execute step by step — wi
 
 ## Features
 
-- **Line-by-line execution** — See which line is running at each step
-- **Variable tracking** — Watch variables change in real time, with diff highlighting
-- **Call tree** — Recursive functions are visualized as an interactive tree
-- **Console output** — `console.log` output appears step by step
-- **TypeScript support** — Types are stripped automatically
-- **No setup needed** — Paste code, enter arguments, hit run
+- Paste your code and input fields are automatically generated
+- Recursive functions are visualized as a tree structure
+- Debug comfortably without setting breakpoints
+- Current execution line is highlighted with manual/auto playback
+- Works with a single function or plain code
 
 ## Usage
 
