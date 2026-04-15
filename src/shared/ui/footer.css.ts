@@ -3,8 +3,7 @@ import { vars } from "@/shared/styles/theme.css";
 
 export const footer = style({
   textAlign: "center",
-  padding: `${vars.space.lg} ${vars.space.lg}`,
-  borderTop: `1px solid ${vars.color.border}`,
+  padding: `${vars.space.md} ${vars.space.lg} ${vars.space.xl}`,
   marginTop: "auto",
   flexShrink: 0,
 });

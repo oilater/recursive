@@ -2,13 +2,29 @@ import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://recursive-ochre.vercel.app";
 
+const pages = [
+  { path: "", changeFrequency: "weekly" as const, priority: 1 },
+  { path: "/algorithms", changeFrequency: "weekly" as const, priority: 0.9 },
+  { path: "/visualize/playground", changeFrequency: "weekly" as const, priority: 0.9 },
+  { path: "/visualize/permutations", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/combinations", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/subsets", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/bubble-sort", changeFrequency: "monthly" as const, priority: 0.7 },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE_URL}/visualize/playground`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE_URL}/visualize/permutations`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/visualize/combinations`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/visualize/subsets`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE_URL}/visualize/bubble-sort`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-  ];
+  return pages.flatMap(({ path, changeFrequency, priority }) => [
+    {
+      url: `${BASE_URL}${path}`,
+      lastModified: new Date(),
+      changeFrequency,
+      priority,
+      alternates: {
+        languages: {
+          ko: `${BASE_URL}${path}`,
+          en: `${BASE_URL}/en${path}`,
+        },
+      },
+    },
+  ]);
 }

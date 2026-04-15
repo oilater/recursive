@@ -2,7 +2,6 @@ import { style, globalStyle } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 
 export const page = style({
-  minHeight: "100vh",
   width: "100%",
   maxWidth: "1040px",
   padding: `${vars.space.md} ${vars.space.lg}`,
@@ -88,6 +87,12 @@ export const homeCardTitle = style({
   fontSize: vars.fontSize.lg,
   fontWeight: "700",
   marginBottom: vars.space.sm,
+  transition: "color 0.2s ease",
+  selectors: {
+    [`${homeCard}:hover &`]: {
+      color: "#4ade80",
+    },
+  },
 });
 
 export const homeCardDesc = style({

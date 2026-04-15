@@ -33,6 +33,28 @@ export const logoText = style({
   fontFamily: "var(--font-plus-jakarta), sans-serif",
 });
 
+export const center = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+});
+
+// ── Desktop nav ──
+
+export const desktopRight = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  flex: 1,
+  justifyContent: "flex-end",
+  minWidth: 0,
+  "@media": {
+    "(max-width: 640px)": {
+      display: "none",
+    },
+  },
+});
+
 export const nav = style({
   display: "flex",
   alignItems: "center",
@@ -50,30 +72,87 @@ export const navLink = style({
   },
 });
 
-export const center = style({
-  display: "flex",
-  alignItems: "center",
-  gap: vars.space.sm,
+// ── Mobile menu ──
+
+export const mobileRight = style({
+  display: "none",
+  position: "relative",
+  "@media": {
+    "(max-width: 640px)": {
+      display: "flex",
+      alignItems: "center",
+    },
+  },
 });
 
-export const right = style({
+export const menuButton = style({
   display: "flex",
   alignItems: "center",
-  gap: vars.space.sm,
-  flex: 1,
-  justifyContent: "flex-end",
-  minWidth: 0,
-});
-
-export const iconLink = style({
-  display: "inline-flex",
-  alignItems: "center",
-  padding: "6px 10px",
+  justifyContent: "center",
+  padding: "6px",
+  backgroundColor: "transparent",
   color: vars.color.text,
+  border: "none",
   borderRadius: "6px",
-  textDecoration: "none",
+  cursor: "pointer",
   ":hover": {
     backgroundColor: vars.color.surfaceHover,
+  },
+});
+
+export const mobileMenu = style({
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  right: 0,
+  minWidth: "180px",
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: "8px",
+  overflow: "hidden",
+  zIndex: 50,
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
+});
+
+export const mobileMenuLink = style({
+  display: "block",
+  padding: "12px 16px",
+  fontSize: vars.fontSize.md,
+  color: vars.color.text,
+  textDecoration: "none",
+  ":hover": {
+    backgroundColor: vars.color.surfaceAlt,
+  },
+});
+
+export const mobileMenuDivider = style({
+  height: "1px",
+  backgroundColor: vars.color.border,
+});
+
+export const mobileLocaleRow = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  color: vars.color.textMuted,
+});
+
+export const mobileLocaleButton = style({
+  padding: "4px 12px",
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  backgroundColor: "transparent",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+  ":hover": {
+    backgroundColor: vars.color.surfaceAlt,
     color: vars.color.text,
   },
+});
+
+export const mobileLocaleActive = style({
+  color: vars.color.text,
+  fontWeight: 600,
+  backgroundColor: vars.color.surfaceAlt,
 });
