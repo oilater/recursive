@@ -4,7 +4,7 @@ import { vars } from "@/shared/styles/theme.css";
 export const page = style({
   minHeight: "100vh",
   padding: `${vars.space.md} ${vars.space.lg}`,
-  maxWidth: "960px",
+  maxWidth: "1040px",
   margin: "0 auto",
 });
 
