@@ -3,7 +3,7 @@ import { vars } from "@/shared/styles/theme.css";
 
 export const page = style({
   minHeight: "100vh",
-  padding: `${vars.space.xxl} ${vars.space.lg}`,
+  padding: `${vars.space.md} ${vars.space.lg}`,
   maxWidth: "960px",
   margin: "0 auto",
 });
@@ -11,7 +11,7 @@ export const page = style({
 export const hero = style({
   textAlign: "center",
   marginBottom: vars.space.xxl,
-  paddingTop: vars.space.xxl,
+  paddingTop: vars.space.lg,
 });
 
 export const title = style({
@@ -26,11 +26,11 @@ export const title = style({
 });
 
 export const subtitle = style({
-  fontSize: vars.fontSize.lg,
-  color: vars.color.textMuted,
+  fontSize: "16px",
+  color: "#94a3b8",
   margin: "0 auto",
   lineHeight: 1.7,
-  whiteSpace: "nowrap",
+  maxWidth: "600px",
 });
 
 export const sectionTitle = style({

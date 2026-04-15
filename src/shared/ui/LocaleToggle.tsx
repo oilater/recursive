@@ -1,47 +1,66 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/config";
+import * as styles from "./locale-toggle.css";
+
+const LOCALES: { code: Locale; label: string }[] = [
+  { code: "ko", label: "KO" },
+  { code: "en", label: "EN" },
+];
 
 export function LocaleToggle() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(
+    function closeOnClickOutside() {
+      if (!open) return;
+      const handler = (e: MouseEvent) => {
+        if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      };
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    },
+    [open],
+  );
 
   const switchTo = (target: Locale) => {
-    router.replace(pathname, { locale: target });
+    setOpen(false);
+    if (target !== locale) router.replace(pathname, { locale: target });
   };
 
+  const current = LOCALES.find((l) => l.code === locale)!;
+
   return (
-    <div style={{ display: "flex", gap: "2px", fontSize: "12px", fontWeight: 500 }}>
-      <button
-        onClick={() => switchTo("ko")}
-        style={{
-          padding: "3px 8px",
-          borderRadius: "4px 0 0 4px",
-          border: "1px solid #334155",
-          backgroundColor: locale === "ko" ? "#334155" : "transparent",
-          color: locale === "ko" ? "#e2e8f0" : "#64748b",
-          cursor: "pointer",
-        }}
-      >
-        KO
+    <div ref={ref} style={{ position: "relative" }}>
+      <button onClick={() => setOpen((v) => !v)} className={styles.trigger}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M2 12h20" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+        {current.label}
       </button>
-      <button
-        onClick={() => switchTo("en")}
-        style={{
-          padding: "3px 8px",
-          borderRadius: "0 4px 4px 0",
-          border: "1px solid #334155",
-          borderLeft: "none",
-          backgroundColor: locale === "en" ? "#334155" : "transparent",
-          color: locale === "en" ? "#e2e8f0" : "#64748b",
-          cursor: "pointer",
-        }}
-      >
-        EN
-      </button>
+
+      {open && (
+        <div className={styles.dropdown}>
+          {LOCALES.map(({ code, label }) => (
+            <button
+              key={code}
+              onClick={() => switchTo(code)}
+              className={`${styles.option} ${code === locale ? styles.optionActive : ""}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

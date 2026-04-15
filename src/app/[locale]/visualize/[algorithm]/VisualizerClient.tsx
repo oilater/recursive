@@ -17,7 +17,7 @@ import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { trackEvent } from "@/shared/lib/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
-import { Badge } from "@/shared/ui";
+import { Badge, Header } from "@/shared/ui";
 import * as styles from "./visualize-page.css";
 
 interface VisualizerClientProps {
@@ -75,15 +75,22 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     [preset],
   );
 
+  const presetHeader = (
+    <Header
+      left={<a href="/" className={styles.backLink}>{t("visualizer.backToList")}</a>}
+      center={
+        <>
+          <span className={styles.algoTitle}>{t(`algorithm.${preset.id}.name`)}</span>
+          <Badge variant={preset.difficulty}>{t(`difficulty.${preset.difficulty}`)}</Badge>
+        </>
+      }
+    />
+  );
+
   if (error) {
     return (
       <div className={styles.page}>
-        <div className={styles.header}>
-          <a href="/" className={styles.backLink}>
-            {t("visualizer.backToList")}
-          </a>
-          <span className={styles.algoTitle}>{t(`algorithm.${preset.id}.name`)}</span>
-        </div>
+        {presetHeader}
         <div style={{ padding: "32px", color: "#ef4444" }}>{error}</div>
       </div>
     );
@@ -92,12 +99,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   if (!result) {
     return (
       <div className={styles.page}>
-        <div className={styles.header}>
-          <a href="/" className={styles.backLink}>
-            {t("visualizer.backToList")}
-          </a>
-          <span className={styles.algoTitle}>{t(`algorithm.${preset.id}.name`)}</span>
-        </div>
+        {presetHeader}
         <div style={{ padding: "32px", color: "#94a3b8" }}>{t("visualizer.running")}</div>
       </div>
     );
@@ -105,13 +107,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <a href="/" className={styles.backLink}>
-          ← 목록
-        </a>
-        <span className={styles.algoTitle}>{t(`algorithm.${preset.id}.name`)}</span>
-        <Badge variant={preset.difficulty}>{t(`difficulty.${preset.difficulty}`)}</Badge>
-      </div>
+      {presetHeader}
 
       <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "16px" }}>
