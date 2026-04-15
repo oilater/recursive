@@ -5,7 +5,7 @@ export const trigger = style({
   display: "inline-flex",
   alignItems: "center",
   gap: "8px",
-  padding: "6px 12px",
+  padding: "8px 12px",
   backgroundColor: "transparent",
   color: vars.color.text,
   border: "none",
