@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import type { AlgorithmPlayer, Speed } from "@/player";
 import { Badge } from "@/shared/ui";
 import * as styles from "./stepper.css";
@@ -28,6 +29,7 @@ export function StepperControls({ player }: StepperControlsProps) {
     setSpeed,
   } = player;
 
+  const t = useTranslations("visualizer");
   const progress = totalSteps > 0 ? (currentIndex / (totalSteps - 1)) * 100 : 0;
 
   const handleProgressClick = useCallback(
@@ -56,7 +58,7 @@ export function StepperControls({ player }: StepperControlsProps) {
             <span style={{ color: "#64748b" }}>Line {currentStep.codeLine}</span>
           )
         ) : (
-          "Press play to start"
+          t("pressPlay")
         )}
       </div>
 
@@ -76,7 +78,7 @@ export function StepperControls({ player }: StepperControlsProps) {
           className={styles.controlButton}
           onClick={jumpToStart}
           data-disabled={isAtStart}
-          title="처음으로"
+          title={t("jumpToStart")}
         >
           ⏮
         </button>
@@ -84,14 +86,14 @@ export function StepperControls({ player }: StepperControlsProps) {
           className={styles.controlButton}
           onClick={stepBackward}
           data-disabled={isAtStart}
-          title="한 단계 뒤로"
+          title={t("stepBackward")}
         >
           ◀
         </button>
         <button
           className={styles.playButton}
           onClick={togglePlay}
-          title={isPlaying ? "일시정지" : "재생"}
+          title={isPlaying ? t("pause") : t("play")}
         >
           {isPlaying ? "⏸" : "▶"}
         </button>
@@ -99,7 +101,7 @@ export function StepperControls({ player }: StepperControlsProps) {
           className={styles.controlButton}
           onClick={stepForward}
           data-disabled={isAtEnd}
-          title="한 단계 앞으로"
+          title={t("stepForward")}
         >
           ▶
         </button>
@@ -107,7 +109,7 @@ export function StepperControls({ player }: StepperControlsProps) {
           className={styles.controlButton}
           onClick={jumpToEnd}
           data-disabled={isAtEnd}
-          title="끝으로"
+          title={t("jumpToEnd")}
         >
           ⏭
         </button>

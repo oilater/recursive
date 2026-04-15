@@ -2,13 +2,14 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { javascript } from "@codemirror/lang-javascript";
 import { placeholder as placeholderExt } from "@codemirror/view";
 import * as styles from "./code-editor.css";
 
 const ReactCodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
   ssr: false,
-  loading: () => <div className={styles.loadingBox}>에디터 로딩 중...</div>,
+  loading: () => <div className={styles.loadingBox}>...</div>,
 });
 
 interface CodeEditorProps {
@@ -18,9 +19,10 @@ interface CodeEditorProps {
 }
 
 export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProps) {
+  const t = useTranslations("editor");
   const extensions = useMemo(
-    () => [javascript({ typescript: true }), placeholderExt("여기에 코드를 붙여넣으세요")],
-    [],
+    () => [javascript({ typescript: true }), placeholderExt(t("placeholder"))],
+    [t],
   );
 
   return (

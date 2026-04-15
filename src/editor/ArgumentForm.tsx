@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useImperativeHandle, forwardRef } from "react";
+import { useTranslations } from "next-intl";
 import { safeJsonParse } from "@/shared/lib/validate";
 import * as styles from "./argument-form.css";
 
@@ -28,6 +29,7 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
   { paramNames, defaultArgs, onSubmit },
   ref,
 ) {
+  const t = useTranslations("editor");
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const name of paramNames) initial[name] = "";
@@ -68,7 +70,7 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
               value={values[name] || ""}
               onChange={(e) => updateField(name, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSubmit(buildArgs())}
-              placeholder={defaultVal !== undefined ? JSON.stringify(defaultVal) : "값을 입력하세요"}
+              placeholder={defaultVal !== undefined ? JSON.stringify(defaultVal) : t("inputPlaceholder")}
             />
           </div>
         );

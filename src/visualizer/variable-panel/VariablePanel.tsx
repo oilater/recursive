@@ -1,6 +1,7 @@
 "use client";
 
 import type { Step } from "@/algorithm";
+import { useTranslations } from "next-intl";
 import { omit } from "es-toolkit";
 import { EmptyState } from "@/shared/ui";
 import * as styles from "./variable-panel.css";
@@ -75,11 +76,12 @@ function renderValue(value: unknown, changed: boolean): React.ReactNode {
 }
 
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
+  const t = useTranslations("visualizer");
   if (!currentStep) {
     return (
       <div className={styles.container}>
         <div className={styles.title}>Variables</div>
-        <EmptyState message="스텝을 실행하면 Variables가 표시됩니다" />
+        <EmptyState message={t("variablesEmpty")} />
       </div>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import type { Step, TreeNode } from "@/algorithm";
 import { Badge } from "@/shared/ui";
 import { EmptyState } from "@/shared/ui";
@@ -29,6 +30,7 @@ function buildNodeMap(tree: TreeNode): Map<string, TreeNode> {
 }
 
 export function CallStack({ currentStep, tree }: CallStackProps) {
+  const t = useTranslations("visualizer");
   const nodeMap = useMemo(() => buildNodeMap(tree), [tree]);
 
   const frames: StackFrame[] = useMemo(() => {
@@ -43,7 +45,7 @@ export function CallStack({ currentStep, tree }: CallStackProps) {
     return (
       <div className={styles.container}>
         <div className={styles.title}>Call Stack</div>
-        <EmptyState message="스텝을 실행하면 Call Stack이 표시됩니다" />
+        <EmptyState message={t("callStackEmpty")} />
       </div>
     );
   }
