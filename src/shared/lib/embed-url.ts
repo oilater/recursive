@@ -19,6 +19,6 @@ export function buildEmbedUrl(options: { preset: string } | { code: string; args
   return url.toString();
 }
 
-export function buildIframeSnippet(embedUrl: string, height = 500): string {
+export function buildIframeSnippet(embedUrl: string, height = 1000): string {
   return `<iframe src="${embedUrl}" width="100%" height="${height}" style="border:none;border-radius:8px;" />`;
 }

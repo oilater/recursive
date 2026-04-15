@@ -3,7 +3,6 @@
 import type { StepGeneratorResult } from "@/algorithm";
 import { useAlgorithmPlayer } from "@/player";
 import {
-  TreeView,
   StepperControls,
   VariablePanel,
   CallStack,
@@ -54,13 +53,6 @@ export function EmbedViewer({
           />
         </div>
 
-        {hasRecursion && (
-          <div className={styles.rightPanel}>
-            <div className={styles.treeSection}>
-              <TreeView tree={result.tree} currentStep={player.currentStep} />
-            </div>
-          </div>
-        )}
       </div>
 
       <div className={styles.bottomPanel}>
