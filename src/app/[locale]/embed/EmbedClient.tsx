@@ -10,10 +10,9 @@ import { EmbedViewer } from "./EmbedViewer";
 import * as styles from "./embed.css";
 
 interface EmbedClientProps {
-  presetCode?: string;
-  presetArgs?: unknown[];
-  codeParam?: string;
-  argsParam?: string;
+  code?: string;
+  args?: unknown[];
+  error?: string;
 }
 
 interface ExecState {
@@ -32,42 +31,24 @@ const INITIAL_EXEC: ExecState = {
   consoleLogs: [],
 };
 
-export function EmbedClient({ presetCode, presetArgs, codeParam, argsParam }: EmbedClientProps) {
+export function EmbedClient({ code, args, error: initialError }: EmbedClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError ?? null);
 
   useEffect(
-    function executeFromParams() {
-      let code: string;
-      let args: unknown[];
-
-      if (presetCode) {
-        code = presetCode;
-        args = presetArgs ?? [];
-      } else if (codeParam) {
-        try {
-          code = decodeURIComponent(escape(atob(codeParam)));
-        } catch {
-          setError("Invalid code parameter.");
-          return;
-        }
-        try {
-          args = argsParam ? JSON.parse(argsParam) : [];
-        } catch {
-          setError("Invalid args parameter.");
-          return;
-        }
-      } else {
-        setError("Missing code or preset parameter.");
-        return;
-      }
+    function execute() {
+      if (!code || initialError) return;
 
       (async () => {
         try {
           const [execResult, html] = await Promise.all([
-            executeCustomCode(code, args),
+            executeCustomCode(code, args ?? []),
             highlightCode(code),
           ]);
+          if (execResult.result.steps.length === 0) {
+            setError("No steps generated. The code may need arguments (&args=...).");
+            return;
+          }
           setExec({
             result: execResult.result,
             codeHtml: html,
@@ -80,7 +61,7 @@ export function EmbedClient({ presetCode, presetArgs, codeParam, argsParam }: Em
         }
       })();
     },
-    [presetCode, presetArgs, codeParam, argsParam],
+    [code, args, initialError],
   );
 
   if (error) {

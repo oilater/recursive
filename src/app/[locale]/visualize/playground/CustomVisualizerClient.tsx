@@ -42,6 +42,7 @@ export function CustomVisualizerClient() {
   const [paramNames, setParamNames] = useState<string[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const codeRef = useRef("");
+  const lastArgsRef = useRef<unknown[]>([]);
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
@@ -53,6 +54,7 @@ export function CustomVisualizerClient() {
   };
 
   const handleExecute = async (args: unknown[]) => {
+    lastArgsRef.current = args;
     setMode("loading");
     setError(null);
     try {
@@ -89,8 +91,7 @@ export function CustomVisualizerClient() {
 
   const embedData = useMemo(() => {
     if (!codeRef.current) return null;
-    const args = argFormRef.current?.getArgs() ?? [];
-    const url = buildEmbedUrl({ code: codeRef.current, args });
+    const url = buildEmbedUrl({ code: codeRef.current, args: lastArgsRef.current });
     return { url, snippet: buildIframeSnippet(url) };
   }, [exec]);
 

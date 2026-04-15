@@ -7,25 +7,39 @@ interface EmbedPageProps {
   searchParams: Promise<{ preset?: string; code?: string; args?: string }>;
 }
 
+function decodeBase64(str: string): string {
+  return decodeURIComponent(escape(atob(str)));
+}
+
 export default async function EmbedPage({ searchParams }: EmbedPageProps) {
   const params = await searchParams;
-  let presetCode: string | undefined;
-  let presetArgs: unknown[] | undefined;
+
+  let code: string | undefined;
+  let args: unknown[] | undefined;
+  let error: string | undefined;
 
   if (params.preset) {
     const preset = getPreset(params.preset);
     if (preset) {
-      presetCode = preset.code;
-      presetArgs = preset.defaultArgs;
+      code = preset.code;
+      args = preset.defaultArgs;
+    } else {
+      error = `Unknown preset: ${params.preset}`;
     }
+  } else if (params.code) {
+    try {
+      code = decodeBase64(params.code);
+    } catch {
+      error = "Invalid code parameter.";
+    }
+    try {
+      args = params.args ? JSON.parse(params.args) : [];
+    } catch {
+      error = "Invalid args parameter.";
+    }
+  } else {
+    error = "Missing code or preset parameter.";
   }
 
-  return (
-    <EmbedClient
-      presetCode={presetCode}
-      presetArgs={presetArgs}
-      codeParam={params.code}
-      argsParam={params.args}
-    />
-  );
+  return <EmbedClient code={code} args={args} error={error} />;
 }
