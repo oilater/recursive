@@ -52,6 +52,11 @@ export const toolbarBadge = style({
   padding: `2px ${vars.space.sm}`,
   backgroundColor: "rgba(74, 222, 128, 0.1)",
   border: "1px solid rgba(74, 222, 128, 0.25)",
+  "@media": {
+    "(max-width: 768px)": {
+      display: "none",
+    },
+  },
   borderRadius: vars.radius.sm,
   marginRight: vars.space.sm,
 });
@@ -60,6 +65,11 @@ export const toolbarLabel = style({
   fontSize: vars.fontSize.xs,
   color: vars.color.textMuted,
   fontFamily: vars.font.mono,
+  "@media": {
+    "(max-width: 768px)": {
+      display: "none",
+    },
+  },
 });
 
 export const toolbarRight = style({
