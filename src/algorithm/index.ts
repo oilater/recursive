@@ -7,8 +7,9 @@ export type {
   Difficulty,
   PresetAlgorithm,
   AlgorithmCardData,
+  Category,
 } from "./types";
 
-export { registerAlgorithm, getPreset, getAllPresets, getAllCardData } from "./registry";
+export { registerAlgorithm, getPreset, getCardDataByCategory } from "./registry";
 export { AlgorithmCard } from "./AlgorithmCard";
-export { initializeAlgorithms } from "./presets";
+export { initializeAlgorithms } from "./presets/index";

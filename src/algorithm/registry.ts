@@ -10,13 +10,13 @@ export function registerAlgorithm(preset: PresetAlgorithm): void {
 export const getPreset = (id: string): PresetAlgorithm | undefined =>
   algorithms.find((a) => a.id === id);
 
-export const getAllPresets = (): PresetAlgorithm[] => [...algorithms];
-
 const toCardData = (a: PresetAlgorithm): AlgorithmCardData => ({
   id: a.id,
   name: a.name,
   description: a.description,
   difficulty: a.difficulty,
+  category: a.category,
 });
 
-export const getAllCardData = (): AlgorithmCardData[] => algorithms.map(toCardData);
+export const getCardDataByCategory = (category: string): AlgorithmCardData[] =>
+  algorithms.filter((a) => a.category === category).map(toCardData);

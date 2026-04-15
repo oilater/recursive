@@ -27,11 +27,14 @@ export interface StepGeneratorResult {
 
 export type Difficulty = "easy" | "medium" | "hard";
 
+export type Category = "recursion" | "sorting" | "search" | "graph" | "dp";
+
 export interface PresetAlgorithm {
   id: string;
   name: string;
   description: string;
   difficulty: Difficulty;
+  category: Category;
   code: string;
   defaultArgs: unknown[];
 }
@@ -40,5 +43,6 @@ export interface AlgorithmCardData {
   id: string;
   name: string;
   description: string;
+  category: Category;
   difficulty: Difficulty;
 }

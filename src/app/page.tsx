@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { initializeAlgorithms } from "@/algorithm";
-import { getAllCardData, AlgorithmCard } from "@/algorithm";
+import { getCardDataByCategory, AlgorithmCard } from "@/algorithm";
 import * as styles from "./home.css";
 
 initializeAlgorithms();
 
-export default function Home() {
-  const algorithms = getAllCardData();
+const SECTIONS = [
+  { category: "sorting" as const, title: "정렬", sub: "Sorting" },
+  { category: "recursion" as const, title: "재귀 · 백트래킹", sub: "Recursion & Backtracking" },
+];
 
+export default function Home() {
   return (
     <main className={styles.page}>
       <div className={styles.hero}>
@@ -27,15 +30,24 @@ export default function Home() {
         </div>
       </Link>
 
-      <section>
-        <h2 className={styles.sectionTitle}>알고리즘</h2>
-        <p style={{ fontSize: "13px", color: "#475569", marginBottom: "20px" }}>더 많은 알고리즘이 곧 업데이트될 예정이에요 ✨</p>
-        <div className={styles.grid}>
-          {algorithms.map((algo) => (
-            <AlgorithmCard key={algo.id} algorithm={algo} />
-          ))}
-        </div>
-      </section>
+      {SECTIONS.map(({ category, title, sub }) => {
+        const algorithms = getCardDataByCategory(category);
+        if (algorithms.length === 0) return null;
+        return (
+          <section key={category} style={{ marginBottom: "32px" }}>
+            <h2 className={styles.sectionTitle}>{title}</h2>
+            <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "16px" }}>{sub}</p>
+            <div className={styles.grid}>
+              {algorithms.map((algo) => (
+                <AlgorithmCard key={algo.id} algorithm={algo} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <p style={{ fontSize: "13px", color: "#475569", marginBottom: "20px" }}>더 많은 알고리즘이 곧 업데이트될 예정이에요 ✨</p>
+
       <footer
         style={{
           textAlign: "center",
@@ -45,32 +57,10 @@ export default function Home() {
           marginTop: "32px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "16px",
-            marginBottom: "12px",
-            fontSize: "13px",
-          }}
-        >
-          <a
-            href="https://github.com/oilater/recursive"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#64748b" }}
-          >
-            GitHub
-          </a>
+        <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginBottom: "12px", fontSize: "13px" }}>
+          <a href="https://github.com/oilater/recursive" target="_blank" rel="noopener noreferrer" style={{ color: "#64748b" }}>GitHub</a>
           <span style={{ color: "#334155" }}>·</span>
-          <a
-            href="https://github.com/oilater/recursive/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#64748b" }}
-          >
-            이슈 & 건의
-          </a>
+          <a href="https://github.com/oilater/recursive/issues" target="_blank" rel="noopener noreferrer" style={{ color: "#64748b" }}>이슈 & 건의</a>
         </div>
         <p style={{ fontSize: "12px", color: "#475569" }}>© 2026 Seonghyeon Kim. All rights reserved.</p>
       </footer>
