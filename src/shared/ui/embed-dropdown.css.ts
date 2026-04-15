@@ -81,6 +81,12 @@ export const copyButton = style({
   },
 });
 
+export const hint = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.text,
+  opacity: 0.7,
+});
+
 export const divider = style({
   height: "1px",
   backgroundColor: vars.color.border,

@@ -10,7 +10,7 @@ interface EmbedDropdownProps {
 
 export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
   const [open, setOpen] = useState(false);
-  const [copiedField, setCopiedField] = useState<"iframe" | "url" | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(
@@ -41,7 +41,7 @@ export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
       {open && (
         <div className={styles.dropdown}>
           <div className={styles.section}>
-            <span className={styles.label}>iframe (블로그용)</span>
+            <span className={styles.hint}>블로그나 Obsidian에 그대로 붙여넣으면 시각화가 표시됩니다</span>
             <div className={styles.codeRow}>
               <code className={styles.code}>{iframeSnippet}</code>
               <button
@@ -56,7 +56,7 @@ export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
           <div className={styles.divider} />
 
           <div className={styles.section}>
-            <span className={styles.label}>URL (Notion / Obsidian용)</span>
+            <span className={styles.hint}>Notion에서는 /embed 입력 후 붙여넣어보세요</span>
             <div className={styles.codeRow}>
               <code className={styles.code}>{embedUrl}</code>
               <button
