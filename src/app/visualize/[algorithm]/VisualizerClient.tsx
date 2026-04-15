@@ -111,31 +111,47 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
         </a>
         <span className={styles.algoTitle}>{preset.name}</span>
         <Badge variant={preset.difficulty}>{difficultyLabels[preset.difficulty]}</Badge>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
-          <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={runCode} />
-          <button
-            onClick={() => {
-              const args = argFormRef.current?.getArgs() ?? preset.defaultArgs;
-              runCode(args);
-            }}
-            style={{
-              padding: "4px 16px",
-              backgroundColor: "#4ade80",
-              color: "#0a0a0a",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            실행
-          </button>
-        </div>
       </div>
 
       <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "16px" }}>
           <div className={styles.leftPanel} style={{ flex: 3, minWidth: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "8px 14px",
+                backgroundColor: "#1a1a24",
+                borderRadius: "8px 8px 0 0",
+                border: "1px solid #2e2e48",
+                borderBottom: "none",
+                fontSize: "13px",
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              <div style={{ flex: 1 }} />
+              <ArgumentForm ref={argFormRef} paramNames={paramNames} defaultArgs={preset.defaultArgs} onSubmit={runCode} />
+              <button
+                onClick={() => {
+                  const args = argFormRef.current?.getArgs() ?? preset.defaultArgs;
+                  runCode(args);
+                }}
+                style={{
+                  padding: "4px 14px",
+                  backgroundColor: "#065f46",
+                  color: "#6ee7b7",
+                  border: "1px solid #047857",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  fontWeight: 500,
+                }}
+              >
+                Apply
+              </button>
+            </div>
             <div className={styles.codeSection}>
               <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
             </div>

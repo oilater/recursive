@@ -10,11 +10,22 @@ export interface ArgumentFormHandle {
 
 interface ArgumentFormProps {
   paramNames: string[];
+  defaultArgs?: unknown[];
   onSubmit: (args: unknown[]) => void;
 }
 
+function inferType(value: unknown): string {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "unknown[]";
+    const inner = typeof value[0];
+    if (Array.isArray(value[0])) return `${inferType(value[0])}[]`;
+    return `${inner}[]`;
+  }
+  return typeof value;
+}
+
 export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(function ArgumentForm(
-  { paramNames, onSubmit },
+  { paramNames, defaultArgs, onSubmit },
   ref,
 ) {
   const [values, setValues] = useState<Record<string, string>>(() => {
@@ -28,9 +39,9 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
   };
 
   const buildArgs = (): unknown[] =>
-    paramNames.map((name) => {
+    paramNames.map((name, i) => {
       const raw = values[name]?.trim() ?? "";
-      if (raw === "") return undefined;
+      if (raw === "") return defaultArgs?.[i];
       return safeJsonParse(raw);
     });
 
@@ -42,18 +53,26 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
 
   return (
     <div className={styles.container}>
-      {paramNames.map((name) => (
-        <div key={name} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className={styles.label}>{name}:</span>
-          <input
-            className={styles.input}
-            value={values[name] || ""}
-            onChange={(e) => updateField(name, e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onSubmit(buildArgs())}
-            placeholder="값을 입력하세요"
-          />
-        </div>
-      ))}
+      {paramNames.map((name, i) => {
+        const defaultVal = defaultArgs?.[i];
+        const typeStr = defaultVal !== undefined ? inferType(defaultVal) : undefined;
+        return (
+          <div key={name} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <span className={styles.label}>
+              {name}
+              {typeStr && <span className={styles.typeAnnotation}>: {typeStr}</span>}
+            </span>
+            <span className={styles.equals}>=</span>
+            <input
+              className={styles.input}
+              value={values[name] || ""}
+              onChange={(e) => updateField(name, e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onSubmit(buildArgs())}
+              placeholder={defaultVal !== undefined ? JSON.stringify(defaultVal) : "값을 입력하세요"}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 });
