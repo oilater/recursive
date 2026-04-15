@@ -64,6 +64,8 @@ export const leftPanel = style({
   gap: vars.space.sm,
   overflow: "hidden",
   flexShrink: 0,
+  flex: 3,
+  minWidth: 0,
 });
 
 export const codeSection = style({
@@ -92,6 +94,8 @@ export const rightPanel = style({
   flexDirection: "column",
   overflow: "hidden",
   gap: vars.space.sm,
+  flex: 2,
+  minWidth: 0,
 });
 
 export const treeSection = style({
@@ -180,4 +184,19 @@ export const loadingOverlay = style({
   gap: vars.space.sm,
   color: vars.color.textMuted,
   fontSize: vars.fontSize.lg,
+});
+
+export const editButton = style({
+  marginLeft: "auto",
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  backgroundColor: "transparent",
+  color: vars.color.textMuted,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.fontSize.sm,
+  cursor: "pointer",
+  ":hover": {
+    color: vars.color.text,
+    borderColor: vars.color.text,
+  },
 });

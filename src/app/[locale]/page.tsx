@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { initializeAlgorithms } from "@/algorithm";
 import { getCardDataByCategory, AlgorithmCard } from "@/algorithm";
 import { Link } from "@/i18n/navigation";
-import { LocaleToggle } from "@/shared/ui";
+import { Header } from "@/shared/ui";
 import * as styles from "./home.css";
 
 initializeAlgorithms();
@@ -17,9 +17,7 @@ export default function Home() {
 
   return (
     <main className={styles.page}>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }}>
-        <LocaleToggle />
-      </div>
+      <Header />
 
       <div className={styles.hero}>
         <h1 className={styles.title}>Recursive</h1>
@@ -31,7 +29,7 @@ export default function Home() {
         <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "16px" }}>
           {t("playgroundDesc")}
         </p>
-        <Link href="/visualize/custom" className={styles.customCard}>
+        <Link href="/visualize/playground" className={styles.customCard}>
           <div className={styles.customCardIcon}>{"</>"}</div>
           <div className={styles.customCardTitle}>{t("customCardTitle")}</div>
           <div className={styles.customCardDesc}>{t("customCardDesc")}</div>

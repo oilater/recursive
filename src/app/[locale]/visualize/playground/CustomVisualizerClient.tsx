@@ -17,8 +17,8 @@ import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
-import { PanelHeader } from "@/shared/ui";
 import { trackEvent } from "@/shared/lib/posthog";
+import { Header } from "@/shared/ui";
 import * as styles from "./custom-page.css";
 
 const DEFAULT_CODE = "";
@@ -46,7 +46,7 @@ export function CustomVisualizerClient() {
     try {
       const { analysis } = analyzeCode(newCode);
       setParamNames(analysis.entryParamNames);
-    } catch { }
+    } catch {}
   };
 
   const handleExecute = async (args: unknown[]) => {
@@ -83,35 +83,19 @@ export function CustomVisualizerClient() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <a href="/" className={styles.backLink}>
-          ← Recursive
-        </a>
-        {mode === "visualize" && (
-          <button
-            onClick={handleEdit}
-            style={{
-              marginLeft: "auto",
-              padding: "4px 12px",
-              backgroundColor: "transparent",
-              color: "#94a3b8",
-              border: "1px solid #334155",
-              borderRadius: "6px",
-              fontSize: "13px",
-              cursor: "pointer",
-            }}
-          >
-            Edit
-          </button>
-        )}
-      </div>
+      <Header
+        left={<a href="/" className={styles.backLink}>← Recursive</a>}
+        right={
+          mode === "visualize" ? (
+            <button onClick={handleEdit} className={styles.editButton}>Edit</button>
+          ) : undefined
+        }
+      />
 
       {(mode === "edit" || mode === "error") && (
         <div className={styles.editLayout}>
           {error && <div className={styles.errorBox}>{error}</div>}
-          <div className={styles.hintBanner}>
-            {t("custom.hint")}
-          </div>
+          <div className={styles.hintBanner}>{t("custom.hint")}</div>
           <div className={styles.editorPanel}>
             <CodeEditor value={code} onChange={handleCodeChange} />
           </div>
@@ -136,7 +120,7 @@ export function CustomVisualizerClient() {
       {mode === "visualize" && result && (
         <div className={styles.vizContainer}>
           <div className={styles.vizRow}>
-            <div className={styles.leftPanel} style={{ flex: 3, minWidth: 0 }}>
+            <div className={styles.leftPanel}>
               <div className={styles.codeSection}>
                 <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
               </div>
@@ -161,7 +145,7 @@ export function CustomVisualizerClient() {
             </div>
 
             {hasRecursion && (
-              <div className={styles.rightPanel} style={{ flex: 2, minWidth: 0 }}>
+              <div className={styles.rightPanel}>
                 <div className={styles.treeSection}>
                   <TreeView tree={result.tree} currentStep={player.currentStep} />
                 </div>
