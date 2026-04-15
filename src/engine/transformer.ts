@@ -127,17 +127,18 @@ function walkAndTransform(
             walkAndTransform(item, tracedFuncName, recursiveFuncName, varNames, insideTracedFunc);
         }
       } else if (val.type) {
-        const isFuncBody =
-          (node.type === "FunctionDeclaration" &&
+        const entersTracedBody =
+          key === "body" &&
+          ((node.type === "FunctionDeclaration" &&
             (node.id?.name === tracedFuncName || node.id?.name === ENTRY_FUNC_NAME)) ||
           node.type === "FunctionExpression" ||
-          node.type === "ArrowFunctionExpression";
+          node.type === "ArrowFunctionExpression");
         walkAndTransform(
           val,
           tracedFuncName,
           recursiveFuncName,
           varNames,
-          insideTracedFunc || (isFuncBody && key === "body"),
+          insideTracedFunc || entersTracedBody,
         );
       }
     }

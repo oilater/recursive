@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import * as styles from "./code-panel.css";
 
 interface CodePanelProps {
@@ -9,9 +9,8 @@ interface CodePanelProps {
   title?: string;
 }
 
-export function CodePanel({ html, activeLine, title }: CodePanelProps) {
+export const CodePanel = memo(function CodePanel({ html, activeLine, title }: CodePanelProps) {
   const codeRef = useRef<HTMLDivElement>(null);
-  const prevLineRef = useRef<number | undefined>(undefined);
 
   useEffect(
     function highlightActiveLine() {
@@ -26,8 +25,6 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
         currEl?.classList.add("highlighted-line");
         currEl?.scrollIntoView({ block: "nearest", behavior: "smooth" });
       }
-
-      prevLineRef.current = activeLine;
     },
     [activeLine, html],
   );
@@ -42,4 +39,4 @@ export function CodePanel({ html, activeLine, title }: CodePanelProps) {
       />
     </div>
   );
-}
+});

@@ -27,3 +27,41 @@ export const mainContent = style({
   padding: vars.space.sm,
   gap: vars.space.sm,
 });
+
+export const argsBar = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  backgroundColor: vars.color.surface,
+  borderRadius: `${vars.radius.md} ${vars.radius.md} 0 0`,
+  border: `1px solid ${vars.color.border}`,
+  borderBottom: "none",
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+});
+
+export const errorMessage = style({
+  padding: vars.space.xl,
+  color: vars.color.error,
+});
+
+export const loadingMessage = style({
+  padding: vars.space.xl,
+  color: vars.color.textMuted,
+});
+
+export const applyButton = style({
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  backgroundColor: "#065f46",
+  color: "#6ee7b7",
+  border: "1px solid #047857",
+  borderRadius: vars.radius.sm,
+  fontSize: vars.fontSize.xs,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  fontWeight: 500,
+  ":hover": {
+    backgroundColor: "#047857",
+  },
+});

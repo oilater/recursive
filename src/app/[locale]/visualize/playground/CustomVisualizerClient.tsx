@@ -3,24 +3,15 @@
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
-import { useAlgorithmPlayer } from "@/player";
-import {
-  TreeView,
-  StepperControls,
-  VariablePanel,
-  CallStack,
-  ResultPanel,
-  CodePanel,
-} from "@/visualizer";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/posthog";
-
 import { Header } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
+import { PlaygroundViewer } from "./PlaygroundViewer";
 import * as styles from "./custom-page.css";
 
 type Mode = "edit" | "loading" | "visualize" | "error";
@@ -49,8 +40,6 @@ export function CustomVisualizerClient() {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
-
-  const player = useAlgorithmPlayer(exec.result?.steps ?? []);
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
@@ -137,45 +126,13 @@ export function CustomVisualizerClient() {
       {mode === "loading" && <div className={styles.loadingOverlay}>{t("custom.running")}</div>}
 
       {mode === "visualize" && exec.result && (
-        <div className={styles.vizContainer}>
-          <div className={styles.vizRow}>
-            <div className={styles.leftPanel}>
-              <div className={styles.codeSection}>
-                <CodePanel html={exec.codeHtml} activeLine={player.currentStep?.codeLine} />
-              </div>
-            </div>
-
-            <div className={styles.middlePanel}>
-              {exec.hasRecursion && <CallStack currentStep={player.currentStep} tree={exec.result.tree} />}
-              <div className={styles.variableSection}>
-                <VariablePanel
-                  currentStep={player.currentStep}
-                  prevStep={
-                    player.currentIndex > 0 ? exec.result.steps[player.currentIndex - 1] : undefined
-                  }
-                />
-              </div>
-              <ResultPanel
-                steps={exec.result.steps}
-                currentIndex={player.currentIndex}
-                finalReturnValue={exec.finalReturnValue}
-                consoleLogs={exec.consoleLogs}
-              />
-            </div>
-
-            {exec.hasRecursion && (
-              <div className={styles.rightPanel}>
-                <div className={styles.treeSection}>
-                  <TreeView tree={exec.result.tree} currentStep={player.currentStep} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className={styles.bottomPanel}>
-            <StepperControls player={player} />
-          </div>
-        </div>
+        <PlaygroundViewer
+          result={exec.result}
+          codeHtml={exec.codeHtml}
+          hasRecursion={exec.hasRecursion}
+          finalReturnValue={exec.finalReturnValue}
+          consoleLogs={exec.consoleLogs}
+        />
       )}
     </div>
   );
