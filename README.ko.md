@@ -25,7 +25,39 @@ JavaScript / TypeScript 코드를 붙여넣으면 실행 흐름을 단계별로 
 4. **▶ 실행**을 클릭합니다
 5. 컨트롤로 한 단계씩 이동하거나 재생합니다
 
-홈 페이지에서 순열, 조합, 부분집합 프리셋도 사용할 수 있습니다.
+홈 페이지에서 정렬, 재귀/백트래킹 등 카테고리별 프리셋 알고리즘도 사용할 수 있습니다.
+
+## 알고리즘 추가하기
+
+1. `src/algorithm/presets/codes/`에 `.js` 파일을 추가합니다
+2. 해당 카테고리 파일(`recursion.ts`, `sorting.ts`)에 메타데이터를 등록합니다:
+
+```ts
+{
+  id: "selection-sort",
+  name: "선택 정렬 (Selection Sort)",
+  description: "가장 작은 원소를 찾아 앞으로 보냅니다",
+  difficulty: "easy",
+  category: "sorting",
+  defaultArgs: [[5, 3, 8, 1, 2]],
+  code: loadCode("selection-sort.js"),
+}
+```
+
+## 프로젝트 구조
+
+```
+src/
+├── algorithm/        # 프리셋 알고리즘 정의 및 레지스트리
+│   └── presets/
+│       └── codes/    # 알고리즘 소스 파일 (.js)
+├── engine/           # AST 분석, 변환, Worker 실행
+├── editor/           # CodeMirror 에디터, ArgumentForm
+├── player/           # 스텝 재생 (useAlgorithmPlayer)
+├── visualizer/       # TreeView, CodePanel, CallStack, VariablePanel
+├── shared/           # 테마, 유틸, 공통 UI
+└── app/              # Next.js 라우트
+```
 
 ## 기술 스택
 
