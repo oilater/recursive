@@ -146,13 +146,3 @@ export const errorBox = style({
   maxWidth: "960px",
   width: "100%",
 });
-
-export const loadingOverlay = style({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100%",
-  gap: vars.space.sm,
-  color: vars.color.textMuted,
-  fontSize: vars.fontSize.lg,
-});

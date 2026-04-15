@@ -41,16 +41,6 @@ export const argsBar = style({
   fontFamily: vars.font.mono,
 });
 
-export const errorMessage = style({
-  padding: vars.space.xl,
-  color: vars.color.error,
-});
-
-export const loadingMessage = style({
-  padding: vars.space.xl,
-  color: vars.color.textMuted,
-});
-
 export const applyButton = style({
   padding: `${vars.space.xs} ${vars.space.md}`,
   backgroundColor: "#065f46",

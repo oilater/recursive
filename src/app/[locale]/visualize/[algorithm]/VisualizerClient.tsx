@@ -6,7 +6,7 @@ import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import { trackEvent } from "@/shared/lib/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
-import { Badge, Header } from "@/shared/ui";
+import { Badge, Header, StatusMessage } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { PresetViewer } from "./PresetViewer";
 import * as styles from "./visualize-page.css";
@@ -89,7 +89,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     return (
       <div className={styles.page}>
         {presetHeader}
-        <div className={styles.errorMessage}>{error}</div>
+        <StatusMessage variant="error">{error}</StatusMessage>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     return (
       <div className={styles.page}>
         {presetHeader}
-        <div className={styles.loadingMessage}>{t("visualizer.running")}</div>
+        <StatusMessage variant="loading">{t("visualizer.running")}</StatusMessage>
       </div>
     );
   }

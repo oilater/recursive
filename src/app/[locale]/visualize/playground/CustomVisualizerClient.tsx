@@ -9,7 +9,7 @@ import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/posthog";
-import { Header } from "@/shared/ui";
+import { Header, StatusMessage } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { PlaygroundViewer } from "./PlaygroundViewer";
 import * as styles from "./custom-page.css";
@@ -123,7 +123,7 @@ export function CustomVisualizerClient() {
         </div>
       )}
 
-      {mode === "loading" && <div className={styles.loadingOverlay}>{t("custom.running")}</div>}
+      {mode === "loading" && <StatusMessage variant="loading">{t("custom.running")}</StatusMessage>}
 
       {mode === "visualize" && exec.result && (
         <PlaygroundViewer

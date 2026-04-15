@@ -52,8 +52,34 @@ export const CodePanel = memo(function CodePanel({ html, activeLine }: CodePanel
 
 이중 `requestAnimationFrame`은 제거하고, 일반 `useEffect`로 되돌림.
 
+### 추가 개선: 컴포넌트 분리
+
+`React.memo`로 문제를 해결한 뒤, 구조적으로도 개선했다. 기존에는 `CustomVisualizerClient` 하나가 에디터 모드, 로딩, 시각화 모드를 전부 관리하면서 `useAlgorithmPlayer`도 들고 있었다. player state가 바뀔 때마다 에디터 관련 state까지 포함한 전체 컴포넌트가 리렌더되는 구조였다.
+
+시각화 부분을 별도 컴포넌트(`PlaygroundViewer`, `PresetViewer`)로 분리해서, player가 이 안에서만 존재하도록 변경했다.
+
+```
+// Before: 하나의 거대한 컴포넌트
+CustomVisualizerClient (edit + loading + visualize + player)
+  ├── CodePanel ← player 리렌더에 영향받음
+  ├── CallStack
+  └── StepperControls
+
+// After: 모드별 분리
+CustomVisualizerClient (edit + loading + 모드 전환만)
+  └── PlaygroundViewer (player는 여기서만)
+      ├── CodePanel ← 외부 리렌더와 격리
+      ├── CallStack
+      └── StepperControls
+```
+
+이렇게 하면 `React.memo`와 컴포넌트 분리가 **각각 다른 레벨의 문제를 해결**한다:
+- **컴포넌트 분리** — 외부 state 변경(모드 전환, 코드 입력 등)이 시각화 영역에 영향 안 줌
+- **`React.memo`** — 내부 player RESET으로 인한 CodePanel 불필요한 리렌더 방지
+
 ## 교훈
 
 - `dangerouslySetInnerHTML` + DOM 직접 조작은 충돌할 수밖에 없다. 리렌더를 막거나, DOM 조작을 안 하거나 둘 중 하나.
 - 타이밍 해킹(rAF, setTimeout)으로 해결되면 근본 원인을 다시 봐야 한다. 대부분 불필요한 리렌더가 원인이다.
 - `React.memo`는 성능 최적화뿐 아니라, DOM 직접 조작과 React 렌더링의 충돌을 방지하는 데도 유효하다.
+- 하나의 컴포넌트가 여러 모드를 관리하면서 훅을 공유하면, 관련 없는 state 변경이 서로 영향을 미친다. 역할별로 분리하면 memo 없이도 해결되는 문제가 많다.
