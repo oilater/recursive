@@ -7,7 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
-import { PostHogProvider } from "@/shared/lib/PostHogProvider";
+import { PostHogProvider } from "@/shared/lib/analytics/PostHogProvider";
 import { routing } from "@/i18n/routing";
 
 const geistMono = Geist_Mono({

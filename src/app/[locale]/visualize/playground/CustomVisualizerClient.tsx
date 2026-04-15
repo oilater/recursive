@@ -8,7 +8,7 @@ import { executeCustomCode, analyzeCode } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
-import { trackEvent } from "@/shared/lib/posthog";
+import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { Header, StatusMessage } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { PlaygroundViewer } from "./PlaygroundViewer";

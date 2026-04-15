@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { executeCustomCode, analyzeCode } from "@/engine";
-import { trackEvent } from "@/shared/lib/posthog";
+import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
 import { Badge, Header, StatusMessage } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
