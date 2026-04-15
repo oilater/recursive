@@ -8,7 +8,6 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
 import { PostHogProvider } from "@/shared/lib/PostHogProvider";
-import { Footer } from "@/shared/ui";
 import { routing } from "@/i18n/routing";
 
 const geistMono = Geist_Mono({
@@ -93,10 +92,7 @@ export default async function LocaleLayout({
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <NextIntlClientProvider>
           <PostHogProvider>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-              {children}
-            </div>
-            <Footer />
+            {children}
           </PostHogProvider>
         </NextIntlClientProvider>
         <Analytics />
