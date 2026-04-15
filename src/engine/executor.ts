@@ -38,7 +38,7 @@ export async function executeCustomCode(
 
     const timer = setTimeout(() => {
       worker.terminate();
-      reject(new Error(`실행 시간이 ${timeoutMs / 1000}초를 초과했습니다.`));
+      reject(new Error(`Execution timed out after ${timeoutMs / 1000} seconds.`));
     }, timeoutMs);
 
     worker.onmessage = (e) => {
@@ -60,7 +60,7 @@ export async function executeCustomCode(
     worker.onerror = (e) => {
       clearTimeout(timer);
       worker.terminate();
-      reject(new Error(e.message || "알 수 없는 실행 오류가 발생했습니다"));
+      reject(new Error(e.message || "An unknown execution error occurred."));
     };
 
     worker.postMessage({

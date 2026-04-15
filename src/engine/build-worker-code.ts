@@ -116,7 +116,7 @@ self.onmessage = function(e) {
         apply: function(target, thisArg, argsList) {
           callCount++;
           if (callCount > maxCalls) {
-            throw new Error('재귀 호출 횟수가 ' + maxCalls + '회를 초과했습니다.');
+            throw new Error('Recursive call count exceeded ' + maxCalls + ' calls.');
           }
 
           var nodeId = 'node-' + nodeIdCounter++;
