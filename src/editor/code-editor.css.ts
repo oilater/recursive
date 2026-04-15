@@ -24,4 +24,5 @@ globalStyle(`${editorRoot} .cm-editor`, {
 
 globalStyle(`${editorRoot} .cm-scroller`, {
   overflow: "auto",
+  paddingTop: vars.space.sm,
 });

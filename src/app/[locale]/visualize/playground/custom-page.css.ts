@@ -79,8 +79,8 @@ export const editorBody = style({
 
 export const runButton = style({
   padding: `${vars.space.sm} ${vars.space.xl}`,
-  backgroundColor: vars.color.accent,
-  color: vars.color.accentText,
+  background: "linear-gradient(135deg, #22d3ee, #38bdf8)",
+  color: "#0a0a0a",
   borderRadius: vars.radius.md,
   fontSize: vars.fontSize.sm,
   fontWeight: "700",

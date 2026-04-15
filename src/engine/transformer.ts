@@ -106,6 +106,13 @@ function walkAndTransform(
         insideTracedFunc || !!enteringTracedFunc,
       );
     }
+    if (insideTracedFunc && newBody.length > 0) {
+      const lastStmt = newBody[newBody.length - 1];
+      const lastLine = lastStmt.loc?.end?.line ?? lastStmt.loc?.start?.line;
+      if (lastLine) {
+        newBody.push(traceLineCall(lastLine));
+      }
+    }
     node.body = newBody;
     return;
   }
