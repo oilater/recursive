@@ -4,7 +4,7 @@ import { vars } from "@/shared/styles/theme.css";
 export const header = style({
   display: "flex",
   alignItems: "center",
-  padding: `${vars.space.sm} 0`,
+  padding: `${vars.space.sm} ${vars.space.lg}`,
   backgroundColor: "transparent",
   flexShrink: 0,
 });
@@ -26,11 +26,29 @@ export const logoLink = style({
 });
 
 export const logoText = style({
-  fontSize: "16px",
-  fontWeight: 600,
+  fontSize: "20px",
+  fontWeight: 700,
   letterSpacing: "-0.02em",
-  color: "#e2e8f0",
+  color: vars.color.text,
   fontFamily: "var(--font-plus-jakarta), sans-serif",
+});
+
+export const nav = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "4px",
+});
+
+export const navLink = style({
+  padding: "6px 12px",
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  textDecoration: "none",
+  borderRadius: "6px",
+  ":hover": {
+    backgroundColor: vars.color.surfaceHover,
+    color: vars.color.text,
+  },
 });
 
 export const center = style({
@@ -52,11 +70,11 @@ export const iconLink = style({
   display: "inline-flex",
   alignItems: "center",
   padding: "6px 10px",
-  color: "#94a3b8",
+  color: vars.color.textMuted,
   borderRadius: "6px",
   textDecoration: "none",
   ":hover": {
-    backgroundColor: "#1e293b",
-    color: "#e2e8f0",
+    backgroundColor: vars.color.surfaceHover,
+    color: vars.color.text,
   },
 });

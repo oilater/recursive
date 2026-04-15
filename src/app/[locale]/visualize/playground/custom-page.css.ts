@@ -19,9 +19,13 @@ export const header = style({
 });
 
 export const backLink = style({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "4px",
   color: vars.color.textMuted,
   fontSize: vars.fontSize.sm,
   textDecoration: "none",
+  whiteSpace: "nowrap",
   ":hover": { color: vars.color.text },
 });
 

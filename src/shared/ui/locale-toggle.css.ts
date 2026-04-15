@@ -1,4 +1,5 @@
 import { style } from "@vanilla-extract/css";
+import { vars } from "@/shared/styles/theme.css";
 
 export const trigger = style({
   display: "inline-flex",
@@ -6,13 +7,13 @@ export const trigger = style({
   gap: "8px",
   padding: "6px 12px",
   backgroundColor: "transparent",
-  color: "#94a3b8",
+  color: vars.color.textMuted,
   border: "none",
   borderRadius: "6px",
   fontSize: "13px",
   cursor: "pointer",
   ":hover": {
-    backgroundColor: "#1e293b",
+    backgroundColor: vars.color.surfaceHover,
   },
 });
 
@@ -21,7 +22,7 @@ export const dropdown = style({
   top: "calc(100% + 4px)",
   right: 0,
   minWidth: "80px",
-  backgroundColor: "#1e293b",
+  backgroundColor: vars.color.surfaceHover,
   border: "1px solid #334155",
   borderRadius: "6px",
   overflow: "hidden",
@@ -33,17 +34,17 @@ export const option = style({
   width: "100%",
   padding: "8px 14px",
   backgroundColor: "transparent",
-  color: "#94a3b8",
+  color: vars.color.textMuted,
   border: "none",
   fontSize: "13px",
   textAlign: "left",
   cursor: "pointer",
   ":hover": {
-    backgroundColor: "#334155",
+    backgroundColor: vars.color.borderLight,
   },
 });
 
 export const optionActive = style({
-  backgroundColor: "#334155",
-  color: "#e2e8f0",
+  backgroundColor: vars.color.borderLight,
+  color: vars.color.text,
 });

@@ -1,20 +1,41 @@
 import { createGlobalTheme, createGlobalThemeContract } from "@vanilla-extract/css";
+import { primitive } from "./colors";
 
 export const vars = createGlobalThemeContract({
   color: {
+    // Brand
     primary: "color-primary",
     primaryLight: "color-primary-light",
+
+    // Backgrounds
     bg: "color-bg",
     surface: "color-surface",
     surfaceAlt: "color-surface-alt",
+    surfaceHover: "color-surface-hover",
+
+    // Text
     text: "color-text",
     textMuted: "color-text-muted",
+    textSubtle: "color-text-subtle",
+    textFaint: "color-text-faint",
+
+    // Border
     border: "color-border",
+    borderLight: "color-border-light",
+
+    // Feedback
     highlight: "color-highlight",
     highlightText: "color-highlight-text",
     success: "color-success",
     error: "color-error",
     warning: "color-warning",
+
+    // Accent
+    accent: "color-accent",
+    accentHover: "color-accent-hover",
+    accentText: "color-accent-text",
+
+    // Tree nodes
     nodeIdle: "color-node-idle",
     nodeActive: "color-node-active",
     nodeCompleted: "color-node-completed",
@@ -50,23 +71,43 @@ export const vars = createGlobalThemeContract({
 
 createGlobalTheme(":root", vars, {
   color: {
-    primary: "#6366f1",
-    primaryLight: "#818cf8",
-    bg: "#0f0f13",
-    surface: "#1a1a24",
-    surfaceAlt: "#24243a",
-    text: "#e2e8f0",
-    textMuted: "#94a3b8",
-    border: "#2e2e48",
-    highlight: "#fbbf24",
-    highlightText: "#1a1a24",
-    success: "#22c55e",
-    error: "#ef4444",
-    warning: "#f59e0b",
-    nodeIdle: "#475569",
-    nodeActive: "#fbbf24",
-    nodeCompleted: "#22c55e",
-    nodeBacktracked: "#ef4444",
+    // Brand
+    primary: primitive.indigo500,
+    primaryLight: primitive.indigo400,
+
+    // Backgrounds
+    bg: primitive.dark200,
+    surface: primitive.dark100,
+    surfaceAlt: primitive.dark50,
+    surfaceHover: primitive.slate800,
+
+    // Text
+    text: primitive.slate200,
+    textMuted: primitive.slate400,
+    textSubtle: primitive.slate500,
+    textFaint: primitive.slate600,
+
+    // Border
+    border: primitive.darkBorder,
+    borderLight: primitive.slate700,
+
+    // Feedback
+    highlight: primitive.amber400,
+    highlightText: primitive.dark100,
+    success: primitive.green500,
+    error: primitive.red500,
+    warning: primitive.amber500,
+
+    // Accent
+    accent: primitive.sky400,
+    accentHover: primitive.sky500,
+    accentText: primitive.dark200,
+
+    // Tree nodes
+    nodeIdle: primitive.slate600,
+    nodeActive: primitive.amber400,
+    nodeCompleted: primitive.green500,
+    nodeBacktracked: primitive.red500,
   },
   space: {
     xs: "4px",

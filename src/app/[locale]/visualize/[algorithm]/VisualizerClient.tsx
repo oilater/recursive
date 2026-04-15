@@ -18,6 +18,7 @@ import type { ArgumentFormHandle } from "@/editor";
 import { trackEvent } from "@/shared/lib/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
 import { Badge, Header } from "@/shared/ui";
+import { ChevronLeftIcon } from "@/shared/ui/icons";
 import * as styles from "./visualize-page.css";
 
 interface VisualizerClientProps {
@@ -77,7 +78,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
 
   const presetHeader = (
     <Header
-      left={<a href="/" className={styles.backLink}>{t("visualizer.backToList")}</a>}
+      left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />{t("visualizer.backToList")}</a>}
       center={
         <>
           <span className={styles.algoTitle}>{t(`algorithm.${preset.id}.name`)}</span>
@@ -145,7 +146,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
                   fontWeight: 500,
                 }}
               >
-                Apply
+                {t("visualizer.apply")}
               </button>
             </div>
             <div className={styles.codeSection}>

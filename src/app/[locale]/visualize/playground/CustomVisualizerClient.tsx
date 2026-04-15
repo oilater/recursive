@@ -19,6 +19,7 @@ import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/posthog";
 import { Header } from "@/shared/ui";
+import { ChevronLeftIcon } from "@/shared/ui/icons";
 import * as styles from "./custom-page.css";
 
 const DEFAULT_CODE = "";
@@ -84,7 +85,7 @@ export function CustomVisualizerClient() {
   return (
     <div className={styles.page}>
       <Header
-        left={<a href="/" className={styles.backLink}>← Recursive</a>}
+        left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />{t("visualizer.backToList")}</a>}
         right={
           mode === "visualize" ? (
             <button onClick={handleEdit} className={styles.editButton}>Edit</button>

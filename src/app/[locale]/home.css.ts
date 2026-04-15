@@ -1,25 +1,26 @@
-import { style } from "@vanilla-extract/css";
+import { style, globalStyle } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 
 export const page = style({
   minHeight: "100vh",
-  padding: `${vars.space.md} ${vars.space.lg}`,
+  width: "100%",
   maxWidth: "1040px",
+  padding: `${vars.space.md} ${vars.space.lg}`,
   margin: "0 auto",
 });
 
 export const hero = style({
-  textAlign: "center",
   marginBottom: vars.space.xxl,
   paddingTop: vars.space.xxl,
   paddingBottom: vars.space.lg,
 });
 
 export const title = style({
-  fontSize: "56px",
-  fontWeight: "800",
+  fontSize: "48px",
+  fontWeight: "700",
   letterSpacing: "-0.03em",
-  marginBottom: vars.space.xs,
+  lineHeight: 1.15,
+  marginBottom: vars.space.md,
   fontFamily: "var(--font-plus-jakarta), sans-serif",
   background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
   WebkitBackgroundClip: "text",
@@ -27,33 +28,37 @@ export const title = style({
   filter: "drop-shadow(0 0 30px rgba(74, 222, 128, 0.15))",
 });
 
+export const titleWhite = style({
+  background: "none",
+  WebkitBackgroundClip: "unset",
+  WebkitTextFillColor: "#ffffff",
+});
+
 export const subtitle = style({
   fontSize: "16px",
-  color: "#94a3b8",
-  margin: "0 auto",
-  lineHeight: 1.7,
-  maxWidth: "600px",
-});
-
-export const sectionTitle = style({
-  fontSize: vars.fontSize.xl,
-  fontWeight: "600",
-  marginBottom: vars.space.xs,
   color: vars.color.text,
+  opacity: 0.7,
+  lineHeight: 1.7,
+  maxWidth: "500px",
 });
 
-export const grid = style({
+// ── Home cards ──
+
+export const cardGrid = style({
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-  gap: vars.space.md,
+  gridTemplateColumns: "repeat(2, 1fr)",
+  gap: vars.space.lg,
   marginBottom: vars.space.xxl,
+  "@media": {
+    "(max-width: 640px)": {
+      gridTemplateColumns: "1fr",
+    },
+  },
 });
 
-// ── 카드 공통 ──
-
-const cardBase = {
+export const homeCard = style({
   display: "flex",
-  flexDirection: "column" as const,
+  flexDirection: "column",
   padding: vars.space.lg,
   borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.border}`,
@@ -62,36 +67,63 @@ const cardBase = {
   color: vars.color.text,
   transition: "all 0.2s ease",
   cursor: "pointer",
-};
-
-export const customCard = style({
-  ...cardBase,
-  marginBottom: vars.space.xl,
-  background: `linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(99, 102, 241, 0.06))`,
-  border: `1px solid rgba(56, 189, 248, 0.2)`,
   ":hover": {
-    borderColor: "rgba(56, 189, 248, 0.5)",
+    borderColor: vars.color.textMuted,
     transform: "translateY(-2px)",
-    boxShadow: "0 8px 24px rgba(56, 189, 248, 0.1)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
   },
 });
 
-export const customCardIcon = style({
-  fontSize: "20px",
-  marginBottom: vars.space.sm,
-  color: "#38bdf8",
-  fontFamily: vars.font.mono,
+export const homeCardIcon = style({
+  fontSize: "24px",
   fontWeight: "700",
+  fontFamily: vars.font.mono,
+  marginBottom: vars.space.sm,
+  background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
 });
 
-export const customCardTitle = style({
+export const homeCardTitle = style({
   fontSize: vars.fontSize.lg,
   fontWeight: "700",
-  marginBottom: vars.space.xs,
+  marginBottom: vars.space.sm,
 });
 
-export const customCardDesc = style({
+export const homeCardDesc = style({
   fontSize: vars.fontSize.sm,
   color: vars.color.textMuted,
-  lineHeight: 1.5,
+  lineHeight: 1.6,
+});
+
+// ── Footer ──
+
+export const footer = style({
+  textAlign: "center",
+  paddingTop: vars.space.xxl,
+  paddingBottom: vars.space.lg,
+  borderTop: `1px solid ${vars.color.border}`,
+  marginTop: vars.space.xl,
+});
+
+export const footerLinks = style({
+  display: "flex",
+  justifyContent: "center",
+  gap: vars.space.md,
+  marginBottom: vars.space.sm,
+  fontSize: vars.fontSize.sm,
+});
+
+globalStyle(`${footerLinks} a`, {
+  color: vars.color.textSubtle,
+  textDecoration: "none",
+});
+
+export const footerDot = style({
+  color: vars.color.borderLight,
+});
+
+export const footerCopy = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textFaint,
 });
