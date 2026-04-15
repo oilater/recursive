@@ -16,7 +16,7 @@ export const hero = style({
 });
 
 export const title = style({
-  fontSize: "48px",
+  fontSize: "56px",
   fontWeight: "700",
   letterSpacing: "-0.03em",
   lineHeight: 1.15,

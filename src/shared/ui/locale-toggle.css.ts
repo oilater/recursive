@@ -7,10 +7,10 @@ export const trigger = style({
   gap: "8px",
   padding: "6px 12px",
   backgroundColor: "transparent",
-  color: vars.color.textMuted,
+  color: vars.color.text,
   border: "none",
   borderRadius: "6px",
-  fontSize: "13px",
+  fontSize: vars.fontSize.md,
   cursor: "pointer",
   ":hover": {
     backgroundColor: vars.color.surfaceHover,
@@ -19,32 +19,34 @@ export const trigger = style({
 
 export const dropdown = style({
   position: "absolute",
-  top: "calc(100% + 4px)",
+  top: "calc(100% + 6px)",
   right: 0,
-  minWidth: "80px",
-  backgroundColor: vars.color.surfaceHover,
-  border: "1px solid #334155",
-  borderRadius: "6px",
+  minWidth: "90px",
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: "8px",
   overflow: "hidden",
   zIndex: 50,
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
 });
 
 export const option = style({
   display: "block",
   width: "100%",
-  padding: "8px 14px",
+  padding: "8px 16px",
   backgroundColor: "transparent",
   color: vars.color.textMuted,
   border: "none",
-  fontSize: "13px",
+  fontSize: vars.fontSize.sm,
   textAlign: "left",
   cursor: "pointer",
   ":hover": {
-    backgroundColor: vars.color.borderLight,
+    backgroundColor: vars.color.surfaceAlt,
+    color: vars.color.text,
   },
 });
 
 export const optionActive = style({
-  backgroundColor: vars.color.borderLight,
   color: vars.color.text,
+  fontWeight: 600,
 });

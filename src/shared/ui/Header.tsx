@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { LocaleToggle } from "./LocaleToggle";
-import { GithubIcon, LogoIcon } from "./icons";
+import { LogoIcon } from "./icons";
 import { Link } from "@/i18n/navigation";
 import * as styles from "./header.css";
 
@@ -22,6 +22,11 @@ export function Header({ left, center, right }: HeaderProps) {
           <LogoIcon size={28} />
           <span className={styles.logoText}>Recursive</span>
         </a>
+        {left}
+      </div>
+      <div className={styles.center}>{center}</div>
+      <div className={styles.right}>
+        {right}
         <nav className={styles.nav}>
           <Link href="/visualize/playground" className={styles.navLink}>
             {t("playground")}
@@ -30,19 +35,6 @@ export function Header({ left, center, right }: HeaderProps) {
             {t("algorithms")}
           </Link>
         </nav>
-        {left}
-      </div>
-      <div className={styles.center}>{center}</div>
-      <div className={styles.right}>
-        {right}
-        <a
-          href="https://github.com/oilater/recursive"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.iconLink}
-        >
-          <GithubIcon />
-        </a>
         <LocaleToggle />
       </div>
     </header>

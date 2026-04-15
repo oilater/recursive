@@ -41,13 +41,12 @@ export const nav = style({
 
 export const navLink = style({
   padding: "6px 12px",
-  fontSize: vars.fontSize.sm,
-  color: vars.color.textMuted,
+  fontSize: vars.fontSize.md,
+  color: vars.color.text,
   textDecoration: "none",
   borderRadius: "6px",
   ":hover": {
     backgroundColor: vars.color.surfaceHover,
-    color: vars.color.text,
   },
 });
 
@@ -60,7 +59,7 @@ export const center = style({
 export const right = style({
   display: "flex",
   alignItems: "center",
-  gap: "4px",
+  gap: vars.space.sm,
   flex: 1,
   justifyContent: "flex-end",
   minWidth: 0,
@@ -70,7 +69,7 @@ export const iconLink = style({
   display: "inline-flex",
   alignItems: "center",
   padding: "6px 10px",
-  color: vars.color.textMuted,
+  color: vars.color.text,
   borderRadius: "6px",
   textDecoration: "none",
   ":hover": {

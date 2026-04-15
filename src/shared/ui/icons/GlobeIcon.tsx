@@ -2,7 +2,7 @@ interface GlobeIconProps {
   size?: number;
 }
 
-export function GlobeIcon({ size = 16 }: GlobeIconProps) {
+export function GlobeIcon({ size = 18 }: GlobeIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0 }}>
       <circle cx="12" cy="12" r="10" />

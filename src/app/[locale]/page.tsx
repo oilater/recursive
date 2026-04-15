@@ -12,7 +12,7 @@ export default function Home() {
       <div className={styles.hero}>
         <h1 className={styles.title}>
           Visualize your code,<br />
-          <span className={styles.titleWhite}>line by line</span>
+          <span className={styles.titleWhite}>learn intuitively.</span>
         </h1>
         <p className={styles.subtitle}>{t("subtitle")}</p>
       </div>
