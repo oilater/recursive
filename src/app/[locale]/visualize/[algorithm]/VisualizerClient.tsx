@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
-import { Badge, Header, StatusMessage } from "@/shared/ui";
+import { buildEmbedUrl, buildIframeSnippet } from "@/shared/lib/embed-url";
+import { Badge, Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { PresetViewer } from "./PresetViewer";
 import * as styles from "./visualize-page.css";
@@ -32,6 +33,11 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(null);
   const [paramNames, setParamNames] = useState<string[]>([]);
+
+  const embedData = useMemo(() => {
+    const url = buildEmbedUrl({ preset: preset.id });
+    return { url, snippet: buildIframeSnippet(url) };
+  }, [preset.id]);
 
   useEffect(
     function analyzePresetParams() {
@@ -82,6 +88,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
           <Badge variant={preset.difficulty}>{t(`difficulty.${preset.difficulty}`)}</Badge>
         </>
       }
+      right={<EmbedDropdown embedUrl={embedData.url} iframeSnippet={embedData.snippet} />}
     />
   );
 

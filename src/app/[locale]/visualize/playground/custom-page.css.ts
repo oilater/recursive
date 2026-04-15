@@ -108,11 +108,25 @@ export const runButton = style({
   },
 });
 
-export const editButton = style({
-  marginLeft: "auto",
+export const embedButton = style({
   padding: `${vars.space.xs} ${vars.space.md}`,
   backgroundColor: "transparent",
   color: vars.color.textMuted,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.fontSize.sm,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  ":hover": {
+    color: vars.color.text,
+    borderColor: vars.color.text,
+  },
+});
+
+export const editButton = style({
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  backgroundColor: "transparent",
+  color: vars.color.text,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   fontSize: vars.fontSize.sm,

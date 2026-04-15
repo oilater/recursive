@@ -59,6 +59,21 @@ export const argsBar = style({
   fontFamily: vars.font.mono,
 });
 
+export const embedButton = style({
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  backgroundColor: "transparent",
+  color: vars.color.textMuted,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.fontSize.xs,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  ":hover": {
+    color: vars.color.text,
+    borderColor: vars.color.text,
+  },
+});
+
 export const applyButton = style({
   padding: `${vars.space.xs} ${vars.space.md}`,
   backgroundColor: "#065f46",

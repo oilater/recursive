@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
@@ -9,8 +9,9 @@ import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
-import { Header, StatusMessage } from "@/shared/ui";
+import { Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
+import { buildEmbedUrl, buildIframeSnippet } from "@/shared/lib/embed-url";
 import { PlaygroundViewer } from "./PlaygroundViewer";
 import * as styles from "./custom-page.css";
 
@@ -40,9 +41,11 @@ export function CustomVisualizerClient() {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
+  const codeRef = useRef("");
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
+    codeRef.current = newCode;
     try {
       const { analysis } = analyzeCode(newCode);
       setParamNames(analysis.entryParamNames);
@@ -84,13 +87,23 @@ export function CustomVisualizerClient() {
     setError(null);
   };
 
+  const embedData = useMemo(() => {
+    if (!codeRef.current) return null;
+    const args = argFormRef.current?.getArgs() ?? [];
+    const url = buildEmbedUrl({ code: codeRef.current, args });
+    return { url, snippet: buildIframeSnippet(url) };
+  }, [exec]);
+
   return (
     <div className={styles.page}>
       <Header
         left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />{t("visualizer.backToList")}</a>}
         right={
           mode === "visualize" ? (
-            <button onClick={handleEdit} className={styles.editButton}>Edit</button>
+            <>
+              {embedData && <EmbedDropdown embedUrl={embedData.url} iframeSnippet={embedData.snippet} />}
+              <button onClick={handleEdit} className={styles.editButton}>Edit</button>
+            </>
           ) : undefined
         }
       />
