@@ -11,6 +11,20 @@ export const loadingBox = style({
   fontSize: vars.fontSize.md,
 });
 
+export const skeletonEditor = style({
+  height: "100%",
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  fontFamily: vars.font.mono,
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  opacity: 0.3,
+});
+
+export const skeletonLine = style({
+  display: "block",
+  paddingLeft: vars.space.sm,
+});
+
 export const editorRoot = style({
   height: "100%",
   display: "flex",
@@ -31,6 +45,7 @@ globalStyle(`${editorRoot} .cm-scroller`, {
 
 globalStyle(`${editorRoot} .cm-gutters`, {
   backgroundColor: "transparent !important",
+  paddingLeft: vars.space.sm,
 });
 
 globalStyle(`${editorRoot} .cm-placeholder`, {

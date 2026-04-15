@@ -9,10 +9,16 @@ import { placeholder as placeholderExt } from "@codemirror/view";
 
 import * as styles from "./code-editor.css";
 
-const ReactCodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
+const codemirrorImport = () => import("@uiw/react-codemirror");
+
+const ReactCodeMirror = dynamic(codemirrorImport, {
   ssr: false,
-  loading: () => <div className={styles.loadingBox}>...</div>,
+  loading: () => <div style={{ height: "100%" }} />,
 });
+
+if (typeof window !== "undefined") {
+  codemirrorImport();
+}
 
 interface CodeEditorProps {
   value: string;
