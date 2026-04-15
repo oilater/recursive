@@ -41,9 +41,9 @@ export function PresetViewer({
     player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined;
 
   return (
-    <div className={styles.mainContent} style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: "16px" }}>
-        <div className={styles.leftPanel} style={{ flex: 3, minWidth: 0 }}>
+    <div className={styles.mainContent}>
+      <div className={styles.vizRow}>
+        <div className={styles.leftPanel}>
           <div className={styles.argsBar}>
             <div style={{ flex: 1 }} />
             <ArgumentForm ref={argFormRef} paramNames={paramNames} defaultArgs={preset.defaultArgs} onSubmit={onRunCode} />
@@ -71,7 +71,7 @@ export function PresetViewer({
         </div>
 
         {hasRecursion && (
-          <div className={styles.rightPanel} style={{ flex: 2, minWidth: 0 }}>
+          <div className={styles.rightPanel}>
             <div className={styles.treeSection}>
               <TreeView tree={result.tree} currentStep={player.currentStep} />
             </div>

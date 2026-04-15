@@ -122,6 +122,11 @@ export const vizContainer = style({
   overflow: "hidden",
   padding: vars.space.sm,
   gap: vars.space.sm,
+  "@media": {
+    "(max-width: 768px)": {
+      overflow: "auto",
+    },
+  },
 });
 
 export const vizRow = style({
@@ -129,6 +134,12 @@ export const vizRow = style({
   flex: 1,
   overflow: "hidden",
   gap: vars.space.md,
+  "@media": {
+    "(max-width: 768px)": {
+      flexDirection: "column",
+      overflow: "auto",
+    },
+  },
 });
 
 // ── Feedback ──

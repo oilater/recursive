@@ -1,11 +1,20 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "./theme.css";
 
+const MOBILE = "(max-width: 768px)";
+
 export const page = style({
   display: "flex",
   flexDirection: "column",
   height: "100vh",
   overflow: "hidden",
+  "@media": {
+    [MOBILE]: {
+      height: "auto",
+      minHeight: "100vh",
+      overflow: "auto",
+    },
+  },
 });
 
 export const backLink = style({
@@ -26,12 +35,23 @@ export const leftPanel = style({
   overflow: "hidden",
   flex: 3,
   minWidth: 0,
+  "@media": {
+    [MOBILE]: {
+      flex: "none",
+      minHeight: "300px",
+    },
+  },
 });
 
 export const codeSection = style({
   flex: 1,
   overflow: "hidden",
   minHeight: 0,
+  "@media": {
+    [MOBILE]: {
+      minHeight: "300px",
+    },
+  },
 });
 
 export const middlePanel = style({
@@ -41,6 +61,11 @@ export const middlePanel = style({
   overflow: "auto",
   flex: 2,
   minWidth: 0,
+  "@media": {
+    [MOBILE]: {
+      flex: "none",
+    },
+  },
 });
 
 export const variableSection = style({
@@ -56,12 +81,23 @@ export const rightPanel = style({
   gap: vars.space.sm,
   flex: 2,
   minWidth: 0,
+  "@media": {
+    [MOBILE]: {
+      flex: "none",
+      minHeight: "300px",
+    },
+  },
 });
 
 export const treeSection = style({
   flex: 1,
   overflow: "hidden",
   minHeight: 0,
+  "@media": {
+    [MOBILE]: {
+      minHeight: "300px",
+    },
+  },
 });
 
 export const bottomPanel = style({
