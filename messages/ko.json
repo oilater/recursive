@@ -1,6 +1,7 @@
 {
   "home": {
     "subtitle": "코드의 실행 흐름을 한 줄씩 시각화하고, 알고리즘을 직관적으로 학습하세요.",
+    "langNote": "JavaScript, TypeScript를 지원해요.",
     "playground": "플레이그라운드",
     "playgroundDesc": "알고리즘 코드를 붙여넣거나, 직접 코드를 작성해보세요.",
     "customCardTitle": "여기에 코드를 적어보세요",
@@ -29,6 +30,8 @@
   },
   "custom": {
     "hint": "💡 JS / TS 코드를 붙여넣으면 함수와 매개변수를 자동으로 인식해요. 값을 입력하고 실행해보세요!",
+    "langLabel": "지원 언어",
+    "langList": "JavaScript, TypeScript",
     "run": "▶ 실행",
     "running": "실행 중..."
   },

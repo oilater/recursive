@@ -41,6 +41,14 @@ export const subtitle = style({
   maxWidth: "500px",
 });
 
+export const langNote = style({
+  fontSize: "16px",
+  color: vars.color.text,
+  opacity: 0.7,
+  lineHeight: 1.7,
+  marginTop: vars.space.xs,
+});
+
 // ── Home cards ──
 
 export const cardGrid = style({

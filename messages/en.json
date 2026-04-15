@@ -1,6 +1,7 @@
 {
   "home": {
     "subtitle": "Visualize your code line by line and learn algorithms intuitively.",
+    "langNote": "Supports JavaScript and TypeScript.",
     "playground": "Playground",
     "playgroundDesc": "Paste algorithm code or write your own.",
     "customCardTitle": "Write your code here",
@@ -29,6 +30,8 @@
   },
   "custom": {
     "hint": "💡 Paste JS / TS code and we'll detect functions and parameters automatically. Enter values and run!",
+    "langLabel": "Supported",
+    "langList": "JavaScript, TypeScript",
     "run": "▶ Run",
     "running": "Running..."
   },

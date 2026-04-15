@@ -45,6 +45,17 @@ export const editorToolbar = style({
   backgroundColor: vars.color.surface,
 });
 
+export const toolbarBadge = style({
+  fontSize: vars.fontSize.xs,
+  color: "#4ade80",
+  fontFamily: vars.font.mono,
+  padding: `2px ${vars.space.sm}`,
+  backgroundColor: "rgba(74, 222, 128, 0.1)",
+  border: "1px solid rgba(74, 222, 128, 0.25)",
+  borderRadius: vars.radius.sm,
+  marginRight: vars.space.sm,
+});
+
 export const toolbarLabel = style({
   fontSize: vars.fontSize.xs,
   color: vars.color.textMuted,

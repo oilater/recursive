@@ -111,7 +111,8 @@ export function CustomVisualizerClient() {
           {error && <div className={styles.errorBox}>{error}</div>}
           <div className={styles.editorCard}>
             <div className={styles.editorToolbar}>
-              <span className={styles.toolbarLabel}>JavaScript / TypeScript</span>
+              <span className={styles.toolbarBadge}>{t("custom.langLabel")}</span>
+              <span className={styles.toolbarLabel}>{t("custom.langList")}</span>
               <div className={styles.toolbarRight}>
                 <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
                 <button

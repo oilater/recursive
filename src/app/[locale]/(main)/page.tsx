@@ -15,6 +15,7 @@ export default function Home() {
           <span className={styles.titleWhite}>learn intuitively.</span>
         </h1>
         <p className={styles.subtitle}>{t("subtitle")}</p>
+        <p className={styles.langNote}>{t("langNote")}</p>
       </div>
 
       <div className={styles.cardGrid}>
