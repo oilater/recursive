@@ -47,6 +47,22 @@
       "name": "Bubble Sort",
       "description": "Sorts by comparing adjacent elements"
     },
+    "selection-sort": {
+      "name": "Selection Sort",
+      "description": "Finds the smallest element and moves it to the front"
+    },
+    "insertion-sort": {
+      "name": "Insertion Sort",
+      "description": "Inserts each element into its correct position"
+    },
+    "quick-sort": {
+      "name": "Quick Sort",
+      "description": "Partitions around a pivot and sorts recursively"
+    },
+    "merge-sort": {
+      "name": "Merge Sort",
+      "description": "Divides in half and merges back in order"
+    },
     "permutations": {
       "name": "Permutations",
       "description": "Select r items from n in order"

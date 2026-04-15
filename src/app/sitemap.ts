@@ -10,6 +10,10 @@ const pages = [
   { path: "/visualize/combinations", changeFrequency: "monthly" as const, priority: 0.7 },
   { path: "/visualize/subsets", changeFrequency: "monthly" as const, priority: 0.7 },
   { path: "/visualize/bubble-sort", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/selection-sort", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/insertion-sort", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/quick-sort", changeFrequency: "monthly" as const, priority: 0.7 },
+  { path: "/visualize/merge-sort", changeFrequency: "monthly" as const, priority: 0.7 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
