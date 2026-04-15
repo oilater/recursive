@@ -1,17 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { buildIframeSnippet } from "@/shared/lib/embed-url";
 import * as styles from "./embed-dropdown.css";
 
 interface EmbedDropdownProps {
   embedUrl: string;
-  iframeSnippet: string;
 }
 
-export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
+export function EmbedDropdown({ embedUrl }: EmbedDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [height, setHeight] = useState(1000);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+
+  const iframeSnippet = buildIframeSnippet(embedUrl, height);
 
   useEffect(
     function closeOnClickOutside() {
@@ -25,7 +28,7 @@ export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
     [open],
   );
 
-  const handleCopy = (text: string, field: "iframe" | "url") => {
+  const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 2000);
@@ -42,6 +45,17 @@ export function EmbedDropdown({ embedUrl, iframeSnippet }: EmbedDropdownProps) {
         <div className={styles.dropdown}>
           <div className={styles.section}>
             <span className={styles.hint}>블로그나 Obsidian에 그대로 붙여넣으면 시각화가 표시됩니다</span>
+            <div className={styles.heightRow}>
+              <span className={styles.heightLabel}>높이</span>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(Number(e.target.value) || 0)}
+                onBlur={() => setHeight((h) => Math.max(400, h))}
+                className={styles.heightInput}
+              />
+              <span className={styles.heightUnit}>px</span>
+            </div>
             <div className={styles.codeRow}>
               <code className={styles.code}>{iframeSnippet}</code>
               <button

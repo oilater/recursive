@@ -87,6 +87,37 @@ export const hint = style({
   opacity: 0.7,
 });
 
+export const heightRow = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+});
+
+export const heightLabel = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+});
+
+export const heightInput = style({
+  width: "70px",
+  padding: `2px ${vars.space.xs}`,
+  backgroundColor: vars.color.surfaceAlt,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  color: vars.color.text,
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  outline: "none",
+  ":focus": {
+    borderColor: vars.color.accent,
+  },
+});
+
+export const heightUnit = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+});
+
 export const divider = style({
   height: "1px",
   backgroundColor: vars.color.border,

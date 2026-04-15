@@ -11,7 +11,7 @@ import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
-import { buildEmbedUrl, buildIframeSnippet } from "@/shared/lib/embed-url";
+import { buildEmbedUrl } from "@/shared/lib/embed-url";
 import { PlaygroundViewer } from "./PlaygroundViewer";
 import * as styles from "./custom-page.css";
 
@@ -89,10 +89,9 @@ export function CustomVisualizerClient() {
     setError(null);
   };
 
-  const embedData = useMemo(() => {
+  const embedUrl = useMemo(() => {
     if (!codeRef.current) return null;
-    const url = buildEmbedUrl({ code: codeRef.current, args: lastArgsRef.current });
-    return { url, snippet: buildIframeSnippet(url) };
+    return buildEmbedUrl({ code: codeRef.current, args: lastArgsRef.current });
   }, [exec]);
 
   return (
@@ -102,7 +101,7 @@ export function CustomVisualizerClient() {
         right={
           mode === "visualize" ? (
             <>
-              {embedData && <EmbedDropdown embedUrl={embedData.url} iframeSnippet={embedData.snippet} />}
+              {embedUrl && <EmbedDropdown embedUrl={embedUrl} />}
               <button onClick={handleEdit} className={styles.editButton}>Edit</button>
             </>
           ) : undefined

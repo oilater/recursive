@@ -42,10 +42,10 @@ export function PlaygroundViewer({
         </div>
 
         <div className={styles.middlePanel}>
-          {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
           <div className={styles.variableSection}>
             <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
           </div>
+          {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
           <ResultPanel
             steps={result.steps}
             currentIndex={player.currentIndex}

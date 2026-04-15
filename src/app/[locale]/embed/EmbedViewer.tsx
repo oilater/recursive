@@ -5,7 +5,6 @@ import { useAlgorithmPlayer } from "@/player";
 import {
   StepperControls,
   VariablePanel,
-  CallStack,
   ResultPanel,
   CodePanel,
 } from "@/visualizer";
@@ -41,7 +40,6 @@ export function EmbedViewer({
         </div>
 
         <div className={styles.middlePanel}>
-          {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
           <div className={styles.variableSection}>
             <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
           </div>

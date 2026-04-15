@@ -6,7 +6,7 @@ import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { executeCustomCode, analyzeCode } from "@/engine";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
-import { buildEmbedUrl, buildIframeSnippet } from "@/shared/lib/embed-url";
+import { buildEmbedUrl } from "@/shared/lib/embed-url";
 import { Badge, Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { PresetViewer } from "./PresetViewer";
@@ -34,10 +34,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [paramNames, setParamNames] = useState<string[]>([]);
 
-  const embedData = useMemo(() => {
-    const url = buildEmbedUrl({ preset: preset.id });
-    return { url, snippet: buildIframeSnippet(url) };
-  }, [preset.id]);
+  const embedUrl = useMemo(() => buildEmbedUrl({ preset: preset.id }), [preset.id]);
 
   useEffect(
     function analyzePresetParams() {
@@ -88,7 +85,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
           <Badge variant={preset.difficulty}>{t(`difficulty.${preset.difficulty}`)}</Badge>
         </>
       }
-      right={<EmbedDropdown embedUrl={embedData.url} iframeSnippet={embedData.snippet} />}
+      right={<EmbedDropdown embedUrl={embedUrl} />}
     />
   );
 
