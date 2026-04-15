@@ -9,9 +9,9 @@ export const page = style({
 });
 
 export const hero = style({
-  marginBottom: vars.space.xxl,
+  marginBottom: vars.space.xl,
   paddingTop: vars.space.xxl,
-  paddingBottom: vars.space.lg,
+  paddingBottom: vars.space.md,
 });
 
 export const title = style({
@@ -36,76 +36,91 @@ export const titleWhite = style({
 export const subtitle = style({
   fontSize: "16px",
   color: vars.color.text,
-  opacity: 0.7,
+  opacity: 0.85,
   lineHeight: 1.7,
   maxWidth: "500px",
 });
 
-export const langNote = style({
-  fontSize: "16px",
+export const langRow = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginTop: vars.space.sm,
+});
+
+export const langBadge = style({
+  fontSize: vars.fontSize.xs,
+  color: "#4ade80",
+  fontFamily: vars.font.mono,
+  padding: `2px ${vars.space.sm}`,
+  backgroundColor: "rgba(74, 222, 128, 0.1)",
+  border: "1px solid rgba(74, 222, 128, 0.25)",
+  borderRadius: vars.radius.sm,
+});
+
+export const langList = style({
+  fontSize: vars.fontSize.xs,
   color: vars.color.text,
   opacity: 0.7,
-  lineHeight: 1.7,
-  marginTop: vars.space.xs,
+  fontFamily: vars.font.mono,
 });
 
-// ── Home cards ──
-
-export const cardGrid = style({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, 1fr)",
-  gap: vars.space.lg,
-  marginBottom: vars.space.xxl,
-  "@media": {
-    "(max-width: 640px)": {
-      gridTemplateColumns: "1fr",
-    },
-  },
+export const errorText = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.error,
+  fontFamily: vars.font.mono,
+  marginRight: "auto",
 });
 
-export const homeCard = style({
+// ── Home editor ──
+
+export const editorCard = style({
   display: "flex",
   flexDirection: "column",
-  padding: vars.space.lg,
-  borderRadius: vars.radius.lg,
+  borderRadius: "16px",
   border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.surface,
-  textDecoration: "none",
-  color: vars.color.text,
-  transition: "all 0.2s ease",
-  cursor: "pointer",
-  ":hover": {
-    borderColor: "#4ade80",
-    transform: "translateY(-2px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
-  },
-});
-
-export const homeCardIcon = style({
-  fontSize: "24px",
-  fontWeight: "700",
-  fontFamily: vars.font.mono,
-  marginBottom: vars.space.sm,
-  background: "linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-});
-
-export const homeCardTitle = style({
-  fontSize: vars.fontSize.lg,
-  fontWeight: "700",
-  marginBottom: vars.space.sm,
-  transition: "color 0.2s ease",
+  backgroundColor: vars.color.bg,
+  overflow: "hidden",
+  transition: "border-color 0.2s ease",
   selectors: {
-    [`${homeCard}:hover &`]: {
-      color: "#4ade80",
+    "&:focus-within": {
+      borderColor: "rgba(74, 222, 128, 0.4)",
+      boxShadow: "0 0 12px rgba(74, 222, 128, 0.15)",
     },
   },
 });
 
-export const homeCardDesc = style({
-  fontSize: vars.fontSize.sm,
-  color: vars.color.textMuted,
-  lineHeight: 1.6,
+export const actionBar = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  gap: vars.space.sm,
+  marginBottom: vars.space.md,
 });
 
+export const runButton = style({
+  padding: `${vars.space.sm} ${vars.space.xl}`,
+  background: "linear-gradient(135deg, #4ade80, #22d3ee)",
+  color: "#0a0a0a",
+  borderRadius: "20px",
+  fontSize: vars.fontSize.sm,
+  fontWeight: "700",
+  whiteSpace: "nowrap",
+  transition: "all 0.15s ease",
+  flexShrink: 0,
+  ":hover": {
+    opacity: 0.9,
+  },
+  selectors: {
+    "&:disabled": {
+      opacity: 0.3,
+      cursor: "not-allowed",
+    },
+  },
+});
+
+export const editorBody = style({
+  height: "350px",
+  overflow: "auto",
+  cursor: "text",
+});

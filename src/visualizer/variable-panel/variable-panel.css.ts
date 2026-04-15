@@ -8,7 +8,7 @@ export const title = panelTitle;
 
 export const row = style({
   display: "flex",
-  alignItems: "center",
+  alignItems: "flex-start",
   gap: vars.space.sm,
   padding: `${vars.space.xs} 0`,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -23,6 +23,7 @@ export const varName = style({
   fontFamily: vars.font.mono,
   minWidth: "70px",
   flexShrink: 0,
+  paddingTop: "4px",
 });
 
 export const varValue = style({
@@ -30,12 +31,6 @@ export const varValue = style({
   color: vars.color.text,
   fontFamily: vars.font.mono,
   wordBreak: "break-all",
-});
-
-export const arrayContainer = style({
-  display: "flex",
-  gap: "2px",
-  flexWrap: "wrap",
 });
 
 export const rowChanged = style([
@@ -48,16 +43,51 @@ export const rowChanged = style([
   },
 ]);
 
-export const arrayItem = style({
+// ── Grid (1D array) ──
+
+export const grid = style({
+  display: "flex",
+  gap: "2px",
+  flexWrap: "wrap",
+});
+
+// ── Grid (2D array) ──
+
+export const grid2d = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+});
+
+export const gridRow = style({
+  display: "flex",
+  gap: "2px",
+});
+
+// ── Cell ──
+
+export const cell = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  minWidth: "28px",
-  height: "28px",
+  minWidth: "32px",
+  height: "32px",
   padding: `0 ${vars.space.xs}`,
   backgroundColor: vars.color.surfaceAlt,
+  border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   fontSize: vars.fontSize.sm,
   fontFamily: vars.font.mono,
   color: vars.color.text,
+  transition: "all 0.2s ease",
 });
+
+export const cellChanged = style([
+  cell,
+  {
+    backgroundColor: "rgba(251, 191, 36, 0.15)",
+    borderColor: "#fbbf24",
+    color: "#fbbf24",
+    fontWeight: 600,
+  },
+]);

@@ -20,9 +20,20 @@ export const editorRoot = style({
 globalStyle(`${editorRoot} .cm-editor`, {
   flex: 1,
   height: "100%",
+  backgroundColor: "transparent !important",
 });
 
 globalStyle(`${editorRoot} .cm-scroller`, {
   overflow: "auto",
   paddingTop: vars.space.sm,
+  backgroundColor: "transparent !important",
+});
+
+globalStyle(`${editorRoot} .cm-gutters`, {
+  backgroundColor: "transparent !important",
+});
+
+globalStyle(`${editorRoot} .cm-placeholder`, {
+  color: vars.color.text,
+  opacity: 0.4,
 });

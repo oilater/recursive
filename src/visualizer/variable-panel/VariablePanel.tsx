@@ -20,7 +20,58 @@ function didChange(prev: unknown, curr: unknown): boolean {
   return JSON.stringify(prev) !== JSON.stringify(curr);
 }
 
-function renderValue(value: unknown, changed: boolean): React.ReactNode {
+function cellChanged(prevArr: unknown, currArr: unknown[], index: number): boolean {
+  if (!Array.isArray(prevArr)) return true;
+  if (index >= prevArr.length) return true;
+  return JSON.stringify(prevArr[index]) !== JSON.stringify(currArr[index]);
+}
+
+function cell2dChanged(prevArr: unknown, row: number, col: number, value: unknown): boolean {
+  if (!Array.isArray(prevArr)) return true;
+  if (row >= prevArr.length) return true;
+  const prevRow = prevArr[row];
+  if (!Array.isArray(prevRow)) return true;
+  if (col >= prevRow.length) return true;
+  return JSON.stringify(prevRow[col]) !== JSON.stringify(value);
+}
+
+function renderGrid1D(value: unknown[], prevValue: unknown): React.ReactNode {
+  return (
+    <div className={styles.grid}>
+      {value.map((item, i) => (
+        <span
+          key={i}
+          className={cellChanged(prevValue, value, i) ? styles.cellChanged : styles.cell}
+        >
+          {String(item)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function renderGrid2D(value: unknown[][], prevValue: unknown): React.ReactNode {
+  return (
+    <div className={styles.grid2d}>
+      {value.map((row, r) => (
+        <div key={r} className={styles.gridRow}>
+          {Array.isArray(row) ? row.map((item, c) => (
+            <span
+              key={c}
+              className={cell2dChanged(prevValue, r, c, item) ? styles.cellChanged : styles.cell}
+            >
+              {String(item)}
+            </span>
+          )) : (
+            <span className={styles.cell}>{String(row)}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderValue(value: unknown, changed: boolean, prevValue?: unknown): React.ReactNode {
   const changeStyle = changed
     ? { outline: "1.5px solid #fbbf24", outlineOffset: "1px", borderRadius: "4px" }
     : undefined;
@@ -34,26 +85,10 @@ function renderValue(value: unknown, changed: boolean): React.ReactNode {
       );
 
     if (Array.isArray(value[0])) {
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "2px", ...changeStyle }}>
-          {(value as unknown[][]).map((row, i) => (
-            <span key={i} className={styles.arrayItem} style={{ width: "auto" }}>
-              [{Array.isArray(row) ? row.join(", ") : String(row)}]
-            </span>
-          ))}
-        </div>
-      );
+      return renderGrid2D(value as unknown[][], prevValue);
     }
 
-    return (
-      <div className={styles.arrayContainer} style={changeStyle}>
-        {value.map((item, i) => (
-          <span key={i} className={styles.arrayItem}>
-            {String(item)}
-          </span>
-        ))}
-      </div>
-    );
+    return renderGrid1D(value, prevValue);
   }
 
   if (typeof value === "boolean") {
@@ -96,15 +131,8 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
         const changed = prevStep !== undefined && didChange(prevVars[key], value);
         return (
           <div key={key} className={changed ? styles.rowChanged : styles.row}>
-            <span className={styles.varName}>
-              {key}
-              {changed && (
-                <span style={{ color: "#fbbf24", marginLeft: "4px", fontSize: "9px" }}>
-                  changed
-                </span>
-              )}
-            </span>
-            {renderValue(value, changed)}
+            <span className={styles.varName}>{key}</span>
+            {renderValue(value, changed, prevVars[key])}
           </div>
         );
       })}

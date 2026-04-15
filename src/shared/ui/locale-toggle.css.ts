@@ -12,9 +12,6 @@ export const trigger = style({
   borderRadius: "6px",
   fontSize: vars.fontSize.md,
   cursor: "pointer",
-  ":hover": {
-    backgroundColor: vars.color.surfaceHover,
-  },
 });
 
 export const dropdown = style({

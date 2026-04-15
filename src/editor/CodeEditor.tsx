@@ -40,7 +40,8 @@ export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProp
         basicSetup={{
           lineNumbers: true,
           foldGutter: false,
-          highlightActiveLine: !readOnly,
+          highlightActiveLine: false,
+          highlightActiveLineGutter: false,
           bracketMatching: true,
           closeBrackets: true,
           autocompletion: false,

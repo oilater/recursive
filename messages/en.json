@@ -1,6 +1,6 @@
 {
   "home": {
-    "subtitle": "Visualize your code line by line and learn algorithms intuitively.",
+    "subtitle": "Watch your code run, step by step and learn algorithms intuitively.",
     "langNote": "Supports JavaScript and TypeScript.",
     "playground": "Playground",
     "playgroundDesc": "Paste algorithm code or write your own.",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
@@ -33,16 +33,30 @@ const INITIAL_EXEC: ExecState = {
   codeHtml: "",
 };
 
-export function CustomVisualizerClient() {
+interface CustomVisualizerClientProps {
+  initialCode?: string;
+  initialArgs?: unknown[];
+}
+
+export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisualizerClientProps) {
   const t = useTranslations();
-  const [code, setCode] = useState("");
-  const [mode, setMode] = useState<Mode>("edit");
+  const [code, setCode] = useState(initialCode ?? "");
+  const [mode, setMode] = useState<Mode>(initialCode ? "loading" : "edit");
   const [error, setError] = useState<string | null>(null);
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
-  const codeRef = useRef("");
-  const lastArgsRef = useRef<unknown[]>([]);
+  const codeRef = useRef(initialCode ?? "");
+  const lastArgsRef = useRef<unknown[]>(initialArgs ?? []);
+
+  useEffect(
+    function autoExecuteFromUrl() {
+      if (initialCode) {
+        handleExecute(initialArgs ?? []);
+      }
+    },
+    [],
+  );
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);

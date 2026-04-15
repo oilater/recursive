@@ -1,37 +1,27 @@
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { Header } from "@/shared/ui";
+import { HomeEditor } from "./HomeEditor";
 import * as styles from "./home.css";
 
 export default function Home() {
-  const t = useTranslations("home");
+  const t = useTranslations();
 
   return (
     <main className={styles.page}>
       <Header />
       <div className={styles.hero}>
         <h1 className={styles.title}>
-          Visualize your code,<br />
-          <span className={styles.titleWhite}>learn intuitively.</span>
+          Watch your code run,<br />
+          <span className={styles.titleWhite}>step by step.</span>
         </h1>
-        <p className={styles.subtitle}>{t("subtitle")}</p>
-        <p className={styles.langNote}>{t("langNote")}</p>
+        <p className={styles.subtitle}>{t("home.subtitle")}</p>
+        <div className={styles.langRow}>
+          <span className={styles.langBadge}>{t("custom.langLabel")}</span>
+          <span className={styles.langList}>JavaScript, TypeScript</span>
+        </div>
       </div>
 
-      <div className={styles.cardGrid}>
-        <Link href="/visualize/playground" className={styles.homeCard}>
-          <div className={styles.homeCardIcon}>{"</>"}</div>
-          <div className={styles.homeCardTitle}>{t("playground")}</div>
-          <div className={styles.homeCardDesc}>{t("playgroundDesc")}</div>
-        </Link>
-
-        <Link href="/algorithms" className={styles.homeCard}>
-          <div className={styles.homeCardIcon}>▷</div>
-          <div className={styles.homeCardTitle}>{t("algorithms")}</div>
-          <div className={styles.homeCardDesc}>{t("algorithmsDesc")}</div>
-        </Link>
-      </div>
-
+      <HomeEditor />
     </main>
   );
 }

@@ -66,9 +66,9 @@ export const navLink = style({
   fontSize: vars.fontSize.md,
   color: vars.color.text,
   textDecoration: "none",
-  borderRadius: "6px",
+  transition: "color 0.15s ease",
   ":hover": {
-    backgroundColor: vars.color.surfaceHover,
+    color: "#4ade80",
   },
 });
 
@@ -119,8 +119,9 @@ export const mobileMenuLink = style({
   fontSize: vars.fontSize.md,
   color: vars.color.text,
   textDecoration: "none",
+  transition: "color 0.15s ease",
   ":hover": {
-    backgroundColor: vars.color.surfaceAlt,
+    color: "#4ade80",
   },
 });
 

@@ -17,15 +17,20 @@ export const links = style({
 });
 
 globalStyle(`${links} a`, {
-  color: vars.color.textSubtle,
+  color: vars.color.textMuted,
   textDecoration: "none",
+  transition: "color 0.15s ease",
+});
+
+globalStyle(`${links} a:hover`, {
+  color: "#4ade80",
 });
 
 export const dot = style({
-  color: vars.color.borderLight,
+  color: vars.color.textMuted,
 });
 
 export const copy = style({
   fontSize: vars.fontSize.xs,
-  color: vars.color.textFaint,
+  color: vars.color.textMuted,
 });

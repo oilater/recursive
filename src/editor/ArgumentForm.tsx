@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useState, useImperativeHandle, forwardRef } from "react";
 import { useTranslations } from "next-intl";
 import { safeJsonParse } from "@/shared/lib/validate";
 import * as styles from "./argument-form.css";
@@ -30,19 +30,6 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
   ref,
 ) {
   const t = useTranslations("editor");
-  const firstInputRef = useRef<HTMLInputElement>(null);
-  const prevParamCount = useRef(paramNames.length);
-
-  useEffect(
-    function focusOnNewParams() {
-      if (prevParamCount.current === 0 && paramNames.length > 0) {
-        firstInputRef.current?.focus();
-      }
-      prevParamCount.current = paramNames.length;
-    },
-    [paramNames.length],
-  );
-
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const name of paramNames) initial[name] = "";
@@ -79,7 +66,6 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
             </span>
             <span className={styles.equals}>=</span>
             <input
-              ref={i === 0 ? firstInputRef : undefined}
               className={styles.input}
               value={values[name] || ""}
               onChange={(e) => updateField(name, e.target.value)}
