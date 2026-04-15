@@ -6,8 +6,6 @@ import { ENTRY_FUNC_NAME } from "./constants";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
-// ── AST 유틸 ──
-
 function walkAst(node: AstNode, visitor: (n: AstNode) => boolean | void): void {
   if (!node || typeof node !== "object") return;
   if (visitor(node) === true) return; // true = stop
@@ -42,8 +40,6 @@ function collectInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNod
 
 const lineOf = (node: AstNode): number => node?.loc?.start?.line ?? 0;
 
-// ── 함수/변수 탐지 ──
-
 interface FuncInfo {
   name: string;
   params: string[];
@@ -61,7 +57,6 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
-/** 함수 노드 내부의 주요 변수명 추출 (선언 + 명명 함수 파라미터. 콜백 파라미터 제외) */
 function extractLocalVarNames(funcNode: AstNode): string[] {
   const names = new Set<string>();
 
@@ -126,8 +121,6 @@ function findAllFunctions(ast: AstNode): FuncInfo[] {
 
   return results;
 }
-
-// ── 메인 분석 ──
 
 export interface AnalyzeCodeResult {
   analysis: AnalysisResult;

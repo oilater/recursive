@@ -25,7 +25,6 @@ export const codeWrapper = style({
   padding: `${vars.space.xs} 0`,
 });
 
-// Shiki 출력 초기화: pre, code, span 모두 여백 제거
 globalStyle(`${container} pre`, {
   margin: 0,
   padding: 0,

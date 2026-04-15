@@ -76,13 +76,10 @@ self.onmessage = function(e) {
       }
     }
 
-    // 원본 코드의 라인 수 (래핑 전)
     var originalLineCount = data.originalLineCount || 9999;
 
-    // ── 라인 추적 (모든 코드에서 동작) ──
     function __traceLine(line, varsSnapshot) {
       var correctedLine = line - lineOffset;
-      // 원본 코드 범위 밖이면 무시 (삽입된 코드)
       if (correctedLine < 1 || correctedLine > originalLineCount) return;
 
       var currentNodeId = callStack.length > 0 ? callStack[callStack.length - 1].nodeId : rootNode.id;
@@ -108,7 +105,6 @@ self.onmessage = function(e) {
       });
     }
 
-    // ── 재귀 Proxy: 트리 빌드 + callStack 관리만. 코드 라인 step은 __traceLine이 담당. ──
     function __createProxy(originalFunc) {
       if (!hasRecursion) return originalFunc;
 
@@ -136,7 +132,6 @@ self.onmessage = function(e) {
 
           callStack.push({ nodeId: nodeId, node: node });
 
-          // 함수 선언부 하이라이트 (진입 표시) — 이전 step의 변수 + 파라미터 합침
           var entryLine = Math.max(1, funcStartLine - lineOffset);
           if (entryLine >= 1 && entryLine <= originalLineCount) {
             var prevVars = steps.length > 0 ? Object.assign({}, steps[steps.length - 1].variables) : {};
@@ -170,7 +165,6 @@ self.onmessage = function(e) {
       });
     }
 
-    // console.log 캡처 — 각 로그를 직전 stepId에 연결
     var consoleLogs = [];
     var fakeConsole = {
       log: function() {

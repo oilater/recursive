@@ -22,7 +22,6 @@ export function ResultPanel({
   finalReturnValue,
   consoleLogs,
 }: ResultPanelProps) {
-  // 프리셋: "결과에 [...] 추가" 패턴
   const allPresetResults = useMemo(() => {
     const results: { value: string; stepIdx: number }[] = [];
     for (const step of steps) {

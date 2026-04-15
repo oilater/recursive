@@ -18,29 +18,39 @@ import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/posthog";
+
 import { Header } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import * as styles from "./custom-page.css";
 
-const DEFAULT_CODE = "";
-
 type Mode = "edit" | "loading" | "visualize" | "error";
+
+interface ExecState {
+  result: StepGeneratorResult | null;
+  finalReturnValue: unknown;
+  hasRecursion: boolean;
+  consoleLogs: Array<{ text: string; stepIdx: number }>;
+  codeHtml: string;
+}
+
+const INITIAL_EXEC: ExecState = {
+  result: null,
+  finalReturnValue: undefined,
+  hasRecursion: true,
+  consoleLogs: [],
+  codeHtml: "",
+};
 
 export function CustomVisualizerClient() {
   const t = useTranslations();
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const [code, setCode] = useState("");
   const [mode, setMode] = useState<Mode>("edit");
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<StepGeneratorResult | null>(null);
-  const [finalReturnValue, setFinalReturnValue] = useState<unknown>(undefined);
-  const [hasRecursion, setHasRecursion] = useState(true);
-  const [consoleLogs, setConsoleLogs] = useState<Array<{ text: string; stepIdx: number }>>([]);
-  const [codeHtml, setCodeHtml] = useState<string>("");
+  const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
-  const argsRef = useRef<unknown[]>([]);
   const argFormRef = useRef<ArgumentFormHandle>(null);
 
-  const player = useAlgorithmPlayer(result?.steps ?? []);
+  const player = useAlgorithmPlayer(exec.result?.steps ?? []);
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
@@ -51,18 +61,21 @@ export function CustomVisualizerClient() {
   };
 
   const handleExecute = async (args: unknown[]) => {
-    argsRef.current = args;
     setMode("loading");
     setError(null);
     try {
       const cleanCode = normalizeCode(code);
-      const execResult = await executeCustomCode(cleanCode, args);
-      setResult(execResult.result);
-      setFinalReturnValue(execResult.finalReturnValue);
-      setHasRecursion(execResult.analysis.hasRecursion);
-      setConsoleLogs(execResult.consoleLogs ?? []);
-      const html = await highlightCode(cleanCode);
-      setCodeHtml(html);
+      const [execResult, html] = await Promise.all([
+        executeCustomCode(cleanCode, args),
+        highlightCode(cleanCode),
+      ]);
+      setExec({
+        result: execResult.result,
+        finalReturnValue: execResult.finalReturnValue,
+        hasRecursion: execResult.analysis.hasRecursion,
+        consoleLogs: execResult.consoleLogs ?? [],
+        codeHtml: html,
+      });
       setMode("visualize");
       trackEvent("code_executed", {
         source: "playground",
@@ -78,7 +91,7 @@ export function CustomVisualizerClient() {
 
   const handleEdit = () => {
     setMode("edit");
-    setResult(null);
+    setExec(INITIAL_EXEC);
     setError(null);
   };
 
@@ -118,37 +131,37 @@ export function CustomVisualizerClient() {
 
       {mode === "loading" && <div className={styles.loadingOverlay}>{t("custom.running")}</div>}
 
-      {mode === "visualize" && result && (
+      {mode === "visualize" && exec.result && (
         <div className={styles.vizContainer}>
           <div className={styles.vizRow}>
             <div className={styles.leftPanel}>
               <div className={styles.codeSection}>
-                <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
+                <CodePanel html={exec.codeHtml} activeLine={player.currentStep?.codeLine} />
               </div>
             </div>
 
             <div className={styles.middlePanel}>
-              {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
+              {exec.hasRecursion && <CallStack currentStep={player.currentStep} tree={exec.result.tree} />}
               <div className={styles.variableSection}>
                 <VariablePanel
                   currentStep={player.currentStep}
                   prevStep={
-                    player.currentIndex > 0 ? result.steps[player.currentIndex - 1] : undefined
+                    player.currentIndex > 0 ? exec.result.steps[player.currentIndex - 1] : undefined
                   }
                 />
               </div>
               <ResultPanel
-                steps={result.steps}
+                steps={exec.result.steps}
                 currentIndex={player.currentIndex}
-                finalReturnValue={finalReturnValue}
-                consoleLogs={consoleLogs}
+                finalReturnValue={exec.finalReturnValue}
+                consoleLogs={exec.consoleLogs}
               />
             </div>
 
-            {hasRecursion && (
+            {exec.hasRecursion && (
               <div className={styles.rightPanel}>
                 <div className={styles.treeSection}>
-                  <TreeView tree={result.tree} currentStep={player.currentStep} />
+                  <TreeView tree={exec.result.tree} currentStep={player.currentStep} />
                 </div>
               </div>
             )}

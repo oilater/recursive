@@ -1,4 +1,4 @@
-import { style, globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 
 export const page = style({
@@ -101,34 +101,3 @@ export const homeCardDesc = style({
   lineHeight: 1.6,
 });
 
-// ── Footer ──
-
-export const footer = style({
-  textAlign: "center",
-  paddingTop: vars.space.xxl,
-  paddingBottom: vars.space.lg,
-  borderTop: `1px solid ${vars.color.border}`,
-  marginTop: vars.space.xl,
-});
-
-export const footerLinks = style({
-  display: "flex",
-  justifyContent: "center",
-  gap: vars.space.md,
-  marginBottom: vars.space.sm,
-  fontSize: vars.fontSize.sm,
-});
-
-globalStyle(`${footerLinks} a`, {
-  color: vars.color.textSubtle,
-  textDecoration: "none",
-});
-
-export const footerDot = style({
-  color: vars.color.borderLight,
-});
-
-export const footerCopy = style({
-  fontSize: vars.fontSize.xs,
-  color: vars.color.textFaint,
-});

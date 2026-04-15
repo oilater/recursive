@@ -11,7 +11,6 @@ export const loadingBox = style({
   fontSize: vars.fontSize.md,
 });
 
-// CodeMirror 에디터가 부모 높이를 100% 채우도록
 export const editorRoot = style({
   height: "100%",
   display: "flex",

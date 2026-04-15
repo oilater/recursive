@@ -34,7 +34,6 @@ function renderValue(value: unknown, changed: boolean): React.ReactNode {
       );
 
     if (Array.isArray(value[0])) {
-      // 일반 2D 배열: 각 행을 문자열로 표시
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "2px", ...changeStyle }}>
           {(value as unknown[][]).map((row, i) => (
