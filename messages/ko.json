@@ -132,6 +132,7 @@
     "tip4Js": "JavaScript / TypeScript는 타입이 자동으로 제거되고, Math, JSON, Array 메서드 등 내장 API도 그대로 쓸 수 있어요.",
     "limitsTitle": "현재 지원하지 않는 것들",
     "limit6": "Java, C, C++ 등은 브라우저에서 직접 실행할 수 없어서 별도 서버가 필요해요. 현재는 서버 없이 운영 중이라 아직 지원하지 않아요.",
+    "limit7": "여러 줄에 걸친 입력값(stdin 방식)은 현재 지원하지 않아요. 함수의 매개변수로 값을 전달하는 방식만 가능해요.",
     "limit1": "비동기 코드 (setTimeout, Promise, async/await)는 아직 지원하지 않아요.",
     "limit2": "JavaScript에서 class는 아직 지원하지 않아요.",
     "limit3": "재귀 호출은 최대 1,000회, 실행 스텝은 최대 10,000개까지예요.",

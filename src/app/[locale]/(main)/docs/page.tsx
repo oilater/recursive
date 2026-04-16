@@ -147,6 +147,7 @@ export default async function DocsPage() {
           <li>{t("limit4")}</li>
           <li>{t("limit5")}</li>
           <li>{t("limit6")}</li>
+          <li>{t("limit7")}</li>
         </ul>
       </section>
 

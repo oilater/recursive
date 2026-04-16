@@ -132,6 +132,7 @@
     "tip4Js": "JavaScript / TypeScript types are stripped automatically. Built-in APIs like Math, JSON, and Array methods all work.",
     "limitsTitle": "Not supported yet",
     "limit6": "Java, C, C++ and others can't run directly in the browser and require a separate server. Since the project currently runs without a server, these languages are not supported yet.",
+    "limit7": "Multi-line input (e.g. stdin-style input like on competitive programming sites) is not supported. Values can only be passed as function parameters.",
     "limit1": "Async code (setTimeout, Promise, async/await) isn't supported yet.",
     "limit2": "JavaScript class syntax doesn't work yet.",
     "limit3": "Max 1,000 recursive calls and 10,000 execution steps.",
