@@ -20,6 +20,13 @@ async function initialize() {
   try {
     pyodide = await loadPyodide({ indexURL: "${PYODIDE_CDN}" });
 
+    // Disable network APIs after Pyodide is loaded
+    self.importScripts = undefined;
+    self.fetch = undefined;
+    self.XMLHttpRequest = undefined;
+    self.WebSocket = undefined;
+    self.EventSource = undefined;
+
     // Remove dangerous modules
     pyodide.runPython(\`
 import sys

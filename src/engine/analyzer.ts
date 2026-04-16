@@ -138,7 +138,7 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
       locations: true,
     });
   } catch (e: unknown) {
-    throw new Error(`구문 오류: ${e instanceof Error ? e.message : String(e)}`);
+    throw new Error(`Syntax error: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   const originalFunctions = findAllFunctions(originalAst);

@@ -4,6 +4,8 @@ export function buildWorkerCode(): string {
 self.fetch = undefined;
 self.XMLHttpRequest = undefined;
 self.importScripts = undefined;
+self.WebSocket = undefined;
+self.EventSource = undefined;
 
 self.onmessage = function(e) {
   var data = e.data;
@@ -72,7 +74,7 @@ self.onmessage = function(e) {
     function __guard() {
       loopCount++;
       if (loopCount > maxLoopIterations) {
-        throw new Error('루프 반복 횟수가 ' + maxLoopIterations + '회를 초과했습니다');
+        throw new Error('Loop iteration limit exceeded (' + maxLoopIterations + ').');
       }
     }
 

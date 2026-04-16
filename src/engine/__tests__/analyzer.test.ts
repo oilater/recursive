@@ -93,8 +93,8 @@ describe("analyzeCode", () => {
     expect(analysis.recursiveFuncName).toBe("factorial");
   });
 
-  it("구문 오류를 던진다", () => {
-    expect(() => analyzeCode("function {{{")).toThrow("구문 오류");
+  it("throws syntax error", () => {
+    expect(() => analyzeCode("function {{{")).toThrow("Syntax error");
   });
 
   it("로컬 변수를 추출한다", () => {

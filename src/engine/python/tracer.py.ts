@@ -211,7 +211,25 @@ def _run_traced(source, args_list):
         text = " ".join(str(x) for x in a)
         console_logs.append({"text": text, "stepIdx": max(0, _step_id - 1)})
 
-    exec_globals = {"print": _captured_print, "__builtins__": __builtins__}
+    _safe_builtins = {
+        k: v for k, v in __builtins__.items()
+        if k not in (
+            "open", "eval", "exec", "compile", "__import__",
+            "globals", "locals", "breakpoint", "exit", "quit",
+            "input", "help", "copyright", "credits", "license",
+        )
+    } if isinstance(__builtins__, dict) else {
+        k: getattr(__builtins__, k) for k in dir(__builtins__)
+        if k not in (
+            "open", "eval", "exec", "compile", "__import__",
+            "globals", "locals", "breakpoint", "exit", "quit",
+            "input", "help", "copyright", "credits", "license",
+        ) and not k.startswith("_")
+    }
+    _safe_builtins["print"] = _captured_print
+    _safe_builtins["__build_class__"] = __builtins__.__build_class__ if hasattr(__builtins__, "__build_class__") else __builtins__["__build_class__"]
+
+    exec_globals = {"__builtins__": _safe_builtins}
 
     user_code = compile(source, "<user>", "exec")
     final_return = None
