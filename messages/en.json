@@ -36,6 +36,8 @@
     "running": "Running..."
   },
   "editor": {
+    "defaultLang": "default",
+    "setDefault": "Set as default",
     "loading": "Loading editor...",
     "placeholder": "Paste or write your code here",
     "inputPlaceholder": "Enter value"

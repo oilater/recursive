@@ -36,6 +36,8 @@
     "running": "실행 중..."
   },
   "editor": {
+    "defaultLang": "default",
+    "setDefault": "기본 언어로 설정",
     "loading": "에디터 로딩 중...",
     "placeholder": "여기에 코드를 작성해보세요",
     "inputPlaceholder": "값을 입력하세요"

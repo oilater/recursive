@@ -1,6 +1,12 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 
+export const wrapper = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.md,
+});
+
 export const container = style({
   display: "flex",
   gap: "4px",
@@ -33,3 +39,21 @@ export const buttonActive = style({
   color: "#4ade80",
   fontWeight: 600,
 });
+
+export const defaultTag = style({
+  fontWeight: 400,
+  opacity: 0.7,
+});
+
+export const defaultButton = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  backgroundColor: "transparent",
+  border: "none",
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  ":hover": {
+    color: vars.color.text,
+  },
+});
+

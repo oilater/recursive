@@ -8,14 +8,14 @@ import type { ArgumentFormHandle } from "@/editor";
 import { analyzeCode, analyzePythonCode, executeCode } from "@/engine";
 import type { Language } from "@/engine";
 import { normalizeCode } from "@/shared/lib/normalize-code";
-import { LanguageSelect } from "@/shared/ui";
+import { LanguageSelect, getDefaultLanguage } from "@/shared/ui/LanguageSelect";
 import * as styles from "./home.css";
 
 export function HomeEditor() {
   const t = useTranslations();
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState<Language>("python");
+  const [language, setLanguage] = useState<Language>(getDefaultLanguage);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
