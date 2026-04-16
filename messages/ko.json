@@ -1,6 +1,7 @@
 {
   "home": {
     "subtitle": "코드의 실행 흐름을 한 줄씩 시각화하고, 알고리즘을 직관적으로 학습하세요.",
+    "docsGuide": "30초 가이드 보러가기 →",
     "langNote": "JavaScript, TypeScript를 지원해요.",
     "playground": "플레이그라운드",
     "playgroundDesc": "알고리즘 코드를 붙여넣거나, 직접 코드를 작성해보세요.",
@@ -40,7 +41,7 @@
     "defaultLang": "default",
     "setDefault": "기본 언어로 설정",
     "loading": "에디터 로딩 중...",
-    "placeholder": "여기에 코드를 작성해보세요",
+    "placeholder": "알고리즘 코드를 붙여넣거나 직접 작성해보세요",
     "inputPlaceholder": "값을 입력하세요"
   },
   "difficulty": {
@@ -116,6 +117,7 @@
     "embedDesc3": "프리셋 페이지에서 Embed 버튼을 누르면 바로 복사할 수 있어요.",
     "heroTitle": "Recursive 30초 가이드",
     "heroStar": "도움이 되셨다면 <link>GitHub ⭐</link> 한번씩 부탁드립니다!",
+    "heroSponsor": "<link>후원</link>은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 됩니다.",
     "tip1Title": "알고리즘 풀이를 그대로 붙여넣어보세요",
     "tip1Desc": "풀이 코드를 함수째로 그대로 붙여넣으면 돼요. 주석이 있어도 괜찮고, 매개변수는 자동으로 감지돼요. 입력 필드가 나타나면 원하는 값을 넣고 실행해보세요.",
     "tip1InputExample": "입력 예시",
@@ -129,14 +131,23 @@
     "tip4Python": "Python은 표준 라이브러리를 자유롭게 쓸 수 있어요 (collections, functools, itertools 등).",
     "tip4Js": "JavaScript / TypeScript는 타입이 자동으로 제거되고, Math, JSON, Array 메서드 등 내장 API도 그대로 쓸 수 있어요.",
     "limitsTitle": "현재 지원하지 않는 것들",
-    "limit6": "Java, C, C++ 등은 서버가 필요해서 아직 지원하지 않아요.",
+    "limit6": "Java, C, C++ 등은 브라우저에서 직접 실행할 수 없어서 별도 서버가 필요해요. 현재는 서버 없이 운영 중이라 아직 지원하지 않아요.",
     "limit1": "비동기 코드 (setTimeout, Promise, async/await)는 아직 지원하지 않아요.",
     "limit2": "JavaScript에서 class는 아직 지원하지 않아요.",
     "limit3": "재귀 호출은 최대 1,000회, 실행 스텝은 최대 10,000개까지예요.",
     "limit4": "Python은 표준 라이브러리만 사용할 수 있어요. numpy, pandas 같은 외부 패키지는 지원하지 않아요.",
     "limit5": "너무 큰 입력값을 넣으면 실행이 중단될 수 있어요. 적당한 크기로 테스트해주세요.",
     "tip6Title": "피드백은 언제든 환영해요",
-    "tip6Desc": "기능 제안이나 이슈 제보는 언제나 환영해요. <link>GitHub Issues</link>에 남겨주세요. PR로 직접 기여하실 수도 있어요."
+    "tip6Desc": "기능 제안이나 이슈 제보는 언제나 환영해요. <link>GitHub Issues</link>에 남겨주세요. PR로 직접 기여하실 수도 있어요.",
+    "tip7Title": "후원도 언제든 환영해요",
+    "tip7Desc": "<link>후원</link>은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 됩니다.",
+    "changelogTitle": "업데이트 로그",
+    "changelogDesc": "Issue 기반으로 기능을 개선하고 있어요.",
+    "changelog1": "재귀 호출 트리에서 마우스 드래그로 패닝 기능 추가",
+    "changelog2": "Python 지원 추가",
+    "changelog3": "임베드 기능 추가 (블로그, Notion, Obsidian 등)",
+    "changelog4": "다국어 지원 (한국어 / 영어)",
+    "changelog5": "문서 페이지 추가"
   },
   "metadata": {
     "title": "Recursive - 알고리즘을 시각화하세요",

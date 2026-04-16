@@ -68,6 +68,14 @@ export default async function DocsPage() {
               </a>
             ),
           })}
+          <br />
+          {t.rich("heroSponsor", {
+            link: (chunks) => (
+              <a href="https://github.com/sponsors/oilater" target="_blank" rel="noopener noreferrer" className={styles.githubLink}>
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
       </div>
 
@@ -144,6 +152,22 @@ export default async function DocsPage() {
             ),
           })}
         </p>
+      </section>
+
+      {/* 업데이트 로그 */}
+      <div className={styles.changelogSection}>
+        <h1 className={styles.heroTitle}>{t("changelogTitle")}</h1>
+        <p className={styles.heroSubtitle}>{t("changelogDesc")}</p>
+      </div>
+
+      <section className={styles.section}>
+        <ul className={styles.list}>
+          <li>{t("changelog1")} (<a href="https://github.com/oilater/recursive/issues/1" target="_blank" rel="noopener noreferrer" className={styles.issueLink}>Issue #1</a>)</li>
+          <li>{t("changelog2")}</li>
+          <li>{t("changelog3")}</li>
+          <li>{t("changelog4")}</li>
+          <li>{t("changelog5")}</li>
+        </ul>
       </section>
     </main>
   );

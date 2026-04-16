@@ -15,7 +15,11 @@ export function HomeEditor() {
   const t = useTranslations();
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState<Language>(getDefaultLanguage);
+  const [language, setLanguage] = useState<Language>("python");
+
+  useEffect(() => {
+    setLanguage(getDefaultLanguage());
+  }, []);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);

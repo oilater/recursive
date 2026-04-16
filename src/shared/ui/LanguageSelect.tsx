@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState as useReactState } from "react";
+import { useCallback, useEffect, useState as useReactState } from "react";
 import { useTranslations } from "next-intl";
 import type { Language } from "@/engine";
 import { ensurePyodideWorker } from "@/engine";
@@ -26,8 +26,12 @@ export function getDefaultLanguage(): Language {
 
 export function LanguageSelect({ value, onChange }: LanguageSelectProps) {
   const t = useTranslations("editor");
-  const [defaultLang, setDefaultLang] = useReactState(() => getDefaultLanguage());
+  const [defaultLang, setDefaultLang] = useReactState<Language>("python");
   const showSetDefault = value !== defaultLang;
+
+  useEffect(() => {
+    setDefaultLang(getDefaultLanguage());
+  }, []);
 
   const handleSetDefault = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, value);

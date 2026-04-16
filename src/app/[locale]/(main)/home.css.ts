@@ -41,6 +41,31 @@ export const subtitle = style({
   maxWidth: "500px",
 });
 
+export const docsGuide = style({
+  fontSize: "16px",
+  color: vars.color.text,
+  opacity: 0.85,
+  lineHeight: 1.7,
+  maxWidth: "500px",
+  marginTop: vars.space.xs,
+});
+
+export const docsGuideCenter = style({
+  textAlign: "right",
+  marginTop: vars.space.sm,
+});
+
+export const docsLink = style({
+  fontSize: "16px",
+  color: vars.color.text,
+  opacity: 0.85,
+  textDecoration: "none",
+  ":hover": {
+    color: "#4ade80",
+    opacity: 1,
+  },
+});
+
 export const langRow = style({
   display: "flex",
   alignItems: "center",

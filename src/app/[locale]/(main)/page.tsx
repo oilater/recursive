@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Header } from "@/shared/ui";
+import { Link } from "@/i18n/navigation";
 import { HomeEditor } from "./HomeEditor";
 import * as styles from "./home.css";
 
@@ -15,6 +16,9 @@ export default function Home() {
           <span className={styles.titleWhite}>step by step.</span>
         </h1>
         <p className={styles.subtitle}>{t("home.subtitle")}</p>
+        <Link href="/docs" className={styles.docsLink}>
+          {t("home.docsGuide")}
+        </Link>
       </div>
 
       <HomeEditor />

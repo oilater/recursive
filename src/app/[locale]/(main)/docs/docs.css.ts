@@ -22,7 +22,7 @@ export const heroTitle = style({
 });
 
 export const heroSubtitle = style({
-  fontSize: vars.fontSize.lg,
+  fontSize: vars.fontSize.md,
   color: vars.color.textMuted,
 });
 
@@ -33,6 +33,31 @@ export const githubLink = style({
   ":hover": {
     textDecoration: "underline",
   },
+});
+
+export const issueLink = style({
+  color: "#4ade80",
+  textDecoration: "none",
+  fontWeight: "600",
+  ":hover": {
+    textDecoration: "underline",
+  },
+});
+
+export const sponsorLink = style({
+  color: "#db61a2",
+  textDecoration: "none",
+  fontWeight: "600",
+  ":hover": {
+    textDecoration: "underline",
+  },
+});
+
+export const changelogSection = style({
+  paddingTop: vars.space.xl,
+  marginTop: vars.space.xxl,
+  marginBottom: vars.space.xxl,
+  borderTop: `1px solid ${vars.color.border}`,
 });
 
 export const tipBadge = style({
@@ -58,7 +83,7 @@ export const stepDesc = style({
 // ── Sections ──
 
 export const section = style({
-  marginBottom: vars.space.xxl,
+  marginBottom: "64px",
 });
 
 export const sectionTitle = style({
@@ -116,6 +141,7 @@ export const blockTitle = style({
   fontSize: vars.fontSize.xl,
   fontWeight: "600",
   color: vars.color.text,
+  marginTop: vars.space.xl,
   marginBottom: vars.space.sm,
 });
 
