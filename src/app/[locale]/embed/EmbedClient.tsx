@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
-import { executeCustomCode } from "@/engine";
+import { executeCode } from "@/engine";
+import type { Language } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { StatusMessage } from "@/shared/ui";
 import { PoweredByBadge } from "@/shared/ui/PoweredByBadge";
@@ -13,6 +14,7 @@ interface EmbedClientProps {
   code?: string;
   args?: unknown[];
   error?: string;
+  lang?: Language;
 }
 
 interface ExecState {
@@ -31,7 +33,7 @@ const INITIAL_EXEC: ExecState = {
   consoleLogs: [],
 };
 
-export function EmbedClient({ code, args, error: initialError }: EmbedClientProps) {
+export function EmbedClient({ code, args, error: initialError, lang = "javascript" }: EmbedClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(initialError ?? null);
 
@@ -42,8 +44,8 @@ export function EmbedClient({ code, args, error: initialError }: EmbedClientProp
       (async () => {
         try {
           const [execResult, html] = await Promise.all([
-            executeCustomCode(code, args ?? []),
-            highlightCode(code),
+            executeCode(code, args ?? [], lang),
+            highlightCode(code, lang === "python" ? "python" : "javascript"),
           ]);
           if (execResult.result.steps.length === 0) {
             setError("No steps generated. The code may need arguments (&args=...).");
@@ -52,7 +54,7 @@ export function EmbedClient({ code, args, error: initialError }: EmbedClientProp
           setExec({
             result: execResult.result,
             codeHtml: html,
-            hasRecursion: execResult.analysis.hasRecursion,
+            hasRecursion: execResult.hasRecursion,
             finalReturnValue: execResult.finalReturnValue,
             consoleLogs: execResult.consoleLogs ?? [],
           });
@@ -61,7 +63,7 @@ export function EmbedClient({ code, args, error: initialError }: EmbedClientProp
         }
       })();
     },
-    [code, args, initialError],
+    [code, args, initialError, lang],
   );
 
   if (error) {

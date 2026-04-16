@@ -4,7 +4,7 @@ import { EmbedClient } from "./EmbedClient";
 initializeAlgorithms();
 
 interface EmbedPageProps {
-  searchParams: Promise<{ preset?: string; code?: string; args?: string }>;
+  searchParams: Promise<{ preset?: string; code?: string; args?: string; lang?: string }>;
 }
 
 function decodeBase64(str: string): string {
@@ -17,6 +17,7 @@ export default async function EmbedPage({ searchParams }: EmbedPageProps) {
   let code: string | undefined;
   let args: unknown[] | undefined;
   let error: string | undefined;
+  const lang = params.lang === "python" ? "python" : "javascript";
 
   if (params.preset) {
     const preset = getPreset(params.preset);
@@ -41,5 +42,5 @@ export default async function EmbedPage({ searchParams }: EmbedPageProps) {
     error = "Missing code or preset parameter.";
   }
 
-  return <EmbedClient code={code} args={args} error={error} />;
+  return <EmbedClient code={code} args={args} error={error} lang={lang} />;
 }
