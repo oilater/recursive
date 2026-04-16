@@ -159,7 +159,7 @@ def _tracer(frame, event, arg):
         _step_id += 1
         return _tracer
 
-    if event == "line" and fn_name != "<module>":
+    if event == "line" and (fn_name != "<module>" or _recursive_func_name is None):
         global _last_traced_line
         line_no = frame.f_lineno
 
@@ -208,23 +208,22 @@ def _run_traced(source, args_list):
     exec_globals = {"print": _captured_print, "__builtins__": __builtins__}
 
     user_code = compile(source, "<user>", "exec")
-
-    # exec defines functions (tracer OFF to skip top-level print etc.)
-    exec(user_code, exec_globals)
-
     final_return = None
-    if func_name and func_name in exec_globals:
-        sys.settrace(_tracer)
-        try:
-            final_return = exec_globals[func_name](*args_list)
-        finally:
-            sys.settrace(None)
+
+    if func_name:
+        # define functions with tracer OFF (skip top-level print etc.)
+        exec(user_code, exec_globals)
+        if func_name in exec_globals:
+            sys.settrace(_tracer)
+            try:
+                final_return = exec_globals[func_name](*args_list)
+            finally:
+                sys.settrace(None)
     else:
-        exec_globals2 = {"print": _captured_print, "__builtins__": __builtins__}
-        user_code2 = compile(source, "<user>", "exec")
+        # no function — trace the whole source directly
         sys.settrace(_tracer)
         try:
-            exec(user_code2, exec_globals2)
+            exec(user_code, exec_globals)
         finally:
             sys.settrace(None)
 
