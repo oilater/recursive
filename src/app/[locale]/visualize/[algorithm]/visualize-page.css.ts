@@ -46,6 +46,12 @@ export const vizRow = style({
   },
 });
 
+export const errorText = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.error,
+  fontFamily: vars.font.mono,
+});
+
 export const argsBar = style({
   display: "flex",
   alignItems: "center",

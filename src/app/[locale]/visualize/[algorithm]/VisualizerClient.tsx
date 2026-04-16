@@ -89,11 +89,26 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     />
   );
 
-  if (error) {
+  if (error && !exec.result) {
     return (
       <div className={styles.page}>
         {presetHeader}
         <StatusMessage variant="error">{error}</StatusMessage>
+        <div style={{ textAlign: "center", marginTop: "16px" }}>
+          <button
+            onClick={() => { setError(null); runCode(preset.defaultArgs); }}
+            style={{
+              padding: "8px 20px",
+              backgroundColor: "transparent",
+              color: "#94a3b8",
+              border: "1px solid #334155",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            Reset to defaults
+          </button>
+        </div>
       </div>
     );
   }
@@ -117,6 +132,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
         preset={preset}
         paramNames={paramNames}
         onRunCode={runCode}
+        error={error}
       />
     </div>
   );

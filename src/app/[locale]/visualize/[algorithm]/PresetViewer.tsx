@@ -23,6 +23,7 @@ interface PresetViewerProps {
   preset: PresetAlgorithm;
   paramNames: string[];
   onRunCode: (args: unknown[]) => void;
+  error?: string | null;
 }
 
 export function PresetViewer({
@@ -32,6 +33,7 @@ export function PresetViewer({
   preset,
   paramNames,
   onRunCode,
+  error,
 }: PresetViewerProps) {
   const t = useTranslations();
   const player = useAlgorithmPlayer(result.steps);
@@ -45,6 +47,7 @@ export function PresetViewer({
       <div className={styles.vizRow}>
         <div className={styles.leftPanel}>
           <div className={styles.argsBar}>
+            {error && <span className={styles.errorText}>{error}</span>}
             <div style={{ flex: 1 }} />
             <ArgumentForm ref={argFormRef} paramNames={paramNames} defaultArgs={preset.defaultArgs} onSubmit={onRunCode} />
             <button
