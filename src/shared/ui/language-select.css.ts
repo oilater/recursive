@@ -5,6 +5,7 @@ export const wrapper = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space.md,
+  flexWrap: "wrap",
 });
 
 export const container = style({
