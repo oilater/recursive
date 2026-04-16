@@ -40,6 +40,8 @@ export const editorCard = style({
 export const editorToolbar = style({
   display: "flex",
   alignItems: "center",
+  flexWrap: "wrap",
+  gap: vars.space.sm,
   padding: `${vars.space.sm} ${vars.space.md}`,
   borderBottom: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.surface,

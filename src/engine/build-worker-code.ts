@@ -178,7 +178,7 @@ self.onmessage = function(e) {
     };
 
     var runCode;
-    if (userFunc) {
+    if (userFunc && __args.length > 0) {
       runCode = transformedCode + '\\nvar __fn = __entry__();\\nreturn __fn.apply(null, __args);\\n';
     } else {
       runCode = transformedCode + '\\nreturn __entry__();\\n';

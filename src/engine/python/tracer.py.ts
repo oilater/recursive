@@ -216,7 +216,7 @@ def _run_traced(source, args_list):
     user_code = compile(source, "<user>", "exec")
     final_return = None
 
-    if func_name:
+    if func_name and args_list:
         # define functions with tracer OFF (skip top-level print etc.)
         exec(user_code, exec_globals)
         if func_name in exec_globals:
