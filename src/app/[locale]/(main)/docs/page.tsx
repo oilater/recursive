@@ -5,37 +5,49 @@ import * as styles from "./docs.css";
 
 const SITE = "https://recursive.oilater.com";
 
-const BUBBLE_SORT_KO = `# 배열을 오름차순으로 정렬해서 리턴
-#
-# 풀이 전략
-# 인접한 두 원소를 비교해서 큰 값을 뒤로 보낸다.
-# 한 바퀴 돌 때마다 가장 큰 값이 맨 뒤에 확정된다.
-# 시간복잡도: O(n^2)
+const BUBBLE_SORT_KO = `// 배열을 오름차순으로 정렬해서 리턴
+//
+// 풀이 전략
+// 인접한 두 원소를 비교해서 큰 값을 뒤로 보낸다.
+// 한 바퀴 돌 때마다 가장 큰 값이 맨 뒤에 확정된다.
+// 시간복잡도: O(n^2)
 
-def bubble_sort(arr):
-  n = len(arr)
-  for i in range(n):
-    for j in range(0, n - i - 1):
-      # 앞이 더 크면 교환
-      if arr[j] > arr[j + 1]:
-        arr[j], arr[j + 1] = arr[j + 1], arr[j]
-  return arr`;
+function bubbleSort(arr) {
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - 1 - i; j++) {
+      // 앞이 더 크면 교환
+      if (arr[j] > arr[j + 1]) {
+        const temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+  return arr;
+}`;
 
-const BUBBLE_SORT_EN = `# Sort the array in ascending order and return it
-#
-# Strategy
-# Compare two adjacent elements and push the larger one back.
-# After each pass, the largest value is fixed at the end.
-# Time complexity: O(n^2)
+const BUBBLE_SORT_EN = `// Sort the array in ascending order and return it
+//
+// Strategy
+// Compare two adjacent elements and push the larger one back.
+// After each pass, the largest value is fixed at the end.
+// Time complexity: O(n^2)
 
-def bubble_sort(arr):
-  n = len(arr)
-  for i in range(n):
-    for j in range(0, n - i - 1):
-      # Swap if the left is larger
-      if arr[j] > arr[j + 1]:
-        arr[j], arr[j + 1] = arr[j + 1], arr[j]
-  return arr`;
+function bubbleSort(arr) {
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - 1 - i; j++) {
+      // Swap if the left is larger
+      if (arr[j] > arr[j + 1]) {
+        const temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+  return arr;
+}`;
 
 const PLAIN_JS = `const arr = [5, 3, 8, 1, 2];
 let total = 0;
@@ -50,7 +62,7 @@ export default async function DocsPage() {
 
   const bubbleSortCode = locale === "ko" ? BUBBLE_SORT_KO : BUBBLE_SORT_EN;
   const [bubbleHtml, plainJsHtml] = await Promise.all([
-    highlightCode(bubbleSortCode, "python"),
+    highlightCode(bubbleSortCode, "javascript"),
     highlightCode(PLAIN_JS, "javascript"),
   ]);
 
@@ -90,10 +102,8 @@ export default async function DocsPage() {
           <h4 className={styles.blockTitle}>{t("tip1RunExample")}</h4>
           <p className={styles.blockHint}>{t("tip1Hint")}</p>
           <iframe
-            src="https://recursive-ochre.vercel.app/embed?code=IyDrsLDsl7TsnYQg7Jik66aE7LCo7Iic7Jy866GcIOygleugrO2VtOyEnCDrpqzthLQKIwojIO2SgOydtCDsoITrnrUKIyDsnbjsoJHtlZwg65GQIOybkOyGjOulvCDruYTqtZDtlbTshJwg7YGwIOqwkuydhCDrkqTroZwg67O064K464ukLgojIO2VnCDrsJTtgLQg64%2BMIOuVjOuniOuLpCDqsIDsnqUg7YGwIOqwkuydtCDrp6gg65Kk7JeQIO2ZleygleuQnOuLpC4KIyDsi5zqsITrs7XsnqHrj4Q6IE8obl4yKQoKZGVmIGJ1YmJsZV9zb3J0KGFycik6CiAgbiA9IGxlbihhcnIpCiAgZm9yIGkgaW4gcmFuZ2Uobik6CiAgICBmb3IgaiBpbiByYW5nZSgwLCBuIC0gaSAtIDEpOgogICAgICAjIOyVnuydtCDrjZQg7YGs66m0IOq1kO2ZmAogICAgICBpZiBhcnJbal0gPiBhcnJbaiArIDFdOgogICAgICAgIGFycltqXSwgYXJyW2ogKyAxXSA9IGFycltqICsgMV0sIGFycltqXQogIHJldHVybiBhcnI%3D&args=%5B%5B5%2C3%2C8%2C1%2C2%5D%5D&lang=python"
-            width="100%"
-            height="700"
-            style={{ border: "none", borderRadius: "8px" }}
+            src={`${SITE}/embed?preset=bubble-sort`}
+            className={styles.embedFrame}
             title="Bubble Sort"
           />
         </div>
