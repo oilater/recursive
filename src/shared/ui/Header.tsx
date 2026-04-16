@@ -23,9 +23,9 @@ export function Header({ left, center, right }: HeaderProps) {
   const switchLocale = (target: Locale) => {
     setMenuOpen(false);
     if (target !== locale) {
-      const full = window.location.href;
-      const newUrl = full.replace(`/${locale}/`, `/${target}/`);
-      window.location.href = newUrl;
+      const url = new URL(window.location.href);
+      url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
+      window.location.href = url.toString();
     }
   };
 

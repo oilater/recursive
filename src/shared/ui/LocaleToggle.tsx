@@ -31,8 +31,9 @@ export function LocaleToggle() {
   const switchTo = (target: Locale) => {
     setOpen(false);
     if (target !== locale) {
-      const full = window.location.href;
-      window.location.href = full.replace(`/${locale}/`, `/${target}/`);
+      const url = new URL(window.location.href);
+      url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
+      window.location.href = url.toString();
     }
   };
 
