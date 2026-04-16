@@ -74,6 +74,20 @@ export const navLink = style({
   },
 });
 
+export const sponsorLink = style({
+  padding: "4px 12px",
+  fontSize: vars.fontSize.sm,
+  color: "#db61a2",
+  textDecoration: "none",
+  border: "1px solid #db61a2",
+  borderRadius: vars.radius.md,
+  transition: "all 0.15s ease",
+  ":hover": {
+    backgroundColor: "#db61a2",
+    color: "#fff",
+  },
+});
+
 // ── Mobile menu ──
 
 export const mobileRight = style({

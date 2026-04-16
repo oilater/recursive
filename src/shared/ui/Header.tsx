@@ -69,6 +69,9 @@ export function Header({ left, center, right }: HeaderProps) {
           <Link href="/algorithms" className={styles.navLink}>
             {t("algorithms")}
           </Link>
+          <a href="https://github.com/sponsors/oilater" target="_blank" rel="noopener noreferrer" className={styles.sponsorLink}>
+            Sponsor
+          </a>
         </nav>
         <LocaleToggle />
       </div>
@@ -104,6 +107,15 @@ export function Header({ left, center, right }: HeaderProps) {
             >
               {t("algorithms")}
             </Link>
+            <a
+              href="https://github.com/sponsors/oilater"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.mobileMenuLink}
+              onClick={() => setMenuOpen(false)}
+            >
+              Sponsor
+            </a>
             <div className={styles.mobileMenuDivider} />
             <div className={styles.mobileLocaleRow}>
               <GlobeIcon size={16} />
