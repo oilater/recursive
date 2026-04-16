@@ -9,7 +9,7 @@ import * as styles from "./language-select.css";
 const STORAGE_KEY = "recursive-default-lang";
 
 interface LanguageSelectProps {
-  value: Language;
+  value: Language | null;
   onChange: (language: Language) => void;
 }
 
@@ -26,14 +26,15 @@ export function getDefaultLanguage(): Language {
 
 export function LanguageSelect({ value, onChange }: LanguageSelectProps) {
   const t = useTranslations("editor");
-  const [defaultLang, setDefaultLang] = useReactState<Language>("python");
-  const showSetDefault = value !== defaultLang;
+  const [defaultLang, setDefaultLang] = useReactState<Language | null>(null);
+  const showSetDefault = value !== null && value !== defaultLang;
 
   useEffect(() => {
     setDefaultLang(getDefaultLanguage());
   }, []);
 
   const handleSetDefault = useCallback(() => {
+    if (!value) return;
     localStorage.setItem(STORAGE_KEY, value);
     setDefaultLang(value);
   }, [value]);
@@ -48,7 +49,7 @@ export function LanguageSelect({ value, onChange }: LanguageSelectProps) {
             onClick={() => onChange(code)}
             onMouseEnter={code === "python" ? () => ensurePyodideWorker().catch(() => {}) : undefined}
           >
-            {label}{code === defaultLang && <span className={styles.defaultTag}> ({t("defaultLang")})</span>}
+            {label}{defaultLang !== null && code === defaultLang && <span className={styles.defaultTag}> ({t("defaultLang")})</span>}
           </button>
         ))}
       </div>

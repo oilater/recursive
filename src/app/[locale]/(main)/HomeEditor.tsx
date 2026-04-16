@@ -15,7 +15,7 @@ export function HomeEditor() {
   const t = useTranslations();
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState<Language>("python");
+  const [language, setLanguage] = useState<Language | null>(null);
 
   useEffect(() => {
     setLanguage(getDefaultLanguage());
@@ -59,6 +59,7 @@ export function HomeEditor() {
   };
 
   const handleRun = async (args: unknown[]) => {
+    if (!language) return;
     setError(null);
     setRunning(true);
     try {
@@ -87,7 +88,7 @@ export function HomeEditor() {
               const args = argFormRef.current?.getArgs() ?? [];
               handleRun(args);
             }}
-            disabled={!hasCode || running}
+            disabled={!hasCode || running || !language}
           >
             {running ? "..." : t("custom.run")}
           </button>
@@ -96,7 +97,7 @@ export function HomeEditor() {
 
       <div className={styles.editorCard} ref={editorRef}>
         <div className={styles.editorBody}>
-          <CodeEditor value={code} onChange={handleCodeChange} language={language} />
+          <CodeEditor value={code} onChange={handleCodeChange} language={language ?? "javascript"} />
         </div>
       </div>
     </div>
