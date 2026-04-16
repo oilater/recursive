@@ -83,6 +83,6 @@
   },
   "metadata": {
     "title": "Recursive — Track Your Algorithms",
-    "description": "Paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization."
+    "description": "Watch your code run step by step — line highlighting, variable tracking, and call tree visualization."
   }
 }
