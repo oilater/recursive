@@ -180,10 +180,11 @@ self.onmessage = function(e) {
     };
 
     var runCode;
-    if (userFunc && args.length > 0) {
+    var hasArgs = userFunc && args.length > 0;
+    if (hasArgs) {
       runCode = transformedCode + '\\nvar __fn = __entry__();\\nreturn __fn.apply(null, __args);\\n';
     } else {
-      runCode = transformedCode + '\\nreturn __entry__();\\n';
+      runCode = transformedCode + '\\n__entry__();\\n';
     }
     var runFn = new Function('__guard', '__createProxy', '__traceLine', '__args', 'console', runCode);
     var finalReturnValue = runFn(__guard, __createProxy, __traceLine, args, fakeConsole);
