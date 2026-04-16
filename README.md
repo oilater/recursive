@@ -48,24 +48,6 @@ Preset algorithms (permutations, combinations, subsets, bubble sort) are also av
 }
 ```
 
-## Project structure
-
-```
-src/
-├── algorithm/        # Preset definitions & registry
-│   └── presets/
-│       └── codes/    # Algorithm source files (.js)
-├── engine/           # AST analysis, transformation, Worker execution
-├── editor/           # CodeMirror editor, ArgumentForm
-├── player/           # Step playback (useAlgorithmPlayer)
-├── visualizer/       # TreeView, CodePanel, CallStack, VariablePanel
-├── shared/           # Theme, utils, common UI
-└── app/              # Next.js routes
-```
-
-## Tech stack
-
-Next.js · TypeScript · Vanilla-Extract · acorn · Shiki · d3-hierarchy · CodeMirror · Web Workers
 
 ## Development
 
