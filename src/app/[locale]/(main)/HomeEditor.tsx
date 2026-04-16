@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import type { ArgumentFormHandle } from "@/editor";
-import { analyzeCode, analyzePythonCode, executeCode } from "@/engine";
+import { analyzeCode, analyzePythonCode, executeCode, ensurePyodideWorker } from "@/engine";
 import type { Language } from "@/engine";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { LanguageSelect, getDefaultLanguage } from "@/shared/ui/LanguageSelect";
@@ -19,6 +19,15 @@ export function HomeEditor() {
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+
+  useEffect(
+    function preloadPyodide() {
+      if (language === "python") {
+        ensurePyodideWorker().catch(() => {});
+      }
+    },
+    [],
+  );
   const hasCode = code.trim().length > 0;
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const editorRef = useRef<HTMLDivElement>(null);

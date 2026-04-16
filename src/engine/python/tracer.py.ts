@@ -80,7 +80,10 @@ def _capture_vars(frame):
         if callable(v) and not isinstance(v, (list, dict, set, tuple)):
             continue
         try:
-            result[k] = _safe_value(copy.deepcopy(v))
+            if isinstance(v, (int, float, str, bool, type(None))):
+                result[k] = v
+            else:
+                result[k] = _safe_value(copy.deepcopy(v))
         except:
             try:
                 result[k] = str(v)
@@ -222,6 +225,21 @@ def _run_traced(source, args_list):
                 final_return = exec_globals[func_name](*args_list)
             finally:
                 sys.settrace(None)
+
+            # add final step with return value
+            if _steps:
+                last_line = _steps[-1]["codeLine"]
+                last_vars = dict(_steps[-1]["variables"])
+                _steps.append({
+                    "id": _step_id,
+                    "type": "call",
+                    "codeLine": last_line,
+                    "activeNodeId": _root_node["id"],
+                    "activePath": [_root_node["id"]],
+                    "variables": last_vars,
+                    "description": ""
+                })
+                _step_id += 1
     else:
         # no function — trace the whole source directly
         sys.settrace(_tracer)
@@ -229,6 +247,37 @@ def _run_traced(source, args_list):
             exec(user_code, exec_globals)
         finally:
             sys.settrace(None)
+
+        # capture final variable state after last line
+        if _steps:
+            final_vars = {}
+            for k, v in exec_globals.items():
+                if k.startswith("_") or k == "__builtins__":
+                    continue
+                if isinstance(v, (_types_module.FunctionType, _types_module.BuiltinFunctionType,
+                                  _types_module.ModuleType, type)):
+                    continue
+                if callable(v) and not isinstance(v, (list, dict, set, tuple)):
+                    continue
+                try:
+                    if isinstance(v, (int, float, str, bool, type(None))):
+                        final_vars[k] = v
+                    else:
+                        final_vars[k] = _safe_value(copy.deepcopy(v))
+                except:
+                    final_vars[k] = str(v)
+
+            last_line = _steps[-1]["codeLine"]
+            _steps.append({
+                "id": _step_id,
+                "type": "call",
+                "codeLine": last_line,
+                "activeNodeId": _root_node["id"],
+                "activePath": [_root_node["id"]],
+                "variables": final_vars,
+                "description": ""
+            })
+            _step_id += 1
 
     return {
         "steps": _steps,

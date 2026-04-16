@@ -8,6 +8,11 @@ Paste any JavaScript or TypeScript code and watch it execute step by step — wi
 
 [![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive-ochre.vercel.app)
 
+## Supported Languages
+
+- Python
+- JavaScript / TypeScript
+
 ## Features
 
 - Paste your code and input fields are automatically generated

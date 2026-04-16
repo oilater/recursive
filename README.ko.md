@@ -8,6 +8,11 @@ JavaScript / TypeScript 코드를 붙여넣으면 실행 흐름을 단계별로 
 
 [![사용해보기](https://img.shields.io/badge/%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive-ochre.vercel.app)
 
+## 지원 언어
+
+- Python
+- JavaScript / TypeScript
+
 ## 기능
 
 - 코드를 붙여 넣으면 입력 값 Input이 자동으로 생겨요

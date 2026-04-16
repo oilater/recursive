@@ -378,3 +378,39 @@ id("foo")
 | 도메인 중심 flat 구조 | 프로젝트 규모에 맞는 단순한 구조 |
 
 각 결정에 대한 상세한 기록은 `docs/plans/` 폴더에 남아 있으니, 더 깊이 알고 싶다면 참고하시면 됩니다.
+
+---
+
+## 14. Python 지원: Pyodide와 sys.settrace
+
+JavaScript 엔진은 AST 변환으로 코드를 직접 수정해서 추적 코드를 삽입하는 방식이었습니다. Python을 지원하려면 같은 방식을 Python AST로 다시 구현해야 할까? 그럴 필요가 없었습니다.
+
+Python에는 `sys.settrace()`라는 CPython 내장 API가 있어서, 코드를 수정하지 않고도 매 줄 실행될 때마다 콜백을 받을 수 있습니다. JavaScript 엔진에서 `__traceLine`을 코드에 삽입하는 것과 같은 효과를 코드 변환 없이 얻는 거죠.
+
+Pyodide는 CPython 인터프리터를 WebAssembly로 컴파일한 것입니다. 브라우저에서 진짜 Python이 돌아가는 거라 `sys.settrace`도 정상 동작합니다. 서버 없이 사용자 브라우저에서 Python을 실행하니까 서버 비용이 0입니다.
+
+핵심 구현 포인트는 세 가지였습니다.
+
+첫째, **사용자 코드와 트레이서 코드의 분리**. `exec(source)`로 실행하면 트레이서 자체의 내부 함수도 `sys.settrace`에 잡힙니다. 이걸 해결하기 위해 사용자 코드를 `compile(source, "<user>", "exec")`로 컴파일했습니다. 이렇게 하면 사용자 코드의 모든 함수가 `co_filename == "<user>"`를 가지게 되고, 트레이서에서 `frame.f_code.co_filename != "<user>"`인 프레임은 무시하면 됩니다.
+
+둘째, **함수가 있는 코드와 없는 코드의 분기**. `def factorial(n): ...`처럼 함수가 있으면, 먼저 트레이서 OFF 상태에서 `exec`으로 함수를 정의하고, 트레이서 ON 상태에서 함수를 호출합니다. 이렇게 해야 소스에 `print(factorial(5))` 같은 top-level 호출이 있어도 이중 실행을 방지할 수 있습니다. 함수가 없는 코드(`a = 1; b = 2`)는 트레이서 ON 상태에서 `exec`을 바로 실행합니다.
+
+셋째, **같은 줄 반복 이벤트 합치기**. 리스트 컴프리헨션 `[x for x in range(10)]`은 한 줄이지만 `sys.settrace`가 반복마다 "line" 이벤트를 발생시킵니다. 같은 줄 번호가 연속으로 나오면 새 step을 만들지 않고 마지막 step의 변수만 업데이트해서 JS 엔진과 동일한 동작을 만들었습니다.
+
+---
+
+## 15. 성능 최적화: Pyodide 로딩 전략
+
+Pyodide의 가장 큰 약점은 초기 로딩 시간입니다. CPython 바이너리(~5MB gzipped)를 CDN에서 다운로드하고 WebAssembly를 컴파일하는 데 2-5초가 걸립니다. 이 대기 시간을 최소화하기 위해 여러 전략을 적용했습니다.
+
+**CDN dns-prefetch + preconnect**. layout.tsx의 `<head>`에 `<link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />`와 `<link rel="preconnect" ...>`를 추가해서, 페이지가 로드되는 순간 CDN과의 DNS 조회와 TLS 핸드셰이크를 미리 수행합니다.
+
+**기본 언어가 Python이면 페이지 로드 시 즉시 Worker 초기화**. localStorage에 저장된 기본 언어가 Python이면, 사용자가 코드를 입력하기도 전에 Pyodide Worker를 백그라운드에서 로드합니다. 사용자가 코드를 작성하는 동안 Pyodide가 준비되므로, 실행 버튼을 누를 때는 이미 로드가 끝나있습니다.
+
+**Python 탭 hover 시 preload**. 사용자가 언어 선택 토글에서 Python 버튼 위에 마우스를 올리면 `ensurePyodideWorker()`를 호출해서 로드를 시작합니다. 클릭하기 전에 1-2초 hover하는 동안 다운로드가 시작됩니다.
+
+**영속 Worker 재사용**. Pyodide Worker를 한 번 초기화하면 이후 실행에서 재사용합니다. 매번 Worker를 새로 만들면 5MB를 다시 다운로드해야 하지만, 한 번 로드된 Worker는 즉시 실행 가능합니다.
+
+**immutable 변수 deepcopy 스킵**. `sys.settrace`의 "line" 이벤트에서 매번 `copy.deepcopy()`를 호출하면 성능이 크게 떨어집니다. `int`, `float`, `str`, `bool`, `None` 같은 immutable 타입은 복사할 필요가 없으므로 바로 저장합니다. `deepcopy`는 리스트, 딕셔너리 같은 mutable 타입에만 적용합니다.
+
+이런 최적화들의 결과, 첫 방문 시 Pyodide 로딩 2-3초를 제외하면 일반적인 교육용 코드(100줄 이내, 재귀 깊이 100 이내)의 실행은 1초 이내에 완료됩니다. 두 번째 실행부터는 JavaScript와 거의 동일한 체감 속도입니다.

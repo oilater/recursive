@@ -3,6 +3,7 @@
 import { useCallback, useState as useReactState } from "react";
 import { useTranslations } from "next-intl";
 import type { Language } from "@/engine";
+import { ensurePyodideWorker } from "@/engine";
 import * as styles from "./language-select.css";
 
 const STORAGE_KEY = "recursive-default-lang";
@@ -41,6 +42,7 @@ export function LanguageSelect({ value, onChange }: LanguageSelectProps) {
             key={code}
             className={code === value ? styles.buttonActive : styles.button}
             onClick={() => onChange(code)}
+            onMouseEnter={code === "python" ? () => ensurePyodideWorker().catch(() => {}) : undefined}
           >
             {label}{code === defaultLang && <span className={styles.defaultTag}> ({t("defaultLang")})</span>}
           </button>
