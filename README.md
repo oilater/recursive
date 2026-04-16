@@ -6,7 +6,7 @@
 
 Paste your code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
-[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive.oilater.com)
+[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive.oilater.com-38bdf8?style=for-the-badge)](https://recursive.oilater.com)
 
 ## Supported Languages
 
@@ -23,31 +23,7 @@ Paste your code and watch it execute step by step — with line highlighting, va
 
 ## Usage
 
-1. Go to the [playground](https://recursive-ochre.vercel.app/visualize/custom)
-2. Paste your code (function or bare code — both work)
-3. Enter arguments if your function needs them
-4. Click **▶ Run**
-5. Step through with the controls or hit play
-
-Preset algorithms (permutations, combinations, subsets, bubble sort) are also available from the home page, organized by category.
-
-## Adding a preset algorithm
-
-1. Add a `.js` file to `src/algorithm/presets/codes/`
-2. Register the metadata in the matching category file (`recursion.ts`, `sorting.ts`):
-
-```ts
-{
-  id: "selection-sort",
-  name: "Selection Sort",
-  description: "Finds the smallest element and moves it to the front",
-  difficulty: "easy",
-  category: "sorting",
-  defaultArgs: [[5, 3, 8, 1, 2]],
-  code: loadCode("selection-sort.js"),
-}
-```
-
+See the [Docs](https://recursive.oilater.com/docs) for a full guide with live examples.
 
 ## Development
 
