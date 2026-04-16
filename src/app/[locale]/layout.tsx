@@ -89,6 +89,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${geistMono.variable} ${plusJakarta.variable}`}>
+      <head>
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+      </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <NextIntlClientProvider>
           <PostHogProvider>

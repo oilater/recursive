@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
-import { executeCustomCode } from "@/engine";
+import { executeCode } from "@/engine";
+import type { Language } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { Header, StatusMessage } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
@@ -12,6 +13,7 @@ import * as styles from "../playground/custom-page.css";
 interface RunClientProps {
   code?: string;
   args?: unknown[];
+  language?: Language;
 }
 
 interface ExecState {
@@ -30,7 +32,7 @@ const INITIAL_EXEC: ExecState = {
   consoleLogs: [],
 };
 
-export function RunClient({ code, args }: RunClientProps) {
+export function RunClient({ code, args, language = "javascript" }: RunClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,14 +45,15 @@ export function RunClient({ code, args }: RunClientProps) {
 
       (async () => {
         try {
+          const lang = language === "python" ? "python" : "javascript";
           const [execResult, html] = await Promise.all([
-            executeCustomCode(code, args ?? []),
-            highlightCode(code),
+            executeCode(code, args ?? [], lang),
+            highlightCode(code, lang),
           ]);
           setExec({
             result: execResult.result,
             codeHtml: html,
-            hasRecursion: execResult.analysis.hasRecursion,
+            hasRecursion: execResult.hasRecursion,
             finalReturnValue: execResult.finalReturnValue,
             consoleLogs: execResult.consoleLogs ?? [],
           });
@@ -59,7 +62,7 @@ export function RunClient({ code, args }: RunClientProps) {
         }
       })();
     },
-    [code, args],
+    [code, args, language],
   );
 
   if (error) {
@@ -75,7 +78,7 @@ export function RunClient({ code, args }: RunClientProps) {
     return (
       <div className={styles.page}>
         <Header left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>} />
-        <StatusMessage variant="loading">Running...</StatusMessage>
+        <StatusMessage variant="loading">{language === "python" ? "Loading Python..." : "Running..."}</StatusMessage>
       </div>
     );
   }

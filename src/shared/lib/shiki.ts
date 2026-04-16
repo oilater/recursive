@@ -6,7 +6,7 @@ export function getHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
       themes: ["github-dark"],
-      langs: ["javascript"],
+      langs: ["javascript", "python"],
     });
   }
   return highlighterPromise;

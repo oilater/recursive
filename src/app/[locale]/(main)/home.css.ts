@@ -93,9 +93,15 @@ export const editorCard = style({
 export const actionBar = style({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-end",
   gap: vars.space.sm,
   marginBottom: vars.space.md,
+});
+
+export const actionRight = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginLeft: "auto",
 });
 
 export const runButton = style({

@@ -15,10 +15,6 @@ export default function Home() {
           <span className={styles.titleWhite}>step by step.</span>
         </h1>
         <p className={styles.subtitle}>{t("home.subtitle")}</p>
-        <div className={styles.langRow}>
-          <span className={styles.langBadge}>{t("custom.langLabel")}</span>
-          <span className={styles.langList}>JavaScript, TypeScript</span>
-        </div>
       </div>
 
       <HomeEditor />

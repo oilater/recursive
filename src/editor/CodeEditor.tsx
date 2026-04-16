@@ -5,7 +5,9 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
 import { placeholder as placeholderExt } from "@codemirror/view";
+import type { Language } from "@/engine";
 
 import * as styles from "./code-editor.css";
 
@@ -24,13 +26,17 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   readOnly?: boolean;
+  language?: Language;
 }
 
-export function CodeEditor({ value, onChange, readOnly = false }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, readOnly = false, language = "javascript" }: CodeEditorProps) {
   const t = useTranslations("editor");
   const extensions = useMemo(
-    () => [javascript({ typescript: true }), placeholderExt(t("placeholder"))],
-    [t],
+    () => [
+      language === "python" ? python() : javascript({ typescript: true }),
+      placeholderExt(t("placeholder")),
+    ],
+    [t, language],
   );
 
   return (
