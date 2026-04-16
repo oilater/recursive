@@ -17,6 +17,7 @@ _node_counter = 0
 _recursive_func_name = None
 _has_recursion = False
 _max_steps = 5000
+_last_traced_line = -1
 _max_depth = 200
 def _find_recursive_func(source):
     """Find top-level func and any recursive func (including nested)."""
@@ -159,30 +160,37 @@ def _tracer(frame, event, arg):
         return _tracer
 
     if event == "line" and fn_name != "<module>":
-        current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
+        global _last_traced_line
+        line_no = frame.f_lineno
 
-        _steps.append({
-            "id": _step_id,
-            "type": "call",
-            "codeLine": frame.f_lineno,
-            "activeNodeId": current_id,
-            "activePath": _get_active_path(),
-            "variables": _capture_vars(frame),
-            "description": ""
-        })
-        _step_id += 1
+        if line_no == _last_traced_line and _steps:
+            _steps[-1]["variables"] = _capture_vars(frame)
+        else:
+            current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
+            _steps.append({
+                "id": _step_id,
+                "type": "call",
+                "codeLine": line_no,
+                "activeNodeId": current_id,
+                "activePath": _get_active_path(),
+                "variables": _capture_vars(frame),
+                "description": ""
+            })
+            _step_id += 1
+            _last_traced_line = line_no
 
     return _tracer
 
 def _run_traced(source, args_list):
     global _steps, _step_id, _call_stack, _root_node, _node_counter
-    global _recursive_func_name, _has_recursion
+    global _recursive_func_name, _has_recursion, _last_traced_line
 
     _steps = []
     _step_id = 0
     _call_stack = []
     _node_counter = 0
     _has_recursion = False
+    _last_traced_line = -1
     _root_node = {"id": "root", "label": "", "args": "", "children": [], "status": "completed"}
 
     func_name, rec_func_name = _find_recursive_func(source)
