@@ -39,8 +39,8 @@ Preset algorithms (permutations, combinations, subsets, bubble sort) are also av
 ```ts
 {
   id: "selection-sort",
-  name: "선택 정렬 (Selection Sort)",
-  description: "가장 작은 원소를 찾아 앞으로 보냅니다",
+  name: "Selection Sort",
+  description: "Finds the smallest element and moves it to the front",
   difficulty: "easy",
   category: "sorting",
   defaultArgs: [[5, 3, 8, 1, 2]],
