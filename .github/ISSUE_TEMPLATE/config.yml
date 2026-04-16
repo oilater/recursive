@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing Guide
+    url: https://github.com/oilater/recursive/blob/main/CONTRIBUTING.md
+    about: 기여 가이드를 먼저 읽어보세요
