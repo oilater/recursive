@@ -5,5 +5,5 @@ export const CREATE_PROXY = "__createProxy";
 export const GUARD = "__guard";
 
 export const DEFAULT_TIMEOUT_MS = 5000;
-export const DEFAULT_MAX_CALLS = 5000;
+export const DEFAULT_MAX_CALLS = 1000;
 export const DEFAULT_MAX_LOOP_ITERATIONS = 100000;

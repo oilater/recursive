@@ -80,7 +80,12 @@ self.onmessage = function(e) {
 
     var originalLineCount = data.originalLineCount || 9999;
 
+    var MAX_STEPS = 10000;
+
     function __traceLine(line, varsSnapshot) {
+      if (steps.length >= MAX_STEPS) {
+        throw new Error('Step limit exceeded (' + MAX_STEPS + '). Try smaller input.');
+      }
       var correctedLine = line - lineOffset;
       if (correctedLine < 1 || correctedLine > originalLineCount) return;
 
