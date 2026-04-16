@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { LocaleToggle } from "./LocaleToggle";
 import { LogoIcon, MenuIcon, GlobeIcon } from "./icons";
-import { Link, useRouter, usePathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/config";
 import * as styles from "./header.css";
 
@@ -17,14 +17,16 @@ interface HeaderProps {
 export function Header({ left, center, right }: HeaderProps) {
   const t = useTranslations("home");
   const locale = useLocale() as Locale;
-  const router = useRouter();
-  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const switchLocale = (target: Locale) => {
     setMenuOpen(false);
-    if (target !== locale) router.replace(pathname, { locale: target });
+    if (target !== locale) {
+      const full = window.location.href;
+      const newUrl = full.replace(`/${locale}/`, `/${target}/`);
+      window.location.href = newUrl;
+    }
   };
 
   useEffect(
@@ -54,6 +56,9 @@ export function Header({ left, center, right }: HeaderProps) {
       <div className={styles.desktopRight}>
         {right}
         <nav className={styles.nav}>
+          <Link href="/docs" className={styles.navLink}>
+            {t("docs")}
+          </Link>
           <Link href="/visualize/playground" className={styles.navLink}>
             {t("playground")}
           </Link>
@@ -74,6 +79,13 @@ export function Header({ left, center, right }: HeaderProps) {
         </button>
         {menuOpen && (
           <div className={styles.mobileMenu}>
+            <Link
+              href="/docs"
+              className={styles.mobileMenuLink}
+              onClick={() => setMenuOpen(false)}
+            >
+              {t("docs")}
+            </Link>
             <Link
               href="/visualize/playground"
               className={styles.mobileMenuLink}

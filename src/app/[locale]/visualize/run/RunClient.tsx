@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
 import { executeCode } from "@/engine";
 import type { Language } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
-import { Header, StatusMessage } from "@/shared/ui";
+import { buildEmbedUrl } from "@/shared/lib/embed-url";
+import { Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
+import { Link } from "@/i18n/navigation";
 import { PlaygroundViewer } from "../playground/PlaygroundViewer";
 import * as styles from "../playground/custom-page.css";
 
@@ -35,6 +37,13 @@ const INITIAL_EXEC: ExecState = {
 export function RunClient({ code, args, language = "javascript" }: RunClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(null);
+  const codeRef = useRef(code);
+  const argsRef = useRef(args);
+
+  const embedUrl = useMemo(() => {
+    if (!codeRef.current) return null;
+    return buildEmbedUrl({ code: codeRef.current, args: argsRef.current });
+  }, [exec]);
 
   useEffect(
     function execute() {
@@ -68,7 +77,15 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
   if (error) {
     return (
       <div className={styles.page}>
-        <Header left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>} />
+        <Header
+          left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
+          right={exec.result && embedUrl ? (
+            <>
+              <EmbedDropdown embedUrl={embedUrl} />
+              <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
+            </>
+          ) : undefined}
+        />
         <StatusMessage variant="error">{error}</StatusMessage>
       </div>
     );
@@ -77,7 +94,15 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
   if (!exec.result) {
     return (
       <div className={styles.page}>
-        <Header left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>} />
+        <Header
+          left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
+          right={exec.result && embedUrl ? (
+            <>
+              <EmbedDropdown embedUrl={embedUrl} />
+              <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
+            </>
+          ) : undefined}
+        />
         <StatusMessage variant="loading">{language === "python" ? "Loading Python..." : "Running..."}</StatusMessage>
       </div>
     );
@@ -85,7 +110,15 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
 
   return (
     <div className={styles.page}>
-      <Header left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>} />
+      <Header
+          left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
+          right={exec.result && embedUrl ? (
+            <>
+              <EmbedDropdown embedUrl={embedUrl} />
+              <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
+            </>
+          ) : undefined}
+        />
       <PlaygroundViewer
         result={exec.result}
         codeHtml={exec.codeHtml}

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/config";
 import { GlobeIcon } from "./icons";
 import * as styles from "./locale-toggle.css";
@@ -14,8 +13,6 @@ const LOCALES: { code: Locale; label: string }[] = [
 
 export function LocaleToggle() {
   const locale = useLocale() as Locale;
-  const router = useRouter();
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -33,7 +30,10 @@ export function LocaleToggle() {
 
   const switchTo = (target: Locale) => {
     setOpen(false);
-    if (target !== locale) router.replace(pathname, { locale: target });
+    if (target !== locale) {
+      const full = window.location.href;
+      window.location.href = full.replace(`/${locale}/`, `/${target}/`);
+    }
   };
 
   const current = LOCALES.find((l) => l.code === locale)!;

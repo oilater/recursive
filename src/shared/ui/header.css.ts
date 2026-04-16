@@ -7,6 +7,8 @@ export const header = style({
   padding: `${vars.space.sm} ${vars.space.lg}`,
   backgroundColor: "transparent",
   flexShrink: 0,
+  position: "relative",
+  zIndex: 10,
 });
 
 export const left = style({
