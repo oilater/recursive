@@ -9,6 +9,10 @@ export const container = style({
   backgroundColor: vars.color.surface,
   borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.border}`,
+  cursor: "grab",
+  ":active": {
+    cursor: "grabbing",
+  },
 });
 
 export const svgStyle = style({
