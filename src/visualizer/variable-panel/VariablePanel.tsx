@@ -102,6 +102,14 @@ function renderValue(value: unknown, changed: boolean, prevValue?: unknown): Rea
     );
   }
 
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return (
+      <span className={styles.varValue} style={changeStyle}>
+        {JSON.stringify(value)}
+      </span>
+    );
+  }
+
   return (
     <span className={styles.varValue} style={changeStyle}>
       {String(value)}

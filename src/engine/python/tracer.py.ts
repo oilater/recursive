@@ -60,11 +60,14 @@ def _safe_value(val, depth=0):
         return [_safe_value(v, depth + 1) for v in val[:100]]
     if isinstance(val, tuple):
         return [_safe_value(v, depth + 1) for v in val[:100]]
-    if isinstance(val, dict):
-        return {str(k): _safe_value(v, depth + 1) for k, v in list(val.items())[:50]}
     if isinstance(val, set):
         return [_safe_value(v, depth + 1) for v in sorted(val, key=str)[:100]]
-    return str(val)
+    if hasattr(val, 'items'):
+        return dict({str(k): _safe_value(v, depth + 1) for k, v in list(val.items())[:50]})
+    try:
+        return str(val)
+    except:
+        return "?"
 
 def _capture_vars(frame):
     result = {}
