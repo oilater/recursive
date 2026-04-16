@@ -7,6 +7,7 @@ import sys
 import copy
 import json
 import ast as _ast_module
+import types as _types_module
 
 _steps = []
 _step_id = 0
@@ -17,45 +18,71 @@ _recursive_func_name = None
 _has_recursion = False
 _max_steps = 5000
 _max_depth = 200
-
-def _detect_recursion(source, func_name):
-    """Detect if a function calls itself."""
+def _find_recursive_func(source):
+    """Find top-level func and any recursive func (including nested)."""
     try:
         tree = _ast_module.parse(source)
-        for node in _ast_module.walk(tree):
-            if isinstance(node, _ast_module.FunctionDef) and node.name == func_name:
-                for child in _ast_module.walk(node):
-                    if isinstance(child, _ast_module.Call):
-                        if isinstance(child.func, _ast_module.Name) and child.func.id == func_name:
-                            return True
     except:
-        pass
-    return False
+        return None, None
 
-def _find_top_function(source):
-    """Find the first top-level function definition."""
-    try:
-        tree = _ast_module.parse(source)
-        for node in tree.body:
-            if isinstance(node, _ast_module.FunctionDef):
-                return node.name
-    except:
-        pass
-    return None
+    top_func = None
+    for node in tree.body:
+        if isinstance(node, _ast_module.FunctionDef):
+            top_func = node.name
+            break
 
-def _safe_serialize(val, depth=0):
-    """Safely serialize a Python value for JSON transfer."""
+    if not top_func:
+        return None, None
+
+    for node in _ast_module.walk(tree):
+        if isinstance(node, _ast_module.FunctionDef):
+            fn_name = node.name
+            for child in _ast_module.walk(node):
+                if isinstance(child, _ast_module.Call):
+                    if isinstance(child.func, _ast_module.Name) and child.func.id == fn_name:
+                        return top_func, fn_name
+
+    return top_func, None
+
+def _safe_value(val, depth=0):
     if depth > 3:
-        return repr(val)
-    if val is None or isinstance(val, (bool, int, float, str)):
+        return str(val)
+    if val is None:
+        return None
+    if isinstance(val, bool):
         return val
-    if isinstance(val, (list, tuple)):
-        return [_safe_serialize(v, depth + 1) for v in val[:200]]
+    if isinstance(val, (int, float)):
+        return val
+    if isinstance(val, str):
+        return val if len(val) < 200 else val[:200] + "..."
+    if isinstance(val, list):
+        return [_safe_value(v, depth + 1) for v in val[:100]]
+    if isinstance(val, tuple):
+        return [_safe_value(v, depth + 1) for v in val[:100]]
     if isinstance(val, dict):
-        return {str(k): _safe_serialize(v, depth + 1) for k, v in list(val.items())[:50]}
+        return {str(k): _safe_value(v, depth + 1) for k, v in list(val.items())[:50]}
     if isinstance(val, set):
-        return [_safe_serialize(v, depth + 1) for v in list(val)[:200]]
-    return repr(val)
+        return [_safe_value(v, depth + 1) for v in sorted(val, key=str)[:100]]
+    return str(val)
+
+def _capture_vars(frame):
+    result = {}
+    for k, v in frame.f_locals.items():
+        if k.startswith("_"):
+            continue
+        if isinstance(v, (_types_module.FunctionType, _types_module.BuiltinFunctionType,
+                          _types_module.ModuleType, type)):
+            continue
+        if callable(v) and not isinstance(v, (list, dict, set, tuple)):
+            continue
+        try:
+            result[k] = _safe_value(copy.deepcopy(v))
+        except:
+            try:
+                result[k] = str(v)
+            except:
+                result[k] = "?"
+    return result
 
 def _get_active_path():
     path = [_root_node["id"]]
@@ -66,26 +93,27 @@ def _get_active_path():
 def _tracer(frame, event, arg):
     global _step_id, _node_counter, _has_recursion
 
-    if frame.f_code.co_filename != "<exec>":
+    if frame.f_code.co_filename != "<user>":
         return _tracer
 
-    if _step_id >= _max_steps:
-        raise RuntimeError(f"Step limit exceeded ({_max_steps})")
-
     fn_name = frame.f_code.co_name
+
+    if _step_id >= _max_steps:
+        raise RuntimeError("Step limit exceeded (" + str(_max_steps) + ")")
 
     if event == "call" and fn_name == _recursive_func_name:
         _has_recursion = True
         _node_counter += 1
-        args_dict = {}
-        for k in frame.f_code.co_varnames[:frame.f_code.co_argcount]:
-            if k in frame.f_locals:
-                args_dict[k] = _safe_serialize(frame.f_locals[k])
+
+        param_names = frame.f_code.co_varnames[:frame.f_code.co_argcount]
+        args_str = ", ".join(
+            str(_safe_value(frame.f_locals.get(p))) for p in param_names
+        )
 
         node = {
-            "id": f"node-{_node_counter}",
+            "id": "node-" + str(_node_counter),
             "label": fn_name,
-            "args": ", ".join(f"{v}" for v in args_dict.values()),
+            "args": args_str,
             "children": [],
             "status": "active",
         }
@@ -98,67 +126,48 @@ def _tracer(frame, event, arg):
         _call_stack.append({"node": node, "fn": fn_name})
 
         if len(_call_stack) > _max_depth:
-            raise RuntimeError(f"Recursion depth exceeded ({_max_depth})")
-
-        current_node_id = node["id"]
-        active_path = _get_active_path()
-
-        vars_snapshot = {}
-        for k, v in frame.f_locals.items():
-            if not k.startswith("_"):
-                try:
-                    vars_snapshot[k] = _safe_serialize(copy.deepcopy(v))
-                except:
-                    vars_snapshot[k] = repr(v)
+            raise RuntimeError("Recursion depth exceeded (" + str(_max_depth) + ")")
 
         _steps.append({
             "id": _step_id,
             "type": "call",
             "codeLine": frame.f_lineno,
-            "activeNodeId": current_node_id,
-            "activePath": active_path[:],
-            "variables": vars_snapshot,
-            "description": f"{fn_name}({node['args']})"
+            "activeNodeId": node["id"],
+            "activePath": _get_active_path(),
+            "variables": _capture_vars(frame),
+            "description": fn_name + "(" + args_str + ")"
         })
         _step_id += 1
+        return _tracer
 
-    elif event == "return" and fn_name == _recursive_func_name and _call_stack:
+    if event == "return" and fn_name == _recursive_func_name and _call_stack:
         finished = _call_stack.pop()
         finished["node"]["status"] = "completed"
 
-        current_node_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
-        active_path = _get_active_path()
+        current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
 
         _steps.append({
             "id": _step_id,
             "type": "return",
             "codeLine": frame.f_lineno,
-            "activeNodeId": current_node_id,
-            "activePath": active_path[:],
-            "variables": {},
-            "description": f"return {_safe_serialize(arg)}"
+            "activeNodeId": current_id,
+            "activePath": _get_active_path(),
+            "variables": _capture_vars(frame),
+            "description": "return " + str(_safe_value(arg))
         })
         _step_id += 1
+        return _tracer
 
-    elif event == "line":
-        current_node_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
-        active_path = _get_active_path()
-
-        vars_snapshot = {}
-        for k, v in frame.f_locals.items():
-            if not k.startswith("_"):
-                try:
-                    vars_snapshot[k] = _safe_serialize(copy.deepcopy(v))
-                except:
-                    vars_snapshot[k] = repr(v)
+    if event == "line" and fn_name != "<module>":
+        current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
 
         _steps.append({
             "id": _step_id,
             "type": "call",
             "codeLine": frame.f_lineno,
-            "activeNodeId": current_node_id,
-            "activePath": active_path[:],
-            "variables": vars_snapshot,
+            "activeNodeId": current_id,
+            "activePath": _get_active_path(),
+            "variables": _capture_vars(frame),
             "description": ""
         })
         _step_id += 1
@@ -176,36 +185,46 @@ def _run_traced(source, args_list):
     _has_recursion = False
     _root_node = {"id": "root", "label": "", "args": "", "children": [], "status": "completed"}
 
-    func_name = _find_top_function(source)
+    func_name, rec_func_name = _find_recursive_func(source)
+    _recursive_func_name = rec_func_name
+
     if func_name:
-        _recursive_func_name = func_name if _detect_recursion(source, func_name) else None
         _root_node["label"] = func_name
-    else:
-        _recursive_func_name = None
 
     console_logs = []
-    original_print = print
 
-    def captured_print(*args, **kwargs):
-        text = " ".join(str(a) for a in args)
-        console_logs.append({"text": text, "stepIdx": _step_id - 1 if _step_id > 0 else 0})
+    def _captured_print(*a, **kw):
+        text = " ".join(str(x) for x in a)
+        console_logs.append({"text": text, "stepIdx": max(0, _step_id - 1)})
 
-    exec_globals = {"print": captured_print, "__builtins__": __builtins__}
+    exec_globals = {"print": _captured_print, "__builtins__": __builtins__}
 
-    sys.settrace(_tracer)
+    user_code = compile(source, "<user>", "exec")
+
+    # exec defines functions (tracer OFF to skip top-level print etc.)
+    exec(user_code, exec_globals)
+
     final_return = None
-    try:
-        exec(source, exec_globals)
-        if func_name and func_name in exec_globals:
+    if func_name and func_name in exec_globals:
+        sys.settrace(_tracer)
+        try:
             final_return = exec_globals[func_name](*args_list)
-    finally:
-        sys.settrace(None)
+        finally:
+            sys.settrace(None)
+    else:
+        exec_globals2 = {"print": _captured_print, "__builtins__": __builtins__}
+        user_code2 = compile(source, "<user>", "exec")
+        sys.settrace(_tracer)
+        try:
+            exec(user_code2, exec_globals2)
+        finally:
+            sys.settrace(None)
 
     return {
         "steps": _steps,
         "tree": _root_node,
         "hasRecursion": _has_recursion,
-        "finalReturnValue": _safe_serialize(final_return),
+        "finalReturnValue": _safe_value(final_return),
         "consoleLogs": console_logs,
     }
 `;
