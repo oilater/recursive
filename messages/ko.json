@@ -82,7 +82,7 @@
     }
   },
   "metadata": {
-    "title": "Recursive — 알고리즘을 시각화하세요",
-    "description": "코드를 붙여넣기만 하면 실행 흐름을 한 줄씩 따라갈 수 있어요. 재귀라면 호출 트리까지 한눈에. JS / TS 지원."
+    "title": "Recursive - 알고리즘을 시각화하세요",
+    "description": "코드를 붙여넣기만 하면 실행 흐름을 한 줄씩 따라갈 수 있어요."
   }
 }
