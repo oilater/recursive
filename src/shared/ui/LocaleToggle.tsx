@@ -32,7 +32,11 @@ export function LocaleToggle() {
     setOpen(false);
     if (target !== locale) {
       const url = new URL(window.location.href);
-      url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
+      if (/^\/(ko|en)(\/|$)/.test(url.pathname)) {
+        url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
+      } else {
+        url.pathname = `/${target}${url.pathname}`;
+      }
       window.location.href = url.toString();
     }
   };
