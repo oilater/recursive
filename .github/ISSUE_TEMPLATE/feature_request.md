@@ -1,14 +1,14 @@
 ---
 name: Feature Request
-about: 이런 기능이 있으면 좋겠어요
+about: Suggest a new feature or improvement
 title: "[Feature] "
 labels: enhancement
 assignees: ""
 ---
 
-## 어떤 기능인가요?
+## What feature would you like?
 
-## 왜 필요한가요?
+## Why is it needed?
 
-## 참고 자료 (있다면)
+## References (if any)
 

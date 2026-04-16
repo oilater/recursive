@@ -1,32 +1,32 @@
 ---
 name: Bug Report
-about: 버그를 발견했어요
+about: Something isn't working
 title: "[Bug] "
 labels: bug
 assignees: ""
 ---
 
-## 어떤 문제인가요?
+## What happened?
 
-## 재현 방법
+## Steps to reproduce
 
 1. 
 2. 
 3. 
 
-## 입력한 코드 (있다면)
+## Code you entered (if applicable)
 
 ```python
 
 ```
 
-## 예상 결과
+## Expected behavior
 
-## 실제 결과
+## Actual behavior
 
-## 스크린샷 (있다면)
+## Screenshots (if applicable)
 
-## 환경
+## Environment
 
-- 브라우저:
-- 언어: Python / JavaScript
+- Browser:
+- Language: Python / JavaScript
