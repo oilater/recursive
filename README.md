@@ -38,6 +38,12 @@ pnpm fix          # oxlint + oxfmt
 
 Bug reports and feature requests → [GitHub Issues](https://github.com/oilater/recursive/issues)
 
+## Sponsor
+
+Your sponsorship helps support more languages like Java and C++.
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-♥-db61a2?style=for-the-badge)](https://github.com/sponsors/oilater)
+
 ## License
 
 MIT

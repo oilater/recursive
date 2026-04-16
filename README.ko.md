@@ -38,6 +38,12 @@ pnpm fix          # oxlint + oxfmt
 
 버그 제보 및 기능 건의 → [GitHub Issues](https://github.com/oilater/recursive/issues)
 
+## 후원
+
+후원은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 됩니다.
+
+[![후원하기](https://img.shields.io/badge/%ED%9B%84%EC%9B%90%ED%95%98%EA%B8%B0-♥-db61a2?style=for-the-badge)](https://github.com/sponsors/oilater)
+
 ## 라이선스
 
 MIT
