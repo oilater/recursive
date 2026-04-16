@@ -2,11 +2,11 @@
 
 [한국어](./README.ko.md) | English
 
-**Track your algorithms, line by line.**
+<img width="2400" height="1260" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
-Paste any JavaScript or TypeScript code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
+Paste your code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
-[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive-ochre.vercel.app)
+[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive--ochre.vercel.app-38bdf8?style=for-the-badge&logo=vercel&logoColor=white)](https://recursive.oilater.com)
 
 ## Supported Languages
 
