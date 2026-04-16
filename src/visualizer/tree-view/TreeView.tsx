@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import type { TreeNode, Step } from "@/algorithm";
 import { computeTreeLayout, type PositionedNode } from "@/shared/lib/tree-layout";
+import { usePannable } from "@/shared/lib/usePannable";
 import * as styles from "./tree-view.css";
 
 const NODE_MIN_W = 80;
 const NODE_H = 36;
 const NODE_RX = 8;
-const CHAR_WIDTH = 6.5; // 대략적인 글자 너비 (monospace 8-9px 기준)
-const NODE_PAD = 20; // 좌우 패딩
+const CHAR_WIDTH = 6.5;
+const NODE_PAD = 20;
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   idle: { bg: "#1e293b", text: "#94a3b8", border: "#475569" },
@@ -25,16 +26,16 @@ interface TreeViewProps {
 
 export function TreeView({ tree, currentStep }: TreeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [viewBox, setViewBox] = useState("0 0 800 400");
+  const { viewBox, isDragging, handlers, setViewBox } = usePannable(containerRef);
 
   const layout = useMemo(() => computeTreeLayout(tree), [tree]);
   const activePathSet = useMemo(() => new Set(currentStep?.activePath ?? []), [currentStep]);
   const activeNodeId = currentStep?.activeNodeId;
-
   const nodeById = useMemo(() => new Map(layout.allNodes.map((n) => [n.data.id, n])), [layout]);
 
   useEffect(
     function updateViewBox() {
+      if (isDragging) return;
       if (activeNodeId && containerRef.current) {
         const activeNode = nodeById.get(activeNodeId);
         if (activeNode) {
@@ -63,9 +64,12 @@ export function TreeView({ tree, currentStep }: TreeViewProps) {
     activePathSet.has(source.data.id) && activePathSet.has(target.data.id);
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div
+      ref={containerRef}
+      className={styles.container}
+      {...handlers}
+    >
       <svg className={styles.svgStyle} viewBox={viewBox} preserveAspectRatio="xMidYMid meet">
-        {/* Edges */}
         {layout.allEdges.map((edge, i) => {
           const active = isEdgeActive(edge.source, edge.target);
           const sx = edge.source.x;
@@ -86,7 +90,6 @@ export function TreeView({ tree, currentStep }: TreeViewProps) {
           );
         })}
 
-        {/* Nodes — rounded rectangles */}
         {layout.allNodes.map((node) => {
           const status = getNodeStatus(node);
           const isActive = status === "active";
