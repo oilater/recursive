@@ -168,6 +168,11 @@ export const embedFrame = style({
   border: "none",
   borderRadius: vars.radius.lg,
   marginTop: vars.space.md,
+  "@media": {
+    "(max-width: 768px)": {
+      height: "800px",
+    },
+  },
 });
 
 export const argsHint = style({
