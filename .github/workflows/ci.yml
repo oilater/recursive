@@ -33,6 +33,8 @@ jobs:
   bundle-size:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
