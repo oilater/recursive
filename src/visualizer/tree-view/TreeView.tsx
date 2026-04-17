@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect } from "react";
 import type { TreeNode, Step } from "@/algorithm";
 import { computeTreeLayout, type PositionedNode } from "@/shared/lib/tree-layout";
-import { usePannable } from "@/shared/lib/usePannable";
+import { usePannable } from "@/shared/hooks/usePannable";
 import * as styles from "./tree-view.css";
 
 const NODE_MIN_W = 80;
