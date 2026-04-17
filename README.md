@@ -1,8 +1,6 @@
-# Recursive
+<img width="2400" height="1050" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
 [한국어](./README.ko.md) | English
-
-<img width="2400" height="1050" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
 Paste your code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
