@@ -17,3 +17,13 @@ export function analyzePythonCode(code: string): { funcName: string | null; para
 
   return { funcName, paramNames };
 }
+
+/**
+ * Strip `self` parameter from all def signatures in Python code.
+ */
+export function stripSelfParam(code: string): string {
+  return code.replace(
+    /^(\s*def\s+\w+\s*)\(\s*self\s*,?\s*/gm,
+    (_, prefix) => `${prefix}(`,
+  );
+}

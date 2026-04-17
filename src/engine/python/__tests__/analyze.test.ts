@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { analyzePythonCode } from "../analyze";
+import { analyzePythonCode, stripSelfParam } from "../analyze";
 
 describe("analyzePythonCode", () => {
   it("detects function name and params", () => {
@@ -82,5 +82,33 @@ describe("analyzePythonCode", () => {
     const result = analyzePythonCode("");
     expect(result.funcName).toBeNull();
     expect(result.paramNames).toEqual([]);
+  });
+});
+
+describe("stripSelfParam", () => {
+  it("removes self from method", () => {
+    expect(stripSelfParam("def foo(self, x, y):\n    pass"))
+      .toBe("def foo(x, y):\n    pass");
+  });
+
+  it("removes self when it's the only param", () => {
+    expect(stripSelfParam("def foo(self):\n    pass"))
+      .toBe("def foo():\n    pass");
+  });
+
+  it("does not touch functions without self", () => {
+    const code = "def foo(a, b):\n    pass";
+    expect(stripSelfParam(code)).toBe(code);
+  });
+
+  it("handles nested methods", () => {
+    const code = "def outer(self, x):\n    def inner(self, y):\n        pass";
+    expect(stripSelfParam(code))
+      .toBe("def outer(x):\n    def inner(y):\n        pass");
+  });
+
+  it("handles type annotations with self", () => {
+    expect(stripSelfParam("def solve(self, nums: list[int]) -> int:\n    pass"))
+      .toBe("def solve(nums: list[int]) -> int:\n    pass");
   });
 });
