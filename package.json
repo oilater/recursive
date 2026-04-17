@@ -39,7 +39,7 @@
     "sucrase": "^3.35.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.2.3",
+    "@next/bundle-analyzer": "^16.2.4",
     "@types/d3-hierarchy": "^3.1.7",
     "@types/node": "^20",
     "@types/react": "^19",
