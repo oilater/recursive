@@ -143,7 +143,7 @@
     "tip7Title": "Sponsorship is always welcome",
     "tip7Desc": "Your <link>sponsorship</link> helps support more languages like Java and C++.",
     "changelogTitle": "Changelog",
-    "changelogDesc": "Features are improved based on GitHub Issues.",
+    "changelogDesc": "Features are improved based on GitHub Issues. <link>View all issues →</link>",
     "changelog1": "Mouse drag panning on the recursion call tree",
     "changelog2": "Python support",
     "changelog3": "Embed support (blog, Notion, Obsidian, etc.)",

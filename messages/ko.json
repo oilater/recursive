@@ -143,7 +143,7 @@
     "tip7Title": "후원도 언제든 환영해요",
     "tip7Desc": "<link>후원</link>은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 됩니다.",
     "changelogTitle": "업데이트 로그",
-    "changelogDesc": "Issue 기반으로 기능을 개선하고 있어요.",
+    "changelogDesc": "Issue 기반으로 기능을 개선하고 있어요. <link>전체 이슈 보기 →</link>",
     "changelog1": "재귀 호출 트리에서 마우스 드래그로 패닝 기능 추가",
     "changelog2": "Python 지원 추가",
     "changelog3": "임베드 기능 추가 (블로그, Notion, Obsidian 등)",
