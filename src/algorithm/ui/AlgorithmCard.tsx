@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { AlgorithmCardData } from "./types";
+import type { AlgorithmCardData } from "../types";
 import { Badge } from "@/shared/ui";
 import { Link } from "@/i18n/navigation";
 import * as styles from "./algorithm-card.css";
