@@ -8,11 +8,9 @@ assignees: ""
 
 ## What happened?
 
-## Steps to reproduce
+## How to reproduce
 
-1. 
-2. 
-3. 
+<!-- Describe what you did to trigger this bug -->
 
 ## Code you entered (if applicable)
 
