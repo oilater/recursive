@@ -1,5 +1,6 @@
 import type { StepGeneratorResult } from "@/algorithm/types";
 import { buildPyodideWorkerCode } from "./pyodide-worker";
+import { stripSelfParam } from "./analyze";
 import { DEFAULT_TIMEOUT_MS } from "../constants";
 
 export type PyodideState = "idle" | "loading" | "ready" | "error";
@@ -96,6 +97,6 @@ export async function executePython(
     };
 
     worker!.addEventListener("message", handler);
-    worker!.postMessage({ type: "execute", code, args });
+    worker!.postMessage({ type: "execute", code: stripSelfParam(code), args });
   });
 }
