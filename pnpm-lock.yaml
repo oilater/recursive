@@ -73,8 +73,8 @@ importers:
         version: 3.35.1
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.2.3
-        version: 16.2.3
+        specifier: ^16.2.4
+        version: 16.2.4
       '@types/d3-hierarchy':
         specifier: ^3.1.7
         version: 3.1.7
@@ -580,8 +580,8 @@ packages:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
 
-  '@next/bundle-analyzer@16.2.3':
-    resolution: {integrity: sha512-aDwW4f4SVqbQDWzSBHQJ1KI6H+lx8oX/vS3xGqzLajUu+KQb7uakK88AIMvRIf7TlIonce67g594rzpxvBuJIw==}
+  '@next/bundle-analyzer@16.2.4':
+    resolution: {integrity: sha512-EAA9xTDv0P1IiUcZaASJJPkNDjRvL7OMTha6XN8MBzALYGfn7I52Mn7vRiyjVfNrtUPi2qiacY+eFVXe3lKCXA==}
 
   '@next/env@16.2.3':
     resolution: {integrity: sha512-ZWXyj4uNu4GCWQw9cjRxWlbD+33mcDszIo9iQxFnBX3Wmgq9ulaSJcl6VhuWx5pCWqqD+9W6Wfz7N0lM5lYPMA==}
@@ -2930,7 +2930,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@next/bundle-analyzer@16.2.3':
+  '@next/bundle-analyzer@16.2.4':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
