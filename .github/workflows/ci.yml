@@ -60,12 +60,6 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Read Next.js build output
-            const routesManifest = JSON.parse(
-              fs.readFileSync('.next/routes-manifest.json', 'utf8')
-            );
-
-            // Get .next/static size
             function getDirSize(dir) {
               let size = 0;
               if (!fs.existsSync(dir)) return 0;
@@ -77,22 +71,45 @@ jobs:
               return size;
             }
 
-            const staticSize = getDirSize('.next/static');
-            const formatSize = (bytes) => {
+            function getFileSize(filePath) {
+              if (!fs.existsSync(filePath)) return 0;
+              return fs.statSync(filePath).size;
+            }
+
+            const fmt = (bytes) => {
               if (bytes > 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + ' MB';
               return (bytes / 1024).toFixed(1) + ' KB';
             };
 
-            // Read build manifest for JS bundles
-            const buildManifest = JSON.parse(
-              fs.readFileSync('.next/build-manifest.json', 'utf8')
-            );
-            const pages = Object.keys(buildManifest.pages);
+            const staticSize = getDirSize('.next/static');
+            const jsSize = getDirSize('.next/static/chunks');
+            const cssSize = getDirSize('.next/static/css');
+
+            // Top 5 largest chunks
+            const chunksDir = '.next/static/chunks';
+            let chunkRows = '';
+            if (fs.existsSync(chunksDir)) {
+              const chunks = fs.readdirSync(chunksDir, { recursive: true })
+                .filter(f => f.endsWith('.js'))
+                .map(f => ({ name: f, size: getFileSize(path.join(chunksDir, f)) }))
+                .sort((a, b) => b.size - a.size)
+                .slice(0, 5);
+
+              for (const { name, size } of chunks) {
+                chunkRows += `| \`${name}\` | ${fmt(size)} |\n`;
+              }
+            }
 
             let report = '## 📦 Bundle Size Report\n\n';
+            report += '### Overview\n\n';
             report += `| Metric | Size |\n|--------|------|\n`;
-            report += `| Total static assets | ${formatSize(staticSize)} |\n`;
-            report += `| Routes | ${pages.length} |\n\n`;
+            report += `| Total static assets | ${fmt(staticSize)} |\n`;
+            report += `| JavaScript | ${fmt(jsSize)} |\n`;
+            report += `| CSS | ${fmt(cssSize)} |\n\n`;
+
+            report += '### Top 5 Largest Chunks\n\n';
+            report += `| Chunk | Size |\n|-------|------|\n`;
+            report += chunkRows;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
