@@ -32,7 +32,7 @@ describe("transformCode", () => {
     const result = transformCode(code, makeAnalysis({ recursiveFuncName: "fib" }));
 
     expect(result).toContain("__createProxy");
-    expect(result).toContain("fib = __createProxy(fib)");
+    expect(result).toContain(`fib = __createProxy(fib, "fib", ["n"])`);
   });
 
   it("루프에 __guard를 삽입한다", () => {

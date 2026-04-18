@@ -39,6 +39,8 @@ self.onmessage = function(e) {
       status: 'completed'
     };
 
+    callStack.push({ funcName: entryFuncName, variables: {} });
+
     function deepClone(val) {
       if (val === null || val === undefined) return val;
       if (typeof val === 'function') return '[Function: ' + (val.name || 'anonymous') + ']';
@@ -64,11 +66,13 @@ self.onmessage = function(e) {
       }).join(', ');
     }
 
-    function getPath(stack, nodeId) {
+    function getPath(activeNodeId) {
       var path = [];
       if (hasRecursion && rootNode.children.length > 0) path.push(rootNode.id);
-      for (var i = 0; i < stack.length; i++) path.push(stack[i].nodeId);
-      if (nodeId) path.push(nodeId);
+      for (var i = 0; i < callStack.length; i++) {
+        if (callStack[i].nodeId) path.push(callStack[i].nodeId);
+      }
+      if (activeNodeId && path[path.length - 1] !== activeNodeId) path.push(activeNodeId);
       return path;
     }
 
@@ -81,6 +85,23 @@ self.onmessage = function(e) {
 
     var originalLineCount = data.originalLineCount || 9999;
 
+    // Active frame is deep-cloned per step; parent frames share references.
+    // Safe because parent.variables is mutated only while parent is active (after pop returns control).
+    function snapshotFrames() {
+      if (callStack.length === 0) return [];
+      var snap = new Array(callStack.length);
+      for (var i = 0; i < callStack.length - 1; i++) {
+        snap[i] = callStack[i];
+      }
+      var top = callStack[callStack.length - 1];
+      var clonedVars = {};
+      for (var k in top.variables) {
+        if (top.variables.hasOwnProperty(k)) clonedVars[k] = deepClone(top.variables[k]);
+      }
+      snap[callStack.length - 1] = { funcName: top.funcName, variables: clonedVars };
+      return snap;
+    }
+
     function __traceLine(line, varsSnapshot) {
       if (steps.length >= maxSteps) {
         throw new Error('Step limit exceeded (' + maxSteps + '). Try smaller input.');
@@ -88,84 +109,80 @@ self.onmessage = function(e) {
       var correctedLine = line - lineOffset;
       if (correctedLine < 1 || correctedLine > originalLineCount) return;
 
-      var currentNodeId = callStack.length > 0 ? callStack[callStack.length - 1].nodeId : rootNode.id;
-      var activePath = callStack.length > 0 ? getPath(callStack, currentNodeId) : [rootNode.id];
-
-      var variables = {};
+      var top = callStack[callStack.length - 1];
       if (varsSnapshot) {
         for (var k in varsSnapshot) {
           if (varsSnapshot.hasOwnProperty(k)) {
-            variables[k] = deepClone(varsSnapshot[k]);
+            top.variables[k] = varsSnapshot[k];
           }
         }
       }
+
+      var currentNodeId = null;
+      for (var j = callStack.length - 1; j >= 0; j--) {
+        if (callStack[j].nodeId) { currentNodeId = callStack[j].nodeId; break; }
+      }
+      if (!currentNodeId) currentNodeId = rootNode.id;
 
       steps.push({
         id: stepId++,
         type: 'call',
         codeLine: correctedLine,
         activeNodeId: currentNodeId,
-        activePath: activePath.slice(),
-        frames: [{ funcName: userFunc || entryFuncName, variables: variables }],
+        activePath: getPath(currentNodeId),
+        frames: snapshotFrames(),
         description: ''
       });
     }
 
-    function __createProxy(originalFunc) {
-      if (!hasRecursion) return originalFunc;
+    function __createProxy(originalFunc, funcName, paramNames) {
+      funcName = funcName || (hasRecursion ? recursiveFuncName : (originalFunc.name || 'anonymous'));
+      paramNames = paramNames || (hasRecursion ? recursiveParamNames : []);
 
       return new Proxy(originalFunc, {
         apply: function(target, thisArg, argsList) {
           callCount++;
           if (callCount > maxCalls) {
-            throw new Error('Recursive call count exceeded ' + maxCalls + ' calls.');
+            throw new Error('Function call count exceeded ' + maxCalls + ' calls.');
           }
 
-          var nodeId = 'node-' + nodeIdCounter++;
-          var node = {
-            id: nodeId,
-            label: recursiveFuncName,
-            args: formatArgs(argsList),
-            children: [],
-            status: 'idle'
-          };
-
-          if (callStack.length === 0) {
-            rootNode.children.push(node);
-          } else {
-            callStack[callStack.length - 1].node.children.push(node);
-          }
-
-          callStack.push({ nodeId: nodeId, node: node });
-
-          var entryLine = Math.max(1, funcStartLine - lineOffset);
-          if (entryLine >= 1 && entryLine <= originalLineCount) {
-            var prevFrame = steps.length > 0 ? steps[steps.length - 1].frames[0] : null;
-            var prevVars = prevFrame ? Object.assign({}, prevFrame.variables) : {};
-            for (var i = 0; i < recursiveParamNames.length; i++) {
-              prevVars[recursiveParamNames[i]] = deepClone(argsList[i]);
+          // TreeNode only for the recursive function — keeps the call tree visualization scoped
+          var nodeId = null;
+          var node = null;
+          if (hasRecursion && funcName === recursiveFuncName) {
+            nodeId = 'node-' + nodeIdCounter++;
+            node = {
+              id: nodeId,
+              label: funcName,
+              args: formatArgs(argsList),
+              children: [],
+              status: 'idle'
+            };
+            var parentNode = rootNode;
+            for (var p = callStack.length - 1; p >= 0; p--) {
+              if (callStack[p].node) { parentNode = callStack[p].node; break; }
             }
-            steps.push({
-              id: stepId++,
-              type: 'call',
-              codeLine: entryLine,
-              activeNodeId: nodeId,
-              activePath: getPath(callStack, nodeId),
-              frames: [{ funcName: recursiveFuncName, variables: prevVars }],
-              description: recursiveFuncName + '(' + formatArgs(argsList) + ')'
-            });
+            parentNode.children.push(node);
           }
+
+          var seedVars = {};
+          for (var i = 0; i < paramNames.length; i++) {
+            seedVars[paramNames[i]] = deepClone(argsList[i]);
+          }
+          var frame = { funcName: funcName, variables: seedVars };
+          if (nodeId) { frame.nodeId = nodeId; frame.node = node; }
+          callStack.push(frame);
 
           var result;
           try {
             result = Reflect.apply(target, thisArg, argsList);
           } catch(err) {
-            node.status = 'backtracked';
+            if (node) node.status = 'backtracked';
             callStack.pop();
             throw err;
           }
 
-          node.status = 'completed';
+          if (node) node.status = 'completed';
           callStack.pop();
           return result;
         }
