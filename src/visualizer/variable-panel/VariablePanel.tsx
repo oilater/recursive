@@ -1,8 +1,7 @@
 "use client";
 
-import type { Step } from "@/algorithm";
+import type { Step, Frame } from "@/algorithm";
 import { useTranslations } from "next-intl";
-import { omit } from "es-toolkit";
 import { EmptyState } from "@/shared/ui";
 import * as styles from "./variable-panel.css";
 
@@ -10,8 +9,6 @@ interface VariablePanelProps {
   currentStep: Step | undefined;
   prevStep?: Step | undefined;
 }
-
-const HIDDEN_KEYS = ["depth"] as const;
 
 function didChange(prev: unknown, curr: unknown): boolean {
   if (prev === curr) return false;
@@ -117,9 +114,16 @@ function renderValue(value: unknown, changed: boolean, prevValue?: unknown): Rea
   );
 }
 
+function findPrevFrame(prevStep: Step | undefined, depth: number, funcName: string): Frame | undefined {
+  if (!prevStep) return undefined;
+  const candidate = prevStep.frames[depth];
+  if (candidate && candidate.funcName === funcName) return candidate;
+  return undefined;
+}
+
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   const t = useTranslations("visualizer");
-  if (!currentStep) {
+  if (!currentStep || currentStep.frames.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.title}>Variables</div>
@@ -128,21 +132,38 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
     );
   }
 
-  const activeFrame = currentStep.frames[currentStep.frames.length - 1];
-  const prevActiveFrame = prevStep ? prevStep.frames[prevStep.frames.length - 1] : undefined;
-  const visibleVars = activeFrame ? omit(activeFrame.variables, HIDDEN_KEYS) : {};
-  const prevVars = prevActiveFrame ? omit(prevActiveFrame.variables, HIDDEN_KEYS) : {};
-  const entries = Object.entries(visibleVars);
+  const lastIdx = currentStep.frames.length - 1;
 
   return (
     <div className={styles.container}>
       <div className={styles.title}>Variables</div>
-      {entries.map(([key, value]) => {
-        const changed = prevStep !== undefined && didChange(prevVars[key], value);
+      {currentStep.frames.map((frame, depth) => {
+        const isActive = depth === lastIdx;
+        const prevFrame = findPrevFrame(prevStep, depth, frame.funcName);
+        const entries = Object.entries(frame.variables);
+
         return (
-          <div key={key} className={changed ? styles.rowChanged : styles.row}>
-            <span className={styles.varName}>{key}</span>
-            {renderValue(value, changed, prevVars[key])}
+          <div
+            key={`${depth}:${frame.funcName}`}
+            className={isActive ? styles.frameActive : styles.frame}
+          >
+            <div className={styles.frameHeader}>
+              <span className={styles.frameArrow}>{isActive ? ">" : "|"}</span>
+              <span className={styles.frameName}>{frame.funcName}</span>
+            </div>
+            {entries.length === 0 ? (
+              <div className={styles.frameEmpty}>—</div>
+            ) : (
+              entries.map(([key, value]) => {
+                const changed = prevFrame !== undefined && didChange(prevFrame.variables[key], value);
+                return (
+                  <div key={key} className={changed ? styles.rowChanged : styles.row}>
+                    <span className={styles.varName}>{key}</span>
+                    {renderValue(value, changed, prevFrame?.variables[key])}
+                  </div>
+                );
+              })
+            )}
           </div>
         );
       })}

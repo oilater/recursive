@@ -91,3 +91,49 @@ export const cellChanged = style([
     fontWeight: 600,
   },
 ]);
+
+// ── Frame stack ──
+
+export const frame = style({
+  marginTop: vars.space.sm,
+  paddingLeft: vars.space.sm,
+  borderLeft: `2px solid ${vars.color.border}`,
+  opacity: 0.55,
+  transition: "opacity 0.15s ease",
+});
+
+export const frameActive = style([
+  frame,
+  {
+    opacity: 1,
+    borderLeftColor: "#fbbf24",
+  },
+]);
+
+export const frameHeader = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  padding: `${vars.space.xs} 0`,
+});
+
+export const frameArrow = style({
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+});
+
+export const frameName = style({
+  color: vars.color.text,
+  fontWeight: 600,
+});
+
+export const frameEmpty = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  paddingLeft: vars.space.md,
+  paddingBottom: vars.space.xs,
+});
