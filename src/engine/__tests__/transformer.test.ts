@@ -7,9 +7,6 @@ const makeAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult =
   entryParamNames: [],
   recursiveFuncName: null,
   recursiveParamNames: [],
-  tracedFuncStartLine: 1,
-  tracedFuncEndLine: 5,
-  localVarNames: ["x"],
   hasRecursion: false,
   hasTopLevelCall: false,
   lineOffset: 1,
@@ -20,7 +17,7 @@ const makeAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult =
 describe("transformCode", () => {
   it("추적 함수 본문에 __traceLine을 삽입한다", () => {
     const code = `function __entry__() {\nconst x = 1;\nreturn x;\n}`;
-    const result = transformCode(code, makeAnalysis({ tracedFuncEndLine: 4 }));
+    const result = transformCode(code, makeAnalysis());
 
     expect(result).toContain("__traceLine");
     // try-catch로 감싸서 삽입됨
@@ -37,7 +34,7 @@ describe("transformCode", () => {
 
   it("루프에 __guard를 삽입한다", () => {
     const code = `function __entry__() {\nfor (let i = 0; i < 10; i++) {\nconsole.log(i);\n}\n}`;
-    const result = transformCode(code, makeAnalysis({ localVarNames: ["i"] }));
+    const result = transformCode(code, makeAnalysis());
 
     expect(result).toContain("__guard()");
   });
@@ -54,15 +51,14 @@ describe("transformCode", () => {
 
   it("변수 스냅샷을 __traceLine에 전달한다", () => {
     const code = `function __entry__() {\nconst arr = [1];\n}`;
-    const result = transformCode(code, makeAnalysis({ localVarNames: ["arr"] }));
+    const result = transformCode(code, makeAnalysis());
 
-    // shorthand property: { arr } 형태로 전달
     expect(result).toContain("arr");
   });
 
   it("추적 함수 밖에는 __traceLine을 삽입하지 않는다", () => {
     const code = `const outside = 1;\nfunction __entry__() {\nconst inside = 2;\n}`;
-    const result = transformCode(code, makeAnalysis({ localVarNames: ["inside"] }));
+    const result = transformCode(code, makeAnalysis());
 
     // 첫 번째 줄(outside) 앞에는 traceLine이 없어야 함
     const lines = result.split("\n");

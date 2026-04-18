@@ -75,8 +75,6 @@ export async function executeCustomCode(
       maxCalls,
       maxLoopIterations,
       maxSteps,
-      funcStartLine: analysis.tracedFuncStartLine,
-      funcEndLine: analysis.tracedFuncEndLine,
       lineOffset: analysis.lineOffset,
       userTopLevelFuncName: analysis.userTopLevelFuncName,
       originalLineCount: code.split("\n").length,

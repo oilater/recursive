@@ -18,8 +18,6 @@ self.onmessage = function(e) {
   var maxCalls = data.maxCalls || 5000;
   var maxLoopIterations = data.maxLoopIterations || 100000;
   var maxSteps = data.maxSteps || 10000;
-  var funcStartLine = data.funcStartLine || 1;
-  var funcEndLine = data.funcEndLine || 1;
   var lineOffset = data.lineOffset || 0;
   var userFunc = data.userTopLevelFuncName;
 

@@ -17,9 +17,6 @@ export interface AnalysisResult {
   entryParamNames: string[];
   recursiveFuncName: string | null;
   recursiveParamNames: string[];
-  tracedFuncStartLine: number;
-  tracedFuncEndLine: number;
-  localVarNames: string[];
   hasRecursion: boolean;
   hasTopLevelCall: boolean;
   lineOffset: number;

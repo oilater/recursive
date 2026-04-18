@@ -97,16 +97,4 @@ describe("analyzeCode", () => {
     expect(() => analyzeCode("function {{{")).toThrow("Syntax error");
   });
 
-  it("로컬 변수를 추출한다", () => {
-    const { analysis } = analyzeCode(`
-      function test(x) {
-        const a = 1;
-        let b = 2;
-        return x + a + b;
-      }
-    `);
-
-    expect(analysis.localVarNames).toContain("a");
-    expect(analysis.localVarNames).toContain("b");
-  });
 });
