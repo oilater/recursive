@@ -170,7 +170,7 @@ self.onmessage = function(e) {
       var callerLine;
       if (topIdx > 0) {
         var parentFrame = callStack[topIdx - 1];
-        if (parentFrame.funcName !== top.funcName && typeof parentFrame.lastLine === 'number') {
+        if (typeof parentFrame.lastLine === 'number' && parentFrame.lastLine !== correctedLine) {
           callerLine = parentFrame.lastLine;
         }
       }
