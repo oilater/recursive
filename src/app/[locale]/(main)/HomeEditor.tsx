@@ -5,9 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import type { ArgumentFormHandle } from "@/editor";
-import { analyzeCode, analyzePythonCode, executeCode, ensurePyodideWorker } from "@/engine";
+import { executeCode, getCodeLanguageAdapter } from "@/engine";
 import type { CodeLanguage } from "@/engine";
-import { normalizeCode } from "@/shared/lib/normalize-code";
 import { CodeLanguageSelect, getDefaultCodeLanguage } from "@/shared/ui/CodeLanguageSelect";
 import * as styles from "./home.css";
 
@@ -26,11 +25,9 @@ export function HomeEditor() {
 
   useEffect(
     function preloadPyodide() {
-      if (codeLanguage === "python") {
-        ensurePyodideWorker().catch(() => {});
-      }
+      if (codeLanguage) getCodeLanguageAdapter(codeLanguage).onSelected?.();
     },
-    [],
+    [codeLanguage],
   );
   const hasCode = code.trim().length > 0;
   const argFormRef = useRef<ArgumentFormHandle>(null);
@@ -47,14 +44,8 @@ export function HomeEditor() {
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     setError(null);
-    if (codeLanguage === "javascript") {
-      try {
-        const { analysis } = analyzeCode(newCode);
-        setParamNames(analysis.entryParamNames);
-      } catch {}
-    } else {
-      const { paramNames: pyParams } = analyzePythonCode(newCode);
-      setParamNames(pyParams);
+    if (codeLanguage) {
+      setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
     }
   };
 
@@ -63,7 +54,7 @@ export function HomeEditor() {
     setError(null);
     setRunning(true);
     try {
-      const cleanCode = codeLanguage === "javascript" ? normalizeCode(code) : code;
+      const cleanCode = getCodeLanguageAdapter(codeLanguage).prepareForExecution(code);
       await executeCode(cleanCode, args, codeLanguage);
       const encoded = btoa(unescape(encodeURIComponent(cleanCode)));
       const argsStr = args.length > 0 ? `&args=${encodeURIComponent(JSON.stringify(args))}` : "";

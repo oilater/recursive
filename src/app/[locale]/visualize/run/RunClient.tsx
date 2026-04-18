@@ -54,10 +54,9 @@ export function RunClient({ code, args, codeLanguage = "javascript" }: RunClient
 
       (async () => {
         try {
-          const lang = codeLanguage === "python" ? "python" : "javascript";
           const [execResult, html] = await Promise.all([
-            executeCode(code, args ?? [], lang),
-            highlightCode(code, lang),
+            executeCode(code, args ?? [], codeLanguage),
+            highlightCode(code, codeLanguage),
           ]);
           setExec({
             result: execResult.result,

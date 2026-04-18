@@ -4,11 +4,10 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
-import { executeCode, analyzeCode, analyzePythonCode } from "@/engine";
+import { executeCode, getCodeLanguageAdapter } from "@/engine";
 import type { CodeLanguage } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
-import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { Header, StatusMessage, EmbedDropdown, CodeLanguageSelect } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
@@ -63,15 +62,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     codeRef.current = newCode;
-    if (codeLanguage === "javascript") {
-      try {
-        const { analysis } = analyzeCode(newCode);
-        setParamNames(analysis.entryParamNames);
-      } catch {}
-    } else {
-      const { paramNames: pyParams } = analyzePythonCode(newCode);
-      setParamNames(pyParams);
-    }
+    setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
   };
 
   const handleExecute = async (args: unknown[]) => {
@@ -79,11 +70,11 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
     setMode("loading");
     setError(null);
     try {
-      const cleanCode = codeLanguage === "javascript" ? normalizeCode(code) : code;
-      const lang = codeLanguage === "python" ? "python" : "javascript";
+      const adapter = getCodeLanguageAdapter(codeLanguage);
+      const cleanCode = adapter.prepareForExecution(code);
       const [execResult, html] = await Promise.all([
-        executeCode(cleanCode, args, lang),
-        highlightCode(cleanCode, lang === "python" ? "python" : "javascript"),
+        executeCode(cleanCode, args, codeLanguage),
+        highlightCode(cleanCode, adapter.shikiLang),
       ]);
       setExec({
         result: execResult.result,
@@ -96,7 +87,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
       trackEvent("code_executed", {
         source: "playground",
         code: cleanCode.slice(0, 500),
-        language: lang,
+        language: codeLanguage,
         hasRecursion: execResult.hasRecursion,
         stepCount: execResult.result.steps.length,
       });

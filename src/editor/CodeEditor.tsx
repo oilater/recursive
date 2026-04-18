@@ -4,10 +4,9 @@ import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
 import { placeholder as placeholderExt } from "@codemirror/view";
 import type { CodeLanguage } from "@/engine";
+import { getCodeLanguageAdapter } from "@/engine";
 
 import * as styles from "./code-editor.css";
 
@@ -33,7 +32,7 @@ export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "
   const t = useTranslations("editor");
   const extensions = useMemo(
     () => [
-      codeLanguage === "python" ? python() : javascript({ typescript: true }),
+      getCodeLanguageAdapter(codeLanguage).editorExtension(),
       placeholderExt(t("placeholder")),
     ],
     [t, codeLanguage],
