@@ -71,6 +71,7 @@ export const frameCardRoot = style([
   },
 ]);
 
+
 export const frameHeader = style({
   display: "flex",
   alignItems: "center",
@@ -203,3 +204,65 @@ export const cellChanged = style([
     fontWeight: 600,
   },
 ]);
+
+// ── Function value card (closure visualization) ──
+
+export const functionCard = style({
+  display: "inline-flex",
+  flexDirection: "column",
+  borderRadius: vars.radius.sm,
+  border: `1px solid #c084fc`,
+  backgroundColor: "rgba(192, 132, 252, 0.08)",
+  overflow: "hidden",
+  minWidth: "120px",
+});
+
+export const functionCardHeader = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+  padding: `${vars.space.xs} ${vars.space.sm}`,
+  backgroundColor: "rgba(192, 132, 252, 0.12)",
+  borderBottom: `1px solid rgba(192, 132, 252, 0.3)`,
+});
+
+export const functionLabel = style({
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  color: "#c084fc",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  fontWeight: 600,
+});
+
+export const functionName = style({
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  fontWeight: 600,
+});
+
+export const functionSignature = style({
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+  color: vars.color.textMuted,
+});
+
+
+export const functionCardBody = style({
+  padding: `${vars.space.xs} ${vars.space.sm}`,
+});
+
+export const functionRow = style({
+  display: "flex",
+  alignItems: "flex-start",
+  gap: vars.space.sm,
+  padding: `2px 0`,
+});
+
+export const functionVarName = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  minWidth: "50px",
+});

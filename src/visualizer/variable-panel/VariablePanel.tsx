@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import type { Step, Frame } from "@/algorithm";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/shared/ui";
+import { useScrollActiveIntoView } from "@/shared/hooks/useScrollActiveIntoView";
 import * as styles from "./variable-panel.css";
 
 interface VariablePanelProps {
@@ -72,10 +72,57 @@ function renderGrid2D(value: unknown[][], prevValue: unknown): React.ReactNode {
   );
 }
 
+interface FunctionMarker {
+  __kind: "function";
+  funcName: string;
+  params: string[];
+  closure: Record<string, unknown>;
+}
+
+function isFunctionMarker(v: unknown): v is FunctionMarker {
+  return (
+    typeof v === "object" &&
+    v !== null &&
+    !Array.isArray(v) &&
+    (v as { __kind?: unknown }).__kind === "function"
+  );
+}
+
+function renderFunctionCard(value: FunctionMarker, changed: boolean): React.ReactNode {
+  const wrapperStyle = changed
+    ? { outline: "1.5px solid #fbbf24", outlineOffset: "1px", borderRadius: "6px" }
+    : undefined;
+  const closureEntries = Object.entries(value.closure);
+  const sig = `(${value.params.join(", ")})`;
+  return (
+    <div className={styles.functionCard} style={wrapperStyle}>
+      <div className={styles.functionCardHeader}>
+        <span className={styles.functionLabel}>fn</span>
+        <span className={styles.functionName}>{value.funcName}</span>
+        <span className={styles.functionSignature}>{sig}</span>
+      </div>
+      {closureEntries.length > 0 && (
+        <div className={styles.functionCardBody}>
+          {closureEntries.map(([k, v]) => (
+            <div key={k} className={styles.functionRow}>
+              <span className={styles.functionVarName}>{k}</span>
+              {renderValue(v, false)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function renderValue(value: unknown, changed: boolean, prevValue?: unknown): React.ReactNode {
   const changeStyle = changed
     ? { outline: "1.5px solid #fbbf24", outlineOffset: "1px", borderRadius: "4px" }
     : undefined;
+
+  if (isFunctionMarker(value)) {
+    return renderFunctionCard(value, changed);
+  }
 
   if (Array.isArray(value)) {
     if (value.length === 0)
@@ -131,16 +178,10 @@ function frameLabel(frame: Frame): string {
 
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   const t = useTranslations("visualizer");
-  const activeFrameRef = useRef<HTMLDivElement>(null);
   const activeFrameKey = currentStep?.frames.length
     ? `${currentStep.frames.length - 1}:${currentStep.frames[currentStep.frames.length - 1].funcName}`
     : null;
-
-  useEffect(() => {
-    if (activeFrameRef.current) {
-      activeFrameRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-  }, [activeFrameKey]);
+  const activeFrameRef = useScrollActiveIntoView<HTMLDivElement>(activeFrameKey);
 
   if (!currentStep || currentStep.frames.length === 0) {
     return (
@@ -151,10 +192,6 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
     );
   }
 
-  // Caller at top, most recent push at bottom — matches how a process stack
-  // grows visually and the natural reading order for following execution.
-  // Hide the synthesized global frame when the user code has no top-level
-  // variables — it's just noise in that case.
   const lastIdx = currentStep.frames.length - 1;
   const orderedFrames = currentStep.frames
     .map((frame, depth) => ({ frame, depth }))
