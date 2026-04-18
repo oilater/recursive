@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
-import { executeCode } from "@/engine";
+import { executeCodeLazy } from "@/engine/lazy";
 import type { CodeLanguage } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { StatusMessage } from "@/shared/ui";
@@ -44,7 +44,7 @@ export function EmbedClient({ code, args, error: initialError, lang = "javascrip
       (async () => {
         try {
           const [execResult, html] = await Promise.all([
-            executeCode(code, args ?? [], lang),
+            executeCodeLazy(code, args ?? [], lang),
             highlightCode(code, lang === "python" ? "python" : "javascript"),
           ]);
           if (execResult.result.steps.length === 0) {

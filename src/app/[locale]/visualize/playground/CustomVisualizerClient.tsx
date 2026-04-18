@@ -4,7 +4,8 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
-import { executeCode, getCodeLanguageAdapter } from "@/engine";
+import { getCodeLanguageAdapter } from "@/engine";
+import { executeCodeLazy } from "@/engine/lazy";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
@@ -67,11 +68,13 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     codeRef.current = newCode;
-    if (codeLanguage) {
-      const usage = getCodeLanguageAdapter(codeLanguage).analyzeUsage(newCode);
-      setParamNames(usage.paramNames);
-      setHasTopLevelCall(usage.hasTopLevelCall);
-    }
+    if (!codeLanguage) return;
+    getCodeLanguageAdapter(codeLanguage)
+      .analyzeUsage(newCode)
+      .then((usage) => {
+        setParamNames(usage.paramNames);
+        setHasTopLevelCall(usage.hasTopLevelCall);
+      });
   };
 
   const handleExecute = async (args: unknown[]) => {
@@ -83,7 +86,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
       const adapter = getCodeLanguageAdapter(codeLanguage);
       const cleanCode = adapter.prepareForExecution(code);
       const [execResult, html] = await Promise.all([
-        executeCode(cleanCode, args, codeLanguage),
+        executeCodeLazy(cleanCode, args, codeLanguage),
         highlightCode(cleanCode, adapter.shikiLang),
       ]);
       setExec({

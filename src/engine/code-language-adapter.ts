@@ -1,11 +1,7 @@
-import { javascript } from "@codemirror/lang-javascript";
-import { python } from "@codemirror/lang-python";
-import { analyzeCode } from "./analyzer";
 import { analyzePythonCode, ensurePyodideWorker } from "./python";
+import { analyzeCodeLazy } from "./lazy";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import type { CodeLanguage } from "./types";
-
-type EditorExtension = ReturnType<typeof javascript>;
 
 export interface UsageInfo {
   paramNames: string[];
@@ -16,8 +12,7 @@ export interface CodeLanguageAdapter {
   id: CodeLanguage;
   label: string;
   shikiLang: "javascript" | "python";
-  editorExtension: () => EditorExtension;
-  analyzeUsage: (code: string) => UsageInfo;
+  analyzeUsage: (code: string) => Promise<UsageInfo>;
   prepareForExecution: (code: string) => string;
   onSelected?: () => void;
 }
@@ -29,10 +24,9 @@ const ADAPTERS: Record<CodeLanguage, CodeLanguageAdapter> = {
     id: "javascript",
     label: "JS / TS",
     shikiLang: "javascript",
-    editorExtension: () => javascript({ typescript: true }),
-    analyzeUsage: (code) => {
+    analyzeUsage: async (code) => {
       try {
-        const { analysis } = analyzeCode(code);
+        const { analysis } = await analyzeCodeLazy(code);
         return {
           paramNames: analysis.entryParamNames,
           hasTopLevelCall: analysis.hasTopLevelCall,
@@ -47,8 +41,7 @@ const ADAPTERS: Record<CodeLanguage, CodeLanguageAdapter> = {
     id: "python",
     label: "Python",
     shikiLang: "python",
-    editorExtension: () => python(),
-    analyzeUsage: (code) => {
+    analyzeUsage: async (code) => {
       const { paramNames, hasTopLevelCall } = analyzePythonCode(code);
       return { paramNames, hasTopLevelCall };
     },
