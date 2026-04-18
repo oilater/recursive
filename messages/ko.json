@@ -27,7 +27,6 @@
     "pause": "일시정지",
     "stepForward": "한 단계 앞으로",
     "jumpToEnd": "끝으로",
-    "callStackEmpty": "스텝을 실행하면 Call Stack이 표시됩니다",
     "variablesEmpty": "스텝을 실행하면 Variables가 표시됩니다"
   },
   "custom": {

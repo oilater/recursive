@@ -8,7 +8,6 @@ import {
   TreeView,
   StepperControls,
   VariablePanel,
-  CallStack,
   ResultPanel,
   CodePanel,
 } from "@/visualizer";
@@ -69,7 +68,6 @@ export function PresetViewer({
           <div className={styles.variableSection}>
             <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
           </div>
-          {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
           <ResultPanel steps={result.steps} currentIndex={player.currentIndex} />
         </div>
 

@@ -27,7 +27,6 @@
     "pause": "Pause",
     "stepForward": "Step forward",
     "jumpToEnd": "Jump to end",
-    "callStackEmpty": "Run a step to see the Call Stack",
     "variablesEmpty": "Run a step to see Variables"
   },
   "custom": {
