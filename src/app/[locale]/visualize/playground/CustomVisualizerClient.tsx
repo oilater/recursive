@@ -5,10 +5,10 @@ import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import { executeCode, getCodeLanguageAdapter } from "@/engine";
-import type { CodeLanguage } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
+import { useCodeLanguage } from "@/shared/hooks/useCodeLanguage";
 import { Header, StatusMessage, EmbedDropdown, CodeLanguageSelect } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
@@ -45,27 +45,33 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const [error, setError] = useState<string | null>(null);
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
-  const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>("javascript");
+  const { codeLanguage, defaultCodeLanguage, setCodeLanguage, setDefaultCodeLanguage } =
+    useCodeLanguage();
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const codeRef = useRef(initialCode ?? "");
   const lastArgsRef = useRef<unknown[]>(initialArgs ?? []);
+  const autoExecutedRef = useRef(false);
 
   useEffect(
     function autoExecuteFromUrl() {
-      if (initialCode) {
+      if (initialCode && codeLanguage && !autoExecutedRef.current) {
+        autoExecutedRef.current = true;
         handleExecute(initialArgs ?? []);
       }
     },
-    [],
+    [codeLanguage],
   );
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     codeRef.current = newCode;
-    setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
+    if (codeLanguage) {
+      setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
+    }
   };
 
   const handleExecute = async (args: unknown[]) => {
+    if (!codeLanguage) return;
     lastArgsRef.current = args;
     setMode("loading");
     setError(null);
@@ -127,7 +133,12 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
           {error && <div className={styles.errorBox}>{error}</div>}
           <div className={styles.editorCard}>
             <div className={styles.editorToolbar}>
-              <CodeLanguageSelect value={codeLanguage} onChange={setCodeLanguage} />
+              <CodeLanguageSelect
+                value={codeLanguage}
+                defaultValue={defaultCodeLanguage}
+                onChange={setCodeLanguage}
+                onSetDefault={setDefaultCodeLanguage}
+              />
               <div className={styles.toolbarRight}>
                 <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
                 <button
@@ -143,7 +154,11 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
               </div>
             </div>
             <div className={styles.editorBody}>
-              <CodeEditor value={code} onChange={handleCodeChange} codeLanguage={codeLanguage} />
+              <CodeEditor
+                value={code}
+                onChange={handleCodeChange}
+                codeLanguage={codeLanguage ?? "javascript"}
+              />
             </div>
           </div>
         </div>

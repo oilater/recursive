@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState as useReactState } from "react";
 import { useTranslations } from "next-intl";
 import type { CodeLanguage } from "@/engine";
 import { getCodeLanguageAdapter, listCodeLanguageAdapters } from "@/engine";
 import * as styles from "./code-language-select.css";
 
-const STORAGE_KEY = "recursive-default-lang";
-
 interface CodeLanguageSelectProps {
   value: CodeLanguage | null;
+  defaultValue: CodeLanguage | null;
   onChange: (codeLanguage: CodeLanguage) => void;
+  onSetDefault: (codeLanguage: CodeLanguage) => void;
 }
 
 const CODE_LANGUAGES = listCodeLanguageAdapters().map((a) => ({
@@ -18,26 +17,14 @@ const CODE_LANGUAGES = listCodeLanguageAdapters().map((a) => ({
   label: a.label,
 }));
 
-export function getDefaultCodeLanguage(): CodeLanguage {
-  if (typeof window === "undefined") return "python";
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved === "javascript" ? "javascript" : "python";
-}
-
-export function CodeLanguageSelect({ value, onChange }: CodeLanguageSelectProps) {
+export function CodeLanguageSelect({
+  value,
+  defaultValue,
+  onChange,
+  onSetDefault,
+}: CodeLanguageSelectProps) {
   const t = useTranslations("editor");
-  const [defaultCodeLanguage, setDefaultCodeLanguage] = useReactState<CodeLanguage | null>(null);
-  const showSetDefault = value !== null && value !== defaultCodeLanguage;
-
-  useEffect(() => {
-    setDefaultCodeLanguage(getDefaultCodeLanguage());
-  }, []);
-
-  const handleSetDefault = useCallback(() => {
-    if (!value) return;
-    localStorage.setItem(STORAGE_KEY, value);
-    setDefaultCodeLanguage(value);
-  }, [value]);
+  const showSetDefault = value !== null && value !== defaultValue;
 
   return (
     <div className={styles.wrapper}>
@@ -49,12 +36,15 @@ export function CodeLanguageSelect({ value, onChange }: CodeLanguageSelectProps)
             onClick={() => onChange(code)}
             onMouseEnter={() => getCodeLanguageAdapter(code).onSelected?.()}
           >
-            {label}{defaultCodeLanguage !== null && code === defaultCodeLanguage && <span className={styles.defaultTag}> ({t("defaultLang")})</span>}
+            {label}
+            {defaultValue !== null && code === defaultValue && (
+              <span className={styles.defaultTag}> ({t("defaultLang")})</span>
+            )}
           </button>
         ))}
       </div>
-      {showSetDefault && (
-        <button className={styles.defaultButton} onClick={handleSetDefault}>
+      {showSetDefault && value && (
+        <button className={styles.defaultButton} onClick={() => onSetDefault(value)}>
           ☐ {t("setDefault")}
         </button>
       )}
