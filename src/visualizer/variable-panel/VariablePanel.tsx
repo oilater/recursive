@@ -212,7 +212,7 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   return (
     <div className={styles.container}>
       <div className={styles.titleRow}>
-        <span className={styles.title}>Call Stack</span>
+        <span className={styles.titleInRow}>Call Stack</span>
         <span className={styles.depthBadge}>
           {orderedFrames.length} {orderedFrames.length === 1 ? "frame" : "frames"}
         </span>

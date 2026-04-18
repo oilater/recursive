@@ -12,6 +12,14 @@ export const titleRow = style({
   marginBottom: vars.space.md,
 });
 
+export const titleInRow = style([
+  panelTitle,
+  {
+    marginBottom: 0,
+    lineHeight: 1,
+  },
+]);
+
 export const depthBadge = style({
   fontSize: vars.fontSize.xs,
   color: vars.color.textMuted,
@@ -20,6 +28,9 @@ export const depthBadge = style({
   backgroundColor: vars.color.surfaceAlt,
   borderRadius: vars.radius.sm,
   border: `1px solid ${vars.color.border}`,
+  lineHeight: 1,
+  display: "inline-flex",
+  alignItems: "center",
 });
 
 // ── Stack ──
