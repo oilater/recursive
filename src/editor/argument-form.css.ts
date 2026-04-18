@@ -1,5 +1,20 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
+
+const flashPulse = keyframes({
+  "0%": {
+    borderColor: vars.color.border,
+    boxShadow: "0 0 0 0 rgba(74, 222, 128, 0)",
+  },
+  "30%": {
+    borderColor: "#4ade80",
+    boxShadow: "0 0 0 4px rgba(74, 222, 128, 0.25)",
+  },
+  "100%": {
+    borderColor: vars.color.border,
+    boxShadow: "0 0 0 0 rgba(74, 222, 128, 0)",
+  },
+});
 
 export const container = style({
   display: "flex",
@@ -29,6 +44,13 @@ export const input = style({
     borderColor: vars.color.primary,
   },
 });
+
+export const inputFlashing = style([
+  input,
+  {
+    animation: `${flashPulse} 0.8s ease-out`,
+  },
+]);
 
 export const typeAnnotation = style({
   color: "#38bdf8",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { useTranslations } from "next-intl";
 import { safeJsonParse } from "@/shared/lib/validate";
 import * as styles from "./argument-form.css";
@@ -13,6 +13,7 @@ interface ArgumentFormProps {
   paramNames: string[];
   defaultArgs?: unknown[];
   onSubmit: (args: unknown[]) => void;
+  onValidityChange?: (valid: boolean) => void;
 }
 
 function inferType(value: unknown): string {
@@ -26,7 +27,7 @@ function inferType(value: unknown): string {
 }
 
 export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(function ArgumentForm(
-  { paramNames, defaultArgs, onSubmit },
+  { paramNames, defaultArgs, onSubmit, onValidityChange },
   ref,
 ) {
   const t = useTranslations("editor");
@@ -35,6 +36,7 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
     for (const name of paramNames) initial[name] = "";
     return initial;
   });
+  const [flashing, setFlashing] = useState(true);
 
   const updateField = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -51,6 +53,20 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
     getArgs: buildArgs,
   }));
 
+  useEffect(() => {
+    const valid = paramNames.every((name, i) => {
+      const raw = (values[name] ?? "").trim();
+      return raw !== "" || defaultArgs?.[i] !== undefined;
+    });
+    onValidityChange?.(valid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values, paramNames, defaultArgs]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setFlashing(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (paramNames.length === 0) return null;
 
   return (
@@ -66,7 +82,7 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
             </span>
             <span className={styles.equals}>=</span>
             <input
-              className={styles.input}
+              className={flashing ? styles.inputFlashing : styles.input}
               value={values[name] || ""}
               onChange={(e) => updateField(name, e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && onSubmit(buildArgs())}

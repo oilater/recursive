@@ -41,7 +41,9 @@
     "setDefault": "Set as default",
     "loading": "Loading editor...",
     "placeholder": "Paste your algorithm code or write your own",
-    "inputPlaceholder": "Enter value"
+    "inputPlaceholder": "Enter value",
+    "example1": "Example 1",
+    "example2": "Example 2"
   },
   "difficulty": {
     "easy": "Easy",

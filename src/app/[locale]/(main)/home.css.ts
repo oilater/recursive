@@ -155,3 +155,26 @@ export const editorBody = style({
   overflow: "auto",
   cursor: "text",
 });
+
+export const exampleRow = style({
+  display: "flex",
+  gap: vars.space.sm,
+  marginTop: vars.space.sm,
+});
+
+export const exampleButton = style({
+  padding: `${vars.space.xs} ${vars.space.md}`,
+  backgroundColor: "transparent",
+  color: vars.color.text,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  cursor: "pointer",
+  transition: "all 0.15s ease",
+  ":hover": {
+    color: "#ffffff",
+    borderColor: "rgba(74, 222, 128, 0.4)",
+    backgroundColor: "rgba(74, 222, 128, 0.05)",
+  },
+});

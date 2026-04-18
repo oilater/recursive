@@ -41,7 +41,9 @@
     "setDefault": "기본 언어로 설정",
     "loading": "에디터 로딩 중...",
     "placeholder": "알고리즘 코드를 붙여넣거나 직접 작성해보세요",
-    "inputPlaceholder": "값을 입력하세요"
+    "inputPlaceholder": "값을 입력하세요",
+    "example1": "예시 코드 1",
+    "example2": "예시 코드 2"
   },
   "difficulty": {
     "easy": "쉬움",

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { CodeEditor, ArgumentForm } from "@/editor";
+import { CodeEditor, ArgumentForm, CODE_EXAMPLES } from "@/editor";
 import type { ArgumentFormHandle } from "@/editor";
 import { getCodeLanguageAdapter } from "@/engine";
 import type { CodeLanguage } from "@/engine";
@@ -20,14 +20,19 @@ export function HomeEditor() {
   const [code, setCode] = useState("");
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [hasTopLevelCall, setHasTopLevelCall] = useState(false);
+  const [argsValid, setArgsValid] = useState(true);
 
   const hasCode = code.trim().length > 0;
   const showArgumentForm = paramNames.length > 0 && !hasTopLevelCall;
+  const canRun = hasCode && !!codeLanguage && (!showArgumentForm || argsValid);
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const handleCodeLanguageChange = (lang: CodeLanguage) => {
     setCodeLanguage(lang);
+    setCode("");
+    setParamNames([]);
+    setHasTopLevelCall(false);
     setTimeout(() => {
       const cm = editorRef.current?.querySelector(".cm-content") as HTMLElement | null;
       cm?.focus();
@@ -65,7 +70,12 @@ export function HomeEditor() {
         />
         <div className={styles.actionRight}>
           {showArgumentForm && (
-            <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleRun} />
+            <ArgumentForm
+              ref={argFormRef}
+              paramNames={paramNames}
+              onSubmit={handleRun}
+              onValidityChange={setArgsValid}
+            />
           )}
           <button
             className={styles.runButton}
@@ -73,7 +83,7 @@ export function HomeEditor() {
               const args = argFormRef.current?.getArgs() ?? [];
               handleRun(args);
             }}
-            disabled={!hasCode || !codeLanguage}
+            disabled={!canRun}
           >
             {t("custom.run")}
           </button>
@@ -88,6 +98,23 @@ export function HomeEditor() {
             codeLanguage={codeLanguage ?? "javascript"}
           />
         </div>
+      </div>
+
+      <div className={styles.exampleRow}>
+        <button
+          type="button"
+          className={styles.exampleButton}
+          onClick={() => handleCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].recursion)}
+        >
+          {t("editor.example1")}
+        </button>
+        <button
+          type="button"
+          className={styles.exampleButton}
+          onClick={() => handleCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].closure)}
+        >
+          {t("editor.example2")}
+        </button>
       </div>
     </div>
   );
