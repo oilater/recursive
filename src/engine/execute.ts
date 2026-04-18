@@ -1,4 +1,4 @@
-import type { Language } from "./types";
+import type { CodeLanguage } from "./types";
 import type { ExecuteResult } from "./executor";
 import { executeCustomCode } from "./executor";
 import { executePython } from "./python";
@@ -13,9 +13,9 @@ export interface ExecuteCodeResult {
 export async function executeCode(
   code: string,
   args: unknown[],
-  language: Language = "javascript",
+  codeLanguage: CodeLanguage = "javascript",
 ): Promise<ExecuteCodeResult> {
-  if (language === "python") {
+  if (codeLanguage === "python") {
     const pyResult = await executePython(code, args);
     return {
       result: pyResult.result,

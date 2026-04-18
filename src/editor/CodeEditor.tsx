@@ -7,7 +7,7 @@ import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { placeholder as placeholderExt } from "@codemirror/view";
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 
 import * as styles from "./code-editor.css";
 
@@ -26,17 +26,17 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   readOnly?: boolean;
-  language?: Language;
+  codeLanguage?: CodeLanguage;
 }
 
-export function CodeEditor({ value, onChange, readOnly = false, language = "javascript" }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "javascript" }: CodeEditorProps) {
   const t = useTranslations("editor");
   const extensions = useMemo(
     () => [
-      language === "python" ? python() : javascript({ typescript: true }),
+      codeLanguage === "python" ? python() : javascript({ typescript: true }),
       placeholderExt(t("placeholder")),
     ],
-    [t, language],
+    [t, codeLanguage],
   );
 
   return (

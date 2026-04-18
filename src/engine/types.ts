@@ -31,4 +31,4 @@ export interface ExecuteOptions {
   maxLoopIterations?: number;
 }
 
-export type Language = "javascript" | "python";
+export type CodeLanguage = "javascript" | "python";

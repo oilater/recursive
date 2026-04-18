@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import { executeCode, analyzeCode, analyzePythonCode } from "@/engine";
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
 import { normalizeCode } from "@/shared/lib/normalize-code";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
-import { Header, StatusMessage, EmbedDropdown, LanguageSelect } from "@/shared/ui";
+import { Header, StatusMessage, EmbedDropdown, CodeLanguageSelect } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
 import { PlaygroundViewer } from "./PlaygroundViewer";
@@ -46,7 +46,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const [error, setError] = useState<string | null>(null);
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
-  const [language, setLanguage] = useState<Language>("javascript");
+  const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>("javascript");
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const codeRef = useRef(initialCode ?? "");
   const lastArgsRef = useRef<unknown[]>(initialArgs ?? []);
@@ -63,7 +63,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     codeRef.current = newCode;
-    if (language === "javascript") {
+    if (codeLanguage === "javascript") {
       try {
         const { analysis } = analyzeCode(newCode);
         setParamNames(analysis.entryParamNames);
@@ -79,8 +79,8 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
     setMode("loading");
     setError(null);
     try {
-      const cleanCode = language === "javascript" ? normalizeCode(code) : code;
-      const lang = language === "python" ? "python" : "javascript";
+      const cleanCode = codeLanguage === "javascript" ? normalizeCode(code) : code;
+      const lang = codeLanguage === "python" ? "python" : "javascript";
       const [execResult, html] = await Promise.all([
         executeCode(cleanCode, args, lang),
         highlightCode(cleanCode, lang === "python" ? "python" : "javascript"),
@@ -136,7 +136,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
           {error && <div className={styles.errorBox}>{error}</div>}
           <div className={styles.editorCard}>
             <div className={styles.editorToolbar}>
-              <LanguageSelect value={language} onChange={setLanguage} />
+              <CodeLanguageSelect value={codeLanguage} onChange={setCodeLanguage} />
               <div className={styles.toolbarRight}>
                 <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
                 <button
@@ -152,7 +152,7 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
               </div>
             </div>
             <div className={styles.editorBody}>
-              <CodeEditor value={code} onChange={handleCodeChange} language={language} />
+              <CodeEditor value={code} onChange={handleCodeChange} codeLanguage={codeLanguage} />
             </div>
           </div>
         </div>

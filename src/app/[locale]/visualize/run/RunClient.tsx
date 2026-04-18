@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
 import { executeCode } from "@/engine";
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
 import { Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
@@ -15,7 +15,7 @@ import * as styles from "../playground/custom-page.css";
 interface RunClientProps {
   code?: string;
   args?: unknown[];
-  language?: Language;
+  codeLanguage?: CodeLanguage;
 }
 
 interface ExecState {
@@ -34,7 +34,7 @@ const INITIAL_EXEC: ExecState = {
   consoleLogs: [],
 };
 
-export function RunClient({ code, args, language = "javascript" }: RunClientProps) {
+export function RunClient({ code, args, codeLanguage = "javascript" }: RunClientProps) {
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(null);
   const codeRef = useRef(code);
@@ -54,7 +54,7 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
 
       (async () => {
         try {
-          const lang = language === "python" ? "python" : "javascript";
+          const lang = codeLanguage === "python" ? "python" : "javascript";
           const [execResult, html] = await Promise.all([
             executeCode(code, args ?? [], lang),
             highlightCode(code, lang),
@@ -71,7 +71,7 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
         }
       })();
     },
-    [code, args, language],
+    [code, args, codeLanguage],
   );
 
   if (error) {
@@ -103,7 +103,7 @@ export function RunClient({ code, args, language = "javascript" }: RunClientProp
             </>
           ) : undefined}
         />
-        <StatusMessage variant="loading">{language === "python" ? "Loading Python..." : "Running..."}</StatusMessage>
+        <StatusMessage variant="loading">{codeLanguage === "python" ? "Loading Python..." : "Running..."}</StatusMessage>
       </div>
     );
   }

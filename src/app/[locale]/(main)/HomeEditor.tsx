@@ -6,19 +6,19 @@ import { useRouter } from "next/navigation";
 import { CodeEditor, ArgumentForm } from "@/editor";
 import type { ArgumentFormHandle } from "@/editor";
 import { analyzeCode, analyzePythonCode, executeCode, ensurePyodideWorker } from "@/engine";
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 import { normalizeCode } from "@/shared/lib/normalize-code";
-import { LanguageSelect, getDefaultLanguage } from "@/shared/ui/LanguageSelect";
+import { CodeLanguageSelect, getDefaultCodeLanguage } from "@/shared/ui/CodeLanguageSelect";
 import * as styles from "./home.css";
 
 export function HomeEditor() {
   const t = useTranslations();
   const router = useRouter();
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState<Language | null>(null);
+  const [codeLanguage, setCodeLanguage] = useState<CodeLanguage | null>(null);
 
   useEffect(() => {
-    setLanguage(getDefaultLanguage());
+    setCodeLanguage(getDefaultCodeLanguage());
   }, []);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function HomeEditor() {
 
   useEffect(
     function preloadPyodide() {
-      if (language === "python") {
+      if (codeLanguage === "python") {
         ensurePyodideWorker().catch(() => {});
       }
     },
@@ -36,8 +36,8 @@ export function HomeEditor() {
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const handleLanguageChange = (lang: Language) => {
-    setLanguage(lang);
+  const handleCodeLanguageChange = (lang: CodeLanguage) => {
+    setCodeLanguage(lang);
     setTimeout(() => {
       const cm = editorRef.current?.querySelector(".cm-content") as HTMLElement | null;
       cm?.focus();
@@ -47,7 +47,7 @@ export function HomeEditor() {
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     setError(null);
-    if (language === "javascript") {
+    if (codeLanguage === "javascript") {
       try {
         const { analysis } = analyzeCode(newCode);
         setParamNames(analysis.entryParamNames);
@@ -59,15 +59,15 @@ export function HomeEditor() {
   };
 
   const handleRun = async (args: unknown[]) => {
-    if (!language) return;
+    if (!codeLanguage) return;
     setError(null);
     setRunning(true);
     try {
-      const cleanCode = language === "javascript" ? normalizeCode(code) : code;
-      await executeCode(cleanCode, args, language);
+      const cleanCode = codeLanguage === "javascript" ? normalizeCode(code) : code;
+      await executeCode(cleanCode, args, codeLanguage);
       const encoded = btoa(unescape(encodeURIComponent(cleanCode)));
       const argsStr = args.length > 0 ? `&args=${encodeURIComponent(JSON.stringify(args))}` : "";
-      const langStr = language === "python" ? `&lang=python` : "";
+      const langStr = codeLanguage === "python" ? `&lang=python` : "";
       router.push(`/visualize/run?code=${encodeURIComponent(encoded)}${argsStr}${langStr}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -78,7 +78,7 @@ export function HomeEditor() {
   return (
     <div>
       <div className={styles.actionBar}>
-        <LanguageSelect value={language} onChange={handleLanguageChange} />
+        <CodeLanguageSelect value={codeLanguage} onChange={handleCodeLanguageChange} />
         {error && <span className={styles.errorText}>{error}</span>}
         <div className={styles.actionRight}>
           <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleRun} />
@@ -88,7 +88,7 @@ export function HomeEditor() {
               const args = argFormRef.current?.getArgs() ?? [];
               handleRun(args);
             }}
-            disabled={!hasCode || running || !language}
+            disabled={!hasCode || running || !codeLanguage}
           >
             {running ? "..." : t("custom.run")}
           </button>
@@ -97,7 +97,7 @@ export function HomeEditor() {
 
       <div className={styles.editorCard} ref={editorRef}>
         <div className={styles.editorBody}>
-          <CodeEditor value={code} onChange={handleCodeChange} language={language ?? "javascript"} />
+          <CodeEditor value={code} onChange={handleCodeChange} codeLanguage={codeLanguage ?? "javascript"} />
         </div>
       </div>
     </div>

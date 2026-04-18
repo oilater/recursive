@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
 import { executeCode } from "@/engine";
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { StatusMessage } from "@/shared/ui";
 import { PoweredByBadge } from "@/shared/ui/PoweredByBadge";
@@ -14,7 +14,7 @@ interface EmbedClientProps {
   code?: string;
   args?: unknown[];
   error?: string;
-  lang?: Language;
+  lang?: CodeLanguage;
 }
 
 interface ExecState {

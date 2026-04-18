@@ -1,4 +1,4 @@
-import type { Language } from "@/engine";
+import type { CodeLanguage } from "@/engine";
 import { RunClient } from "./RunClient";
 
 interface RunPageProps {
@@ -16,7 +16,7 @@ function decodeBase64(str: string): string {
 export default async function RunPage({ searchParams }: RunPageProps) {
   const params = await searchParams;
   const code = params.code ? decodeBase64(params.code) : undefined;
-  const language: Language = params.lang === "python" ? "python" : "javascript";
+  const codeLanguage: CodeLanguage = params.lang === "python" ? "python" : "javascript";
   let args: unknown[] | undefined;
 
   if (params.args) {
@@ -25,5 +25,5 @@ export default async function RunPage({ searchParams }: RunPageProps) {
     } catch {}
   }
 
-  return <RunClient code={code} args={args} language={language} />;
+  return <RunClient code={code} args={args} codeLanguage={codeLanguage} />;
 }

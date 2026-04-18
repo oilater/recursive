@@ -7,5 +7,5 @@ export { PoweredByBadge } from "./PoweredByBadge";
 export { StatusMessage } from "./StatusMessage";
 export { LocaleToggle } from "./LocaleToggle";
 export { Footer } from "./Footer";
-export { LanguageSelect, getDefaultLanguage } from "./LanguageSelect";
+export { CodeLanguageSelect, getDefaultCodeLanguage } from "./CodeLanguageSelect";
 export { Header } from "./Header";

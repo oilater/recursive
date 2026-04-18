@@ -5,6 +5,6 @@ export { executeCustomCode } from "./executor";
 export type { ExecuteResult } from "./executor";
 export { executeCode } from "./execute";
 export type { ExecuteCodeResult } from "./execute";
-export type { AnalysisResult, ExecuteOptions, Language } from "./types";
+export type { AnalysisResult, ExecuteOptions, CodeLanguage } from "./types";
 export { ensurePyodideWorker, getPyodideState, onPyodideStateChange, analyzePythonCode } from "./python";
 export type { PyodideState } from "./python";
