@@ -38,6 +38,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -50,70 +52,112 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build
+      - name: Build PR branch
         run: pnpm build
 
-      - name: Report bundle size
+      - name: Snapshot PR sizes
+        run: |
+          mkdir -p /tmp/sizes
+          node -e '
+            const fs = require("fs"); const path = require("path");
+            function dirSize(d){let s=0;if(!fs.existsSync(d))return 0;for(const f of fs.readdirSync(d,{recursive:true})){const p=path.join(d,f);if(fs.statSync(p).isFile())s+=fs.statSync(p).size}return s}
+            function topChunks(d,n){if(!fs.existsSync(d))return [];return fs.readdirSync(d,{recursive:true}).filter(f=>f.endsWith(".js")).map(f=>({name:f,size:fs.statSync(path.join(d,f)).size})).sort((a,b)=>b.size-a.size).slice(0,n)}
+            const out = {
+              static: dirSize(".next/static"),
+              chunks: dirSize(".next/static/chunks"),
+              css: dirSize(".next/static/css"),
+              top: topChunks(".next/static/chunks", 5),
+            };
+            fs.writeFileSync("/tmp/sizes/pr.json", JSON.stringify(out));
+          '
+
+      - name: Checkout base branch
+        run: |
+          git checkout ${{ github.base_ref }}
+          git clean -fdx -e node_modules -e /tmp
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build base branch
+        run: pnpm build
+
+      - name: Snapshot base sizes
+        run: |
+          node -e '
+            const fs = require("fs"); const path = require("path");
+            function dirSize(d){let s=0;if(!fs.existsSync(d))return 0;for(const f of fs.readdirSync(d,{recursive:true})){const p=path.join(d,f);if(fs.statSync(p).isFile())s+=fs.statSync(p).size}return s}
+            function topChunks(d,n){if(!fs.existsSync(d))return [];return fs.readdirSync(d,{recursive:true}).filter(f=>f.endsWith(".js")).map(f=>({name:f,size:fs.statSync(path.join(d,f)).size})).sort((a,b)=>b.size-a.size).slice(0,n)}
+            const out = {
+              static: dirSize(".next/static"),
+              chunks: dirSize(".next/static/chunks"),
+              css: dirSize(".next/static/css"),
+              top: topChunks(".next/static/chunks", 5),
+            };
+            fs.writeFileSync("/tmp/sizes/base.json", JSON.stringify(out));
+          '
+
+      - name: Comment diff
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const path = require('path');
+            const pr = JSON.parse(fs.readFileSync('/tmp/sizes/pr.json'));
+            const base = JSON.parse(fs.readFileSync('/tmp/sizes/base.json'));
 
-            function getDirSize(dir) {
-              let size = 0;
-              if (!fs.existsSync(dir)) return 0;
-              for (const file of fs.readdirSync(dir, { recursive: true })) {
-                const filePath = path.join(dir, file);
-                const stat = fs.statSync(filePath);
-                if (stat.isFile()) size += stat.size;
-              }
-              return size;
-            }
+            const fmt = (b) => b > 1024 * 1024
+              ? (b / 1024 / 1024).toFixed(2) + ' MB'
+              : (b / 1024).toFixed(1) + ' KB';
 
-            function getFileSize(filePath) {
-              if (!fs.existsSync(filePath)) return 0;
-              return fs.statSync(filePath).size;
-            }
-
-            const fmt = (bytes) => {
-              if (bytes > 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + ' MB';
-              return (bytes / 1024).toFixed(1) + ' KB';
+            const fmtDelta = (delta) => {
+              if (delta === 0) return '✅ unchanged';
+              const sign = delta > 0 ? '+' : '';
+              const icon = delta > 50 * 1024 ? '🚨' : delta > 0 ? '⚠️' : '✅';
+              return `${icon} ${sign}${fmt(delta)}`;
             };
 
-            const staticSize = getDirSize('.next/static');
-            const jsSize = getDirSize('.next/static/chunks');
-            const cssSize = getDirSize('.next/static/css');
+            const row = (label, baseSize, prSize) => {
+              const delta = prSize - baseSize;
+              const pct = baseSize > 0 ? ((delta / baseSize) * 100).toFixed(1) : '—';
+              return `| ${label} | ${fmt(baseSize)} | ${fmt(prSize)} | ${fmtDelta(delta)} (${pct}%) |`;
+            };
 
-            // Top 5 largest chunks
-            const chunksDir = '.next/static/chunks';
-            let chunkRows = '';
-            if (fs.existsSync(chunksDir)) {
-              const chunks = fs.readdirSync(chunksDir, { recursive: true })
-                .filter(f => f.endsWith('.js'))
-                .map(f => ({ name: f, size: getFileSize(path.join(chunksDir, f)) }))
-                .sort((a, b) => b.size - a.size)
-                .slice(0, 5);
+            let body = '## 📦 Bundle Size Report\n\n';
+            body += `Comparing **${context.payload.pull_request.head.sha.slice(0,7)}** against base **${context.payload.pull_request.base.sha.slice(0,7)}**.\n\n`;
+            body += '### Overview\n\n';
+            body += '| Metric | Base | PR | Δ |\n|---|---|---|---|\n';
+            body += row('Total static', base.static, pr.static) + '\n';
+            body += row('JavaScript', base.chunks, pr.chunks) + '\n';
+            body += row('CSS', base.css, pr.css) + '\n';
+            body += '\n';
 
-              for (const { name, size } of chunks) {
-                chunkRows += `| \`${name}\` | ${fmt(size)} |\n`;
-              }
+            body += '### Top 5 chunks (PR branch)\n\n';
+            body += '| Chunk | Size |\n|---|---|\n';
+            for (const { name, size } of pr.top) {
+              body += `| \`${name}\` | ${fmt(size)} |\n`;
             }
 
-            let report = '## 📦 Bundle Size Report\n\n';
-            report += '### Overview\n\n';
-            report += `| Metric | Size |\n|--------|------|\n`;
-            report += `| Total static assets | ${fmt(staticSize)} |\n`;
-            report += `| JavaScript | ${fmt(jsSize)} |\n`;
-            report += `| CSS | ${fmt(cssSize)} |\n\n`;
-
-            report += '### Top 5 Largest Chunks\n\n';
-            report += `| Chunk | Size |\n|-------|------|\n`;
-            report += chunkRows;
-
-            await github.rest.issues.createComment({
+            // Find existing report comment to update
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: report
             });
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body && c.body.startsWith('## 📦 Bundle Size Report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

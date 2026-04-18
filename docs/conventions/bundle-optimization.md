@@ -157,6 +157,33 @@ createHighlighterCore({
 
 ---
 
+## 자동화 — PR 단위 회귀 방지
+
+`.github/workflows/ci.yml`의 `bundle-size` 잡이 매 PR마다 다음을 자동 실행:
+
+1. PR 브랜치 빌드 → 크기 스냅샷
+2. base 브랜치(main) 빌드 → 크기 스냅샷
+3. 두 결과 비교 → PR에 코멘트 자동 게시 (기존 코멘트 있으면 갱신)
+
+코멘트 예시:
+
+```
+| Metric      | Base   | PR     | Δ                       |
+| ----------- | ------ | ------ | ----------------------- |
+| Total static| 6.40 MB| 6.55 MB| ⚠️ +153 KB (+2.4%)      |
+| JavaScript  | 3.10 MB| 3.20 MB| ⚠️ +102 KB (+3.3%)      |
+| CSS         | 120 KB | 121 KB | ✅ +1 KB (+0.8%)        |
+```
+
+아이콘 의미:
+- ✅ 변화 없음 또는 감소
+- ⚠️ 50KB 미만 증가
+- 🚨 50KB 이상 증가 — PR 설명에 사유 필요
+
+**왜 50KB 임계?** 사람이 코드 한 줄 추가로 만들 수 있는 최대 합리적 크기. 그 이상이면 라이브러리 추가, polyfill, asset 포함 등 의식적 결정이 들어간 것이므로 명시적 정당화 요구.
+
+---
+
 ## 참고
 
 - [Next.js bundle analyzer docs](https://nextjs.org/docs/pages/guides/package-bundling)
