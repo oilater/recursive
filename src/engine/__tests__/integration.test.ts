@@ -165,6 +165,13 @@ function bubbleSort(arr) {
     expect(tracedLines.length).toBeGreaterThan(10);
     const last = varSnapshots[varSnapshots.length - 1];
     expect(last.arr).toEqual([1, 2, 3, 5, 8]);
+
+    // for-loop-scoped i/j and if-block-scoped temp must show real values
+    // inside their lexical scopes, not "-" (regression: __captureVars at
+    // function top couldn't reach block-scoped vars)
+    expect(varSnapshots.some((s) => typeof s.i === "number")).toBe(true);
+    expect(varSnapshots.some((s) => typeof s.j === "number")).toBe(true);
+    expect(varSnapshots.some((s) => typeof s.temp === "number")).toBe(true);
   });
 
   it("traces recursive function (factorial)", () => {

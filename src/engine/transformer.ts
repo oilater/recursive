@@ -1,7 +1,7 @@
 import * as acorn from "acorn";
 import { generate } from "astring";
 import type { AnalysisResult } from "./types";
-import { ENTRY_FUNC_NAME, TRACE_LINE, CAPTURE_VARS, CREATE_PROXY, GUARD } from "./constants";
+import { ENTRY_FUNC_NAME, TRACE_LINE, CREATE_PROXY, GUARD } from "./constants";
 import {
   id,
   literal,
@@ -104,26 +104,21 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
   const enclosingFunc = enclosingFuncs[enclosingFuncs.length - 1] ?? null;
   const isFuncBody =
     enclosingFunc !== null && enclosingFunc.body === node && !enclosingFunc.__bodyTransformed;
+  const visibleVars = enclosingFunc !== null ? collectVisibleVarNames(enclosingFuncs) : [];
 
   const newBody: AstNode[] = [];
-  let captureInjected = false;
 
   for (const stmt of node.body) {
     if (isLoop(stmt) && stmt.body?.type === "BlockStatement" && Array.isArray(stmt.body.body)) {
       const loopLine = stmt.loc?.start?.line;
       const loopBackTrace =
-        enclosingFunc !== null && loopLine ? [traceLineCall(loopLine)] : [];
+        enclosingFunc !== null && loopLine ? [traceLineCall(loopLine, visibleVars)] : [];
       stmt.body.body = [guardCall(), ...stmt.body.body, ...loopBackTrace];
-    }
-
-    if (isFuncBody && !captureInjected) {
-      newBody.push(captureVarsInit(collectVisibleVarNames(enclosingFuncs)));
-      captureInjected = true;
     }
 
     const skipTrace = stmt.type === "FunctionDeclaration" || stmt.type === "EmptyStatement";
     if (enclosingFunc !== null && stmt.loc?.start?.line && !skipTrace) {
-      newBody.push(traceLineCall(stmt.loc.start.line));
+      newBody.push(traceLineCall(stmt.loc.start.line, visibleVars));
     }
 
     newBody.push(stmt);
@@ -142,7 +137,7 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
   if (isFuncBody && newBody.length > 0) {
     const lastStmt = node.body[node.body.length - 1];
     const lastLine = lastStmt?.loc?.end?.line ?? lastStmt?.loc?.start?.line;
-    if (lastLine) newBody.push(traceLineCall(lastLine));
+    if (lastLine) newBody.push(traceLineCall(lastLine, visibleVars));
     enclosingFunc!.__bodyTransformed = true;
   }
 
@@ -258,7 +253,7 @@ function mark(node: AstNode): AstNode {
   return node;
 }
 
-function captureVarsInit(varNames: string[]): AstNode {
+function captureVarsExpr(varNames: string[]): AstNode {
   const tryBlocks = varNames.map((name) =>
     tryCatch(
       [expr(assign(member(id("__v"), id(name)), id(name)))],
@@ -266,15 +261,12 @@ function captureVarsInit(varNames: string[]): AstNode {
     ),
   );
   return mark(
-    varDecl(
-      CAPTURE_VARS,
-      funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
-    ),
+    call(funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])), []),
   );
 }
 
-function traceLineCall(line: number): AstNode {
-  return mark(expr(call(id(TRACE_LINE), [literal(line), call(id(CAPTURE_VARS))])));
+function traceLineCall(line: number, varNames: string[]): AstNode {
+  return mark(expr(call(id(TRACE_LINE), [literal(line), captureVarsExpr(varNames)])));
 }
 
 function paramArrayLiteral(paramNames: string[]): AstNode {
