@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import type { Step, Frame } from "@/algorithm";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/shared/ui";
@@ -130,6 +131,17 @@ function frameLabel(frame: Frame): string {
 
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   const t = useTranslations("visualizer");
+  const activeFrameRef = useRef<HTMLDivElement>(null);
+  const activeFrameKey = currentStep?.frames.length
+    ? `${currentStep.frames.length - 1}:${currentStep.frames[currentStep.frames.length - 1].funcName}`
+    : null;
+
+  useEffect(() => {
+    if (activeFrameRef.current) {
+      activeFrameRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [activeFrameKey]);
+
   if (!currentStep || currentStep.frames.length === 0) {
     return (
       <div className={styles.container}>
@@ -185,7 +197,7 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
 
           return (
             <div key={`${depth}:${frame.funcName}`} className={styles.frameWrapper}>
-              <div className={cardClass}>
+              <div className={cardClass} ref={isActive ? activeFrameRef : undefined}>
                 <div className={styles.frameHeader}>
                   <span className={styles.frameDepth}>#{depth}</span>
                   <span className={styles.frameName}>{frameLabel(frame)}</span>
