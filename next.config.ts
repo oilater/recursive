@@ -26,6 +26,12 @@ const nextConfig: NextConfig = {
         { key: "X-Frame-Options", value: "ALLOWALL" },
       ],
     },
+    {
+      source: "/:locale/embed",
+      headers: [
+        { key: "X-Frame-Options", value: "ALLOWALL" },
+      ],
+    },
   ],
 };
 
