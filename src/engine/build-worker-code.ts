@@ -127,6 +127,31 @@ self.onmessage = function(e) {
       return -1;
     }
 
+    function emitReturnStep() {
+      if (steps.length >= maxSteps) return;
+      if (callStack.length === 0) return;
+      var topIdx = callStack.length - 1;
+      var top = callStack[topIdx];
+      var line = top.lastLine;
+      if (typeof line !== 'number') return;
+
+      var currentNodeId = null;
+      for (var j = topIdx; j >= 0; j--) {
+        if (callStack[j].nodeId) { currentNodeId = callStack[j].nodeId; break; }
+      }
+      if (!currentNodeId) currentNodeId = rootNode.id;
+
+      steps.push({
+        id: stepId++,
+        type: 'return',
+        codeLine: line,
+        activeNodeId: currentNodeId,
+        activePath: getPath(currentNodeId),
+        frames: snapshotFrames(),
+        description: ''
+      });
+    }
+
     function __traceLine(line, varsSnapshot) {
       if (steps.length >= maxSteps) {
         throw new Error('Step limit exceeded (' + maxSteps + '). Try smaller input.');
@@ -231,11 +256,13 @@ self.onmessage = function(e) {
           } catch(err) {
             if (node) node.status = 'backtracked';
             callStack.pop();
+            emitReturnStep();
             throw err;
           }
 
           if (node) node.status = 'completed';
           callStack.pop();
+          emitReturnStep();
           return result;
         }
       });
