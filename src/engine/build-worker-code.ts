@@ -83,21 +83,11 @@ self.onmessage = function(e) {
 
     var originalLineCount = data.originalLineCount || 9999;
 
-    // Active frame is deep-cloned per step; parent frames share references.
-    // Safe because parent.variables is mutated only while parent is active (after pop returns control).
+    // Snapshot is just a slice — each entry is the frame object that existed
+    // at this moment. Frame objects are replaced (not mutated) below, so old
+    // snapshots keep their original frames even when callStack evolves.
     function snapshotFrames() {
-      if (callStack.length === 0) return [];
-      var snap = new Array(callStack.length);
-      for (var i = 0; i < callStack.length - 1; i++) {
-        snap[i] = callStack[i];
-      }
-      var top = callStack[callStack.length - 1];
-      var clonedVars = {};
-      for (var k in top.variables) {
-        if (top.variables.hasOwnProperty(k)) clonedVars[k] = deepClone(top.variables[k]);
-      }
-      snap[callStack.length - 1] = { funcName: top.funcName, variables: clonedVars };
-      return snap;
+      return callStack.slice();
     }
 
     function __traceLine(line, varsSnapshot) {
@@ -107,14 +97,23 @@ self.onmessage = function(e) {
       var correctedLine = line - lineOffset;
       if (correctedLine < 1 || correctedLine > originalLineCount) return;
 
-      var top = callStack[callStack.length - 1];
+      var topIdx = callStack.length - 1;
+      var top = callStack[topIdx];
+      var nextVars = {};
+      for (var prevK in top.variables) {
+        if (top.variables.hasOwnProperty(prevK)) nextVars[prevK] = top.variables[prevK];
+      }
       if (varsSnapshot) {
         for (var k in varsSnapshot) {
           if (varsSnapshot.hasOwnProperty(k)) {
-            top.variables[k] = deepClone(varsSnapshot[k]);
+            nextVars[k] = deepClone(varsSnapshot[k]);
           }
         }
       }
+      var newTop = { funcName: top.funcName, variables: nextVars };
+      if (top.nodeId) { newTop.nodeId = top.nodeId; newTop.node = top.node; }
+      callStack[topIdx] = newTop;
+      top = newTop;
 
       var currentNodeId = null;
       for (var j = callStack.length - 1; j >= 0; j--) {
