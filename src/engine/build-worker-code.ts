@@ -113,7 +113,7 @@ self.onmessage = function(e) {
       if (varsSnapshot) {
         for (var k in varsSnapshot) {
           if (varsSnapshot.hasOwnProperty(k)) {
-            top.variables[k] = varsSnapshot[k];
+            top.variables[k] = deepClone(varsSnapshot[k]);
           }
         }
       }
