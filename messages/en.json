@@ -29,6 +29,9 @@
     "jumpToEnd": "Jump to end",
     "variablesEmpty": "Run a step to see Variables"
   },
+  "run": {
+    "backToEditor": "Back to editor"
+  },
   "custom": {
     "hint": "💡 Paste JS / TS code and we'll detect functions and parameters automatically. Enter values and run!",
     "langLabel": "Supported",

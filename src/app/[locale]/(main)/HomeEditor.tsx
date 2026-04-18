@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { CodeEditor, ArgumentForm, CODE_EXAMPLES } from "@/editor";
@@ -9,6 +9,10 @@ import { getCodeLanguageAdapter } from "@/engine";
 import type { CodeLanguage } from "@/engine";
 import { useCodeLanguage } from "@/shared/hooks/useCodeLanguage";
 import { CodeLanguageSelect } from "@/shared/ui";
+import {
+  loadEditorSession,
+  saveEditorSession,
+} from "@/shared/lib/editor-session-storage";
 import * as styles from "./home.css";
 
 export function HomeEditor() {
@@ -21,6 +25,7 @@ export function HomeEditor() {
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [hasTopLevelCall, setHasTopLevelCall] = useState(false);
   const [argsValid, setArgsValid] = useState(true);
+  const [restoredArgs, setRestoredArgs] = useState<unknown[] | undefined>(undefined);
 
   const hasCode = code.trim().length > 0;
   const showArgumentForm = paramNames.length > 0 && !hasTopLevelCall;
@@ -28,11 +33,28 @@ export function HomeEditor() {
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const saved = loadEditorSession();
+    if (!saved) return;
+    setCodeLanguage(saved.codeLanguage);
+    setCode(saved.code);
+    setRestoredArgs(saved.args);
+    getCodeLanguageAdapter(saved.codeLanguage)
+      .analyzeUsage(saved.code)
+      .then((usage) => {
+        setParamNames(usage.paramNames);
+        setHasTopLevelCall(usage.hasTopLevelCall);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCodeLanguageChange = (lang: CodeLanguage) => {
     setCodeLanguage(lang);
     setCode("");
     setParamNames([]);
     setHasTopLevelCall(false);
+    setRestoredArgs(undefined);
+    saveEditorSession({ code: "", codeLanguage: lang });
     setTimeout(() => {
       const cm = editorRef.current?.querySelector(".cm-content") as HTMLElement | null;
       cm?.focus();
@@ -42,6 +64,7 @@ export function HomeEditor() {
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     if (!codeLanguage) return;
+    saveEditorSession({ code: newCode, codeLanguage });
     getCodeLanguageAdapter(codeLanguage)
       .analyzeUsage(newCode)
       .then((usage) => {
@@ -52,6 +75,7 @@ export function HomeEditor() {
 
   const handleRun = (args: unknown[]) => {
     if (!codeLanguage) return;
+    saveEditorSession({ code, codeLanguage, args });
     const cleanCode = getCodeLanguageAdapter(codeLanguage).prepareForExecution(code);
     const encoded = btoa(unescape(encodeURIComponent(cleanCode)));
     const argsStr = args.length > 0 ? `&args=${encodeURIComponent(JSON.stringify(args))}` : "";
@@ -73,6 +97,7 @@ export function HomeEditor() {
             <ArgumentForm
               ref={argFormRef}
               paramNames={paramNames}
+              defaultArgs={restoredArgs}
               onSubmit={handleRun}
               onValidityChange={setArgsValid}
             />

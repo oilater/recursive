@@ -33,7 +33,10 @@ export const ArgumentForm = forwardRef<ArgumentFormHandle, ArgumentFormProps>(fu
   const t = useTranslations("editor");
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    for (const name of paramNames) initial[name] = "";
+    paramNames.forEach((name, i) => {
+      const d = defaultArgs?.[i];
+      initial[name] = d !== undefined ? JSON.stringify(d) : "";
+    });
     return initial;
   });
   const [flashing, setFlashing] = useState(true);

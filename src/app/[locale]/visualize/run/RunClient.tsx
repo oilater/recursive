@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 import type { StepGeneratorResult } from "@/algorithm";
 import { executeCodeLazy } from "@/engine/lazy";
 import type { CodeLanguage } from "@/engine";
@@ -35,6 +36,7 @@ const INITIAL_EXEC: ExecState = {
 };
 
 export function RunClient({ code, args, codeLanguage = "javascript" }: RunClientProps) {
+  const t = useTranslations("run");
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [error, setError] = useState<string | null>(null);
   const codeRef = useRef(code);
@@ -78,14 +80,14 @@ export function RunClient({ code, args, codeLanguage = "javascript" }: RunClient
       <div className={styles.page}>
         <Header
           left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
-          right={exec.result && embedUrl ? (
-            <>
-              <EmbedDropdown embedUrl={embedUrl} />
-              <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
-            </>
-          ) : undefined}
         />
         <StatusMessage variant="error">{error}</StatusMessage>
+        <div className={styles.errorActions}>
+          <a href="/" className={styles.backToEditorLink}>
+            <ChevronLeftIcon size={14} />
+            {t("backToEditor")}
+          </a>
+        </div>
       </div>
     );
   }
@@ -110,14 +112,14 @@ export function RunClient({ code, args, codeLanguage = "javascript" }: RunClient
   return (
     <div className={styles.page}>
       <Header
-          left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
-          right={exec.result && embedUrl ? (
-            <>
-              <EmbedDropdown embedUrl={embedUrl} />
-              <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
-            </>
-          ) : undefined}
-        />
+        left={<a href="/" className={styles.backLink}><ChevronLeftIcon size={14} />Home</a>}
+        right={exec.result && embedUrl ? (
+          <>
+            <EmbedDropdown embedUrl={embedUrl} />
+            <Link href="/visualize/playground" className={styles.editButton}>Edit</Link>
+          </>
+        ) : undefined}
+      />
       <PlaygroundViewer
         result={exec.result}
         codeHtml={exec.codeHtml}

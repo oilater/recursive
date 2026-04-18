@@ -36,6 +36,9 @@
     "run": "▶ 실행",
     "running": "실행 중..."
   },
+  "run": {
+    "backToEditor": "에디터로 돌아가기"
+  },
   "editor": {
     "defaultLang": "default",
     "setDefault": "기본 언어로 설정",

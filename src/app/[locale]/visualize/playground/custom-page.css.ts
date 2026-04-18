@@ -170,6 +170,30 @@ export const vizRow = style({
 
 // ── Feedback ──
 
+export const errorActions = style({
+  display: "flex",
+  justifyContent: "center",
+  padding: `${vars.space.md} ${vars.space.lg}`,
+});
+
+export const backToEditorLink = style({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: vars.space.xs,
+  padding: `${vars.space.sm} ${vars.space.lg}`,
+  color: vars.color.text,
+  fontSize: vars.fontSize.sm,
+  fontFamily: vars.font.mono,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  textDecoration: "none",
+  transition: "all 0.15s ease",
+  ":hover": {
+    borderColor: vars.color.text,
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+  },
+});
+
 export const errorBox = style({
   padding: vars.space.md,
   backgroundColor: "#ef444420",
