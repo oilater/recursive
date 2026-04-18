@@ -1,9 +1,5 @@
-export { analyzeCode } from "./analyzer";
 export type { AnalyzeCodeResult } from "./analyzer";
-export { transformCode } from "./transformer";
-export { executeCustomCode } from "./executor";
 export type { ExecuteResult } from "./executor";
-export { executeCode } from "./execute";
 export type { ExecuteCodeResult } from "./execute";
 export type { AnalysisResult, ExecuteOptions, CodeLanguage } from "./types";
 export {

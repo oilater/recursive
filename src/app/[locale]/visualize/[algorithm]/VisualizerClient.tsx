@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
-import { executeCustomCode, analyzeCode } from "@/engine";
+import { executeCustomCodeLazy, analyzeCodeLazy } from "@/engine/lazy";
 import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
@@ -38,10 +38,9 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
 
   useEffect(
     function analyzePresetParams() {
-      try {
-        const { analysis } = analyzeCode(preset.code);
-        setParamNames(analysis.entryParamNames);
-      } catch {}
+      analyzeCodeLazy(preset.code)
+        .then(({ analysis }) => setParamNames(analysis.entryParamNames))
+        .catch(() => {});
     },
     [preset.code],
   );
@@ -50,7 +49,7 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
     setError(null);
     try {
       const [execResult, html] = await Promise.all([
-        executeCustomCode(preset.code, args),
+        executeCustomCodeLazy(preset.code, args),
         highlightCode(preset.code),
       ]);
       setExec({

@@ -36,11 +36,13 @@ export function HomeEditor() {
 
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
-    if (codeLanguage) {
-      const usage = getCodeLanguageAdapter(codeLanguage).analyzeUsage(newCode);
-      setParamNames(usage.paramNames);
-      setHasTopLevelCall(usage.hasTopLevelCall);
-    }
+    if (!codeLanguage) return;
+    getCodeLanguageAdapter(codeLanguage)
+      .analyzeUsage(newCode)
+      .then((usage) => {
+        setParamNames(usage.paramNames);
+        setHasTopLevelCall(usage.hasTopLevelCall);
+      });
   };
 
   const handleRun = (args: unknown[]) => {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import type { StepGeneratorResult } from "@/algorithm";
-import { executeCode } from "@/engine";
+import { executeCodeLazy } from "@/engine/lazy";
 import type { CodeLanguage } from "@/engine";
 import { highlightCode } from "@/shared/lib/shiki";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
@@ -55,7 +55,7 @@ export function RunClient({ code, args, codeLanguage = "javascript" }: RunClient
       (async () => {
         try {
           const [execResult, html] = await Promise.all([
-            executeCode(code, args ?? [], codeLanguage),
+            executeCodeLazy(code, args ?? [], codeLanguage),
             highlightCode(code, codeLanguage),
           ]);
           setExec({
