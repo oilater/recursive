@@ -7,6 +7,7 @@ import {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_MAX_CALLS,
   DEFAULT_MAX_LOOP_ITERATIONS,
+  DEFAULT_MAX_STEPS,
 } from "./constants";
 
 export interface ExecuteResult {
@@ -25,6 +26,7 @@ export async function executeCustomCode(
     timeoutMs = DEFAULT_TIMEOUT_MS,
     maxCalls = DEFAULT_MAX_CALLS,
     maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS,
+    maxSteps = DEFAULT_MAX_STEPS,
   } = options;
 
   const { analysis, strippedCode } = analyzeCode(code);
@@ -72,6 +74,7 @@ export async function executeCustomCode(
       args,
       maxCalls,
       maxLoopIterations,
+      maxSteps,
       funcStartLine: analysis.tracedFuncStartLine,
       funcEndLine: analysis.tracedFuncEndLine,
       lineOffset: analysis.lineOffset,

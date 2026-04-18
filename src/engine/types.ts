@@ -30,6 +30,7 @@ export interface ExecuteOptions {
   timeoutMs?: number;
   maxCalls?: number;
   maxLoopIterations?: number;
+  maxSteps?: number;
 }
 
 export type CodeLanguage = "javascript" | "python";
