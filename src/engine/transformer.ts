@@ -36,11 +36,11 @@ export function transformCode(strippedCode: string, _analysis: AnalysisResult): 
     sourceType: "script",
     locations: true,
   }) as AstNode;
-  walkAndTransform(ast, null);
+  walkAndTransform(ast, []);
   return generate(ast);
 }
 
-function walkAndTransform(node: AstNode, enclosingFunc: AstNode | null): void {
+function walkAndTransform(node: AstNode, enclosingFuncs: AstNode[]): void {
   if (!node || typeof node !== "object" || node.__synthetic) return;
 
   if (
@@ -52,10 +52,12 @@ function walkAndTransform(node: AstNode, enclosingFunc: AstNode | null): void {
   }
 
   const nextEnclosing =
-    FUNC_TYPES.includes(node.type) && node.body?.type === "BlockStatement" ? node : enclosingFunc;
+    FUNC_TYPES.includes(node.type) && node.body?.type === "BlockStatement"
+      ? [...enclosingFuncs, node]
+      : enclosingFuncs;
 
   if (Array.isArray(node.body)) {
-    transformBlockBody(node, enclosingFunc);
+    transformBlockBody(node, enclosingFuncs);
     for (const stmt of node.body) walkAndTransform(stmt, nextEnclosing);
     return;
   }
@@ -75,7 +77,8 @@ function walkAndTransform(node: AstNode, enclosingFunc: AstNode | null): void {
   }
 }
 
-function transformBlockBody(node: AstNode, enclosingFunc: AstNode | null): void {
+function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
+  const enclosingFunc = enclosingFuncs[enclosingFuncs.length - 1] ?? null;
   const isFuncBody =
     enclosingFunc !== null && enclosingFunc.body === node && !enclosingFunc.__bodyTransformed;
 
@@ -91,7 +94,7 @@ function transformBlockBody(node: AstNode, enclosingFunc: AstNode | null): void 
     }
 
     if (isFuncBody && !captureInjected) {
-      newBody.push(captureVarsInit(collectFunctionVarNames(enclosingFunc!)));
+      newBody.push(captureVarsInit(collectVisibleVarNames(enclosingFuncs)));
       captureInjected = true;
     }
 
@@ -145,32 +148,39 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
-function collectFunctionVarNames(funcNode: AstNode): string[] {
+function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
   const names = new Set<string>();
-  for (const name of extractParamNames(funcNode.params || [])) {
-    if (name && name !== "_" && name !== "arg") names.add(name);
-  }
-  if (funcNode.body?.type !== "BlockStatement") return [...names];
-
-  function walk(n: AstNode) {
-    if (!n || typeof n !== "object") return;
-    if (FUNC_TYPES.includes(n.type)) return;
-    if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
-      names.add(n.id.name);
+  for (const func of enclosingFuncs) {
+    if (func.id?.name === ENTRY_FUNC_NAME) continue;
+    for (const name of extractParamNames(func.params || [])) {
+      if (name && name !== "_" && name !== "arg") names.add(name);
     }
-    for (const key of Object.keys(n)) {
-      if (["type", "start", "end", "loc"].includes(key)) continue;
-      const val = n[key];
-      if (val && typeof val === "object") {
-        if (Array.isArray(val)) {
-          for (const item of val) walk(item);
-        } else {
-          walk(val);
+  }
+  const innermost = enclosingFuncs[enclosingFuncs.length - 1];
+  if (!innermost || innermost.body?.type !== "BlockStatement") return [...names];
+
+  for (const func of enclosingFuncs) {
+    if (func.body?.type !== "BlockStatement") continue;
+    function walk(n: AstNode) {
+      if (!n || typeof n !== "object") return;
+      if (FUNC_TYPES.includes(n.type)) return;
+      if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
+        names.add(n.id.name);
+      }
+      for (const key of Object.keys(n)) {
+        if (["type", "start", "end", "loc"].includes(key)) continue;
+        const val = n[key];
+        if (val && typeof val === "object") {
+          if (Array.isArray(val)) {
+            for (const item of val) walk(item);
+          } else {
+            walk(val);
+          }
         }
       }
     }
+    for (const stmt of func.body.body) walk(stmt);
   }
-  for (const stmt of funcNode.body.body) walk(stmt);
   return [...names];
 }
 
