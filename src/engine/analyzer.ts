@@ -127,6 +127,21 @@ export interface AnalyzeCodeResult {
   strippedCode: string;
 }
 
+function hasTopLevelCallTo(ast: AstNode, funcName: string): boolean {
+  for (const stmt of ast.body ?? []) {
+    if (stmt.type === "FunctionDeclaration") continue;
+    const found = findInAst(
+      stmt,
+      (n) =>
+        n.type === "CallExpression" &&
+        n.callee?.type === "Identifier" &&
+        n.callee?.name === funcName,
+    );
+    if (found) return true;
+  }
+  return false;
+}
+
 export function analyzeCode(code: string): AnalyzeCodeResult {
   const strippedCode = stripTypeScript(code);
 
@@ -163,6 +178,9 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
   ];
 
   const userFacingParams = topLevelFunc ? topLevelFunc.params : [];
+  const hasTopLevelCall = topLevelFunc
+    ? hasTopLevelCallTo(originalAst, topLevelFunc.name)
+    : false;
 
   return {
     strippedCode: wrappedCode,
@@ -175,6 +193,7 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
       tracedFuncEndLine: recursiveFunc?.endLine ?? entryFunc.endLine,
       localVarNames,
       hasRecursion: !!recursiveFunc,
+      hasTopLevelCall,
       lineOffset: 1,
       userTopLevelFuncName: topLevelFunc?.name ?? null,
     },

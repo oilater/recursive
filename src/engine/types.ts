@@ -21,6 +21,7 @@ export interface AnalysisResult {
   tracedFuncEndLine: number;
   localVarNames: string[];
   hasRecursion: boolean;
+  hasTopLevelCall: boolean;
   lineOffset: number;
   userTopLevelFuncName: string | null;
 }

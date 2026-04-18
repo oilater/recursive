@@ -45,8 +45,10 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
   const [error, setError] = useState<string | null>(null);
   const [exec, setExec] = useState<ExecState>(INITIAL_EXEC);
   const [paramNames, setParamNames] = useState<string[]>([]);
+  const [hasTopLevelCall, setHasTopLevelCall] = useState(false);
   const { codeLanguage, defaultCodeLanguage, setCodeLanguage, setDefaultCodeLanguage } =
     useCodeLanguage();
+  const showArgumentForm = paramNames.length > 0 && !hasTopLevelCall;
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const codeRef = useRef(initialCode ?? "");
   const lastArgsRef = useRef<unknown[]>(initialArgs ?? []);
@@ -66,7 +68,9 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
     setCode(newCode);
     codeRef.current = newCode;
     if (codeLanguage) {
-      setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
+      const usage = getCodeLanguageAdapter(codeLanguage).analyzeUsage(newCode);
+      setParamNames(usage.paramNames);
+      setHasTopLevelCall(usage.hasTopLevelCall);
     }
   };
 
@@ -140,7 +144,13 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
                 onSetDefault={setDefaultCodeLanguage}
               />
               <div className={styles.toolbarRight}>
-                <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleExecute} />
+                {showArgumentForm && (
+                  <ArgumentForm
+                    ref={argFormRef}
+                    paramNames={paramNames}
+                    onSubmit={handleExecute}
+                  />
+                )}
                 <button
                   className={styles.runButton}
                   onClick={() => {

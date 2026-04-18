@@ -7,15 +7,22 @@ import type { CodeLanguage } from "./types";
 
 type EditorExtension = ReturnType<typeof javascript>;
 
+export interface UsageInfo {
+  paramNames: string[];
+  hasTopLevelCall: boolean;
+}
+
 export interface CodeLanguageAdapter {
   id: CodeLanguage;
   label: string;
   shikiLang: "javascript" | "python";
   editorExtension: () => EditorExtension;
-  analyzeParamNames: (code: string) => string[];
+  analyzeUsage: (code: string) => UsageInfo;
   prepareForExecution: (code: string) => string;
   onSelected?: () => void;
 }
+
+const EMPTY_USAGE: UsageInfo = { paramNames: [], hasTopLevelCall: false };
 
 const ADAPTERS: Record<CodeLanguage, CodeLanguageAdapter> = {
   javascript: {
@@ -23,11 +30,15 @@ const ADAPTERS: Record<CodeLanguage, CodeLanguageAdapter> = {
     label: "JS / TS",
     shikiLang: "javascript",
     editorExtension: () => javascript({ typescript: true }),
-    analyzeParamNames: (code) => {
+    analyzeUsage: (code) => {
       try {
-        return analyzeCode(code).analysis.entryParamNames;
+        const { analysis } = analyzeCode(code);
+        return {
+          paramNames: analysis.entryParamNames,
+          hasTopLevelCall: analysis.hasTopLevelCall,
+        };
       } catch {
-        return [];
+        return EMPTY_USAGE;
       }
     },
     prepareForExecution: normalizeCode,
@@ -37,7 +48,10 @@ const ADAPTERS: Record<CodeLanguage, CodeLanguageAdapter> = {
     label: "Python",
     shikiLang: "python",
     editorExtension: () => python(),
-    analyzeParamNames: (code) => analyzePythonCode(code).paramNames,
+    analyzeUsage: (code) => {
+      const { paramNames, hasTopLevelCall } = analyzePythonCode(code);
+      return { paramNames, hasTopLevelCall };
+    },
     prepareForExecution: (code) => code,
     onSelected: () => {
       ensurePyodideWorker().catch(() => {});

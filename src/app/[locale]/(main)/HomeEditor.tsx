@@ -19,8 +19,10 @@ export function HomeEditor() {
 
   const [code, setCode] = useState("");
   const [paramNames, setParamNames] = useState<string[]>([]);
+  const [hasTopLevelCall, setHasTopLevelCall] = useState(false);
 
   const hasCode = code.trim().length > 0;
+  const showArgumentForm = paramNames.length > 0 && !hasTopLevelCall;
   const argFormRef = useRef<ArgumentFormHandle>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,9 @@ export function HomeEditor() {
   const handleCodeChange = (newCode: string) => {
     setCode(newCode);
     if (codeLanguage) {
-      setParamNames(getCodeLanguageAdapter(codeLanguage).analyzeParamNames(newCode));
+      const usage = getCodeLanguageAdapter(codeLanguage).analyzeUsage(newCode);
+      setParamNames(usage.paramNames);
+      setHasTopLevelCall(usage.hasTopLevelCall);
     }
   };
 
@@ -58,7 +62,9 @@ export function HomeEditor() {
           onSetDefault={setDefaultCodeLanguage}
         />
         <div className={styles.actionRight}>
-          <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleRun} />
+          {showArgumentForm && (
+            <ArgumentForm ref={argFormRef} paramNames={paramNames} onSubmit={handleRun} />
+          )}
           <button
             className={styles.runButton}
             onClick={() => {

@@ -11,6 +11,7 @@ const makeAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult =
   tracedFuncEndLine: 5,
   localVarNames: ["x"],
   hasRecursion: false,
+  hasTopLevelCall: false,
   lineOffset: 1,
   userTopLevelFuncName: null,
   ...overrides,
