@@ -181,6 +181,7 @@ export default async function DocsPage() {
 
       <section className={styles.section}>
         <ul className={styles.list}>
+          <li>{t("changelog6")}</li>
           <li>{t("changelog1")}</li>
           <li>{t("changelog2")}</li>
           <li>{t("changelog3")}</li>

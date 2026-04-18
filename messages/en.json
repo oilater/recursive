@@ -147,7 +147,8 @@
     "changelog2": "Python support",
     "changelog3": "Embed support (blog, Notion, Obsidian, etc.)",
     "changelog4": "i18n support (Korean / English)",
-    "changelog5": "Docs page added"
+    "changelog5": "Docs page added",
+    "changelog6": "Visualize function calls as stack frames"
   },
   "metadata": {
     "title": "Recursive — Track Your Algorithms",

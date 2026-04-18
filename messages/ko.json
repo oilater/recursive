@@ -147,7 +147,8 @@
     "changelog2": "Python 지원 추가",
     "changelog3": "임베드 기능 추가 (블로그, Notion, Obsidian 등)",
     "changelog4": "다국어 지원 (한국어 / 영어)",
-    "changelog5": "문서 페이지 추가"
+    "changelog5": "문서 페이지 추가",
+    "changelog6": "함수 호출을 스택 프레임으로 시각화"
   },
   "metadata": {
     "title": "Recursive - 알고리즘을 시각화하세요",
