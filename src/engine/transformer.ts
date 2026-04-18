@@ -42,7 +42,31 @@ export function transformCode(strippedCode: string, _analysis: AnalysisResult): 
     locations: true,
   }) as AstNode;
   walkAndTransform(ast, [], null);
+  wrapAllReturns(ast, []);
   return generate(ast);
+}
+
+function wrapAllReturns(node: AstNode, enclosingFuncs: AstNode[]): void {
+  if (!node || typeof node !== "object") return;
+  const isFunction =
+    FUNC_TYPES.includes(node.type) &&
+    node.body?.type === "BlockStatement" &&
+    !node.__synthetic;
+  const nextEnclosing = isFunction ? [...enclosingFuncs, node] : enclosingFuncs;
+  for (const key of Object.keys(node)) {
+    if (["type", "start", "end", "loc"].includes(key)) continue;
+    const val = node[key];
+    if (val && typeof val === "object") {
+      if (Array.isArray(val)) {
+        for (const item of val) wrapAllReturns(item, nextEnclosing);
+      } else if (val.type) {
+        wrapAllReturns(val, nextEnclosing);
+      }
+    }
+  }
+  if (isFunction && node.__funcName !== ENTRY_FUNC_NAME) {
+    wrapReturnsIn(node.body, collectVisibleVarNames(nextEnclosing));
+  }
 }
 
 function walkAndTransform(
@@ -96,6 +120,46 @@ function walkAndTransform(
     const funcName = node.__funcName ?? determineFuncName(node, parentInfo, enclosingFuncs);
     if (funcName !== ENTRY_FUNC_NAME) {
       wrapInPlace(node, funcName, enclosingFuncs);
+    }
+  }
+}
+
+function wrapReturn(retStmt: AstNode, visibleVars: string[]): AstNode {
+  const line = retStmt.loc?.start?.line ?? 0;
+  const traceCall = traceLineCall(line, visibleVars);
+  const body: AstNode[] = [];
+  if (retStmt.argument) {
+    body.push(varDecl("__ret", retStmt.argument));
+    body.push(traceCall);
+    body.push(ret(id("__ret")));
+  } else {
+    body.push(traceCall);
+    body.push(mark({ type: "ReturnStatement", argument: null, start: 0, end: 0 }));
+  }
+  return mark(block(body));
+}
+
+function wrapReturnsIn(node: AstNode, visibleVars: string[]): void {
+  if (!node || typeof node !== "object" || node.__synthetic) return;
+  if (FUNC_TYPES.includes(node.type)) return;
+  for (const key of Object.keys(node)) {
+    if (["type", "start", "end", "loc"].includes(key)) continue;
+    const val = node[key];
+    if (val && typeof val === "object") {
+      if (Array.isArray(val)) {
+        for (let i = 0; i < val.length; i++) {
+          const child = val[i];
+          if (child?.type === "ReturnStatement" && !child.__synthetic) {
+            val[i] = wrapReturn(child, visibleVars);
+          } else {
+            wrapReturnsIn(child, visibleVars);
+          }
+        }
+      } else if (val.type === "ReturnStatement" && !val.__synthetic) {
+        node[key] = wrapReturn(val, visibleVars);
+      } else {
+        wrapReturnsIn(val, visibleVars);
+      }
     }
   }
 }

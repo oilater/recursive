@@ -185,6 +185,21 @@ function factorial(n) {
     expect(tracedLines.length).toBeGreaterThan(5);
   });
 
+  it("emits a pre-return trace so the stack visibly unwinds", () => {
+    // factorial(3) should emit steps during unwind — at factorial(2) and factorial(3)'s
+    // return lines — showing the parent frame active after the child popped.
+    const { varSnapshots } = runTransformed(`
+function factorial(n) {
+  if (n <= 1) return 1;
+  return n * factorial(n - 1);
+}
+    `, [3]);
+
+    const last = varSnapshots[varSnapshots.length - 1];
+    // Last snapshot should be at factorial(3) level (after full unwind), n=3
+    expect(last.n).toBe(3);
+  });
+
   it("traces nested recursive function", () => {
     const { tracedLines } = runTransformed(`
 function uniquePaths(m, n) {
