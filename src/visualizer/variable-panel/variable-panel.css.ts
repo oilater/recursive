@@ -137,7 +137,7 @@ export const frameEmpty = style({
 
 export const row = style({
   display: "flex",
-  alignItems: "flex-start",
+  alignItems: "baseline",
   gap: vars.space.sm,
   padding: `${vars.space.xs} 0`,
   borderBottom: `1px dashed ${vars.color.border}`,
@@ -161,7 +161,6 @@ export const varName = style({
   fontFamily: vars.font.mono,
   minWidth: "70px",
   flexShrink: 0,
-  paddingTop: "4px",
 });
 
 export const varValue = style({
