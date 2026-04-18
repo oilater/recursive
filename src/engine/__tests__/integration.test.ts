@@ -319,3 +319,66 @@ const double = (n) => {
     expect(tracedLines.length).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("JS engine: function form equivalence (currying)", () => {
+  const formFunction = `
+function add(num) {
+  return function internal(addNum) {
+    return addNum + num;
+  };
+}
+const addTen = add(10);
+const addFive = add(5);
+const fifteen = addTen(5);
+const alsoFifteen = addFive(10);
+const equal = fifteen === alsoFifteen;
+  `;
+
+  const formArrow = `
+const add = (num) => (addNum) => addNum + num;
+const addTen = add(10);
+const addFive = add(5);
+const fifteen = addTen(5);
+const alsoFifteen = addFive(10);
+const equal = fifteen === alsoFifteen;
+  `;
+
+  function lastVars(code: string) {
+    const { varSnapshots } = runTransformed(code);
+    return varSnapshots[varSnapshots.length - 1];
+  }
+
+  it("function declaration and const arrow produce the same final values", () => {
+    const a = lastVars(formFunction);
+    const b = lastVars(formArrow);
+    expect(a.fifteen).toBe(15);
+    expect(a.alsoFifteen).toBe(15);
+    expect(a.equal).toBe(true);
+    expect(b.fifteen).toBe(15);
+    expect(b.alsoFifteen).toBe(15);
+    expect(b.equal).toBe(true);
+  });
+
+  it("both forms wrap the inner function with __createProxy (D12 — every function expression wrapped)", () => {
+    const { analysis: aAnalysis, strippedCode: aWrapped } = analyzeCode(formFunction);
+    const { analysis: bAnalysis, strippedCode: bWrapped } = analyzeCode(formArrow);
+    const tA = transformCode(aWrapped, aAnalysis);
+    const tB = transformCode(bWrapped, bAnalysis);
+
+    const proxyCountA = (tA.match(/__createProxy\(/g) || []).length;
+    const proxyCountB = (tB.match(/__createProxy\(/g) || []).length;
+    expect(proxyCountA).toBeGreaterThanOrEqual(2);
+    expect(proxyCountB).toBeGreaterThanOrEqual(2);
+
+    expect(tA).toMatch(/__createProxy\(function internal/);
+    // astring may emit single-param arrows as `n =>` or `(n) =>`
+    expect(tB).toMatch(/__createProxy\([^,]*=>/);
+  });
+
+  it("both forms trace the inner function body when called via the closure handle", () => {
+    const a = runTransformed(formFunction);
+    const b = runTransformed(formArrow);
+    expect(a.tracedLines.length).toBeGreaterThan(0);
+    expect(b.tracedLines.length).toBeGreaterThan(0);
+  });
+});

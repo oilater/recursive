@@ -77,6 +77,7 @@ export async function executeCustomCode(
       maxSteps,
       lineOffset: analysis.lineOffset,
       userTopLevelFuncName: analysis.userTopLevelFuncName,
+      entryOwnVarNames: analysis.entryOwnVarNames,
       originalLineCount: code.split("\n").length,
     });
   });

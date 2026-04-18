@@ -11,6 +11,7 @@ export interface Step {
   id: number;
   type: StepType;
   codeLine: number;
+  callerLine?: number;
   activeNodeId: string;
   activePath: string[];
   frames: Frame[];

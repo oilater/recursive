@@ -5,6 +5,7 @@ import type { AnalysisResult } from "../types";
 const makeAnalysis = (overrides: Partial<AnalysisResult> = {}): AnalysisResult => ({
   entryFuncName: "__entry__",
   entryParamNames: [],
+  entryOwnVarNames: [],
   recursiveFuncName: null,
   recursiveParamNames: [],
   hasRecursion: false,
@@ -29,7 +30,7 @@ describe("transformCode", () => {
     const result = transformCode(code, makeAnalysis({ recursiveFuncName: "fib" }));
 
     expect(result).toContain("__createProxy");
-    expect(result).toContain(`fib = __createProxy(fib, "fib", ["n"], ["n"])`);
+    expect(result).toContain(`fib = __createProxy(fib, "fib", ["n"], ["n"], `);
   });
 
   it("루프에 __guard를 삽입한다", () => {

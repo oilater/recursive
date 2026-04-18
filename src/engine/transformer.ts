@@ -20,6 +20,11 @@ import {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
+interface ParentInfo {
+  parent: AstNode;
+  key: string;
+}
+
 const LOOP_TYPES = [
   "ForStatement",
   "WhileStatement",
@@ -36,11 +41,15 @@ export function transformCode(strippedCode: string, _analysis: AnalysisResult): 
     sourceType: "script",
     locations: true,
   }) as AstNode;
-  walkAndTransform(ast, []);
+  walkAndTransform(ast, [], null);
   return generate(ast);
 }
 
-function walkAndTransform(node: AstNode, enclosingFuncs: AstNode[]): void {
+function walkAndTransform(
+  node: AstNode,
+  enclosingFuncs: AstNode[],
+  parentInfo: ParentInfo | null,
+): void {
   if (!node || typeof node !== "object" || node.__synthetic) return;
 
   if (
@@ -51,14 +60,12 @@ function walkAndTransform(node: AstNode, enclosingFuncs: AstNode[]): void {
     node.body = block([ret(node.body)]);
   }
 
-  const nextEnclosing =
-    FUNC_TYPES.includes(node.type) && node.body?.type === "BlockStatement"
-      ? [...enclosingFuncs, node]
-      : enclosingFuncs;
+  const isFuncWithBlock = FUNC_TYPES.includes(node.type) && node.body?.type === "BlockStatement";
+  const nextEnclosing = isFuncWithBlock ? [...enclosingFuncs, node] : enclosingFuncs;
 
   if (Array.isArray(node.body)) {
     transformBlockBody(node, enclosingFuncs);
-    for (const stmt of node.body) walkAndTransform(stmt, nextEnclosing);
+    for (const stmt of node.body) walkAndTransform(stmt, nextEnclosing, null);
     return;
   }
 
@@ -68,11 +75,21 @@ function walkAndTransform(node: AstNode, enclosingFuncs: AstNode[]): void {
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {
         for (const item of val) {
-          if (item?.type) walkAndTransform(item, nextEnclosing);
+          if (item?.type) walkAndTransform(item, nextEnclosing, { parent: node, key });
         }
       } else if (val.type) {
-        walkAndTransform(val, nextEnclosing);
+        walkAndTransform(val, nextEnclosing, { parent: node, key });
       }
+    }
+  }
+
+  if (
+    (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") &&
+    !node.__synthetic
+  ) {
+    const funcName = determineFuncName(node, parentInfo);
+    if (funcName !== ENTRY_FUNC_NAME) {
+      wrapInPlace(node, funcName, enclosingFuncs);
     }
   }
 }
@@ -111,22 +128,8 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
       stmt.id.name !== ENTRY_FUNC_NAME
     ) {
       newBody.push(
-        proxyReassignment(stmt.id.name, extractParamNames(stmt.params), collectOwnVarNames(stmt)),
+        proxyReassignment(stmt.id.name, extractParamNames(stmt.params), collectOwnVarNames(stmt), enclosingFuncs),
       );
-    }
-
-    if (stmt.type === "VariableDeclaration" && stmt.declarations) {
-      for (const decl of stmt.declarations) {
-        if (
-          decl.id?.type === "Identifier" &&
-          decl.id.name !== ENTRY_FUNC_NAME &&
-          decl.init &&
-          (decl.init.type === "FunctionExpression" ||
-            decl.init.type === "ArrowFunctionExpression")
-        ) {
-          decl.init = wrapFunctionInProxy(decl.init, decl.id.name);
-        }
-      }
     }
   }
 
@@ -215,6 +218,25 @@ function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
   return [...names];
 }
 
+function determineFuncName(node: AstNode, parentInfo: ParentInfo | null): string {
+  if (node.id?.name) return node.id.name;
+  const parent = parentInfo?.parent;
+  if (parent) {
+    if (parent.type === "VariableDeclarator" && parent.id?.type === "Identifier") {
+      return parent.id.name;
+    }
+    if (parent.type === "Property" && parent.key?.type === "Identifier") {
+      return parent.key.name;
+    }
+    if (parent.type === "AssignmentExpression" && parent.left?.type === "Identifier") {
+      return parent.left.name;
+    }
+  }
+  const line = node.loc?.start?.line ?? 0;
+  const col = node.loc?.start?.column ?? 0;
+  return `<anon@${line}:${col}>`;
+}
+
 function mark(node: AstNode): AstNode {
   node.__synthetic = true;
   return node;
@@ -248,7 +270,51 @@ function paramArrayLiteral(paramNames: string[]): AstNode {
   });
 }
 
-function proxyReassignment(funcName: string, paramNames: string[], ownVars: string[]): AstNode {
+function closureCaptureExpr(enclosingFuncs: AstNode[]): AstNode {
+  const closureNames = new Set<string>();
+  for (const func of enclosingFuncs) {
+    if (func.id?.name === ENTRY_FUNC_NAME) continue;
+    for (const name of extractParamNames(func.params || [])) {
+      if (name && name !== "_" && name !== "arg") closureNames.add(name);
+    }
+    if (func.body?.type !== "BlockStatement") continue;
+    function walk(n: AstNode) {
+      if (!n || typeof n !== "object" || n.__synthetic) return;
+      if (FUNC_TYPES.includes(n.type)) return;
+      if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
+        closureNames.add(n.id.name);
+      }
+      for (const key of Object.keys(n)) {
+        if (["type", "start", "end", "loc"].includes(key)) continue;
+        const val = n[key];
+        if (val && typeof val === "object") {
+          if (Array.isArray(val)) for (const item of val) walk(item);
+          else walk(val);
+        }
+      }
+    }
+    for (const stmt of func.body.body) walk(stmt);
+  }
+
+  if (closureNames.size === 0) return mark(literal(null));
+
+  const tryBlocks = [...closureNames].map((name) =>
+    tryCatch(
+      [expr(assign(member(id("__v"), id(name)), id(name)))],
+      [],
+    ),
+  );
+  return mark(
+    funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
+  );
+}
+
+function proxyReassignment(
+  funcName: string,
+  paramNames: string[],
+  ownVars: string[],
+  enclosingFuncs: AstNode[],
+): AstNode {
   return mark(
     expr(
       assign(
@@ -258,19 +324,40 @@ function proxyReassignment(funcName: string, paramNames: string[], ownVars: stri
           literal(funcName),
           paramArrayLiteral(paramNames),
           paramArrayLiteral(ownVars),
+          closureCaptureExpr(enclosingFuncs),
         ]),
       ),
     ),
   );
 }
 
-function wrapFunctionInProxy(funcExpression: AstNode, funcName: string): AstNode {
-  return call(id(CREATE_PROXY), [
-    funcExpression,
+function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[]): void {
+  const params = node.params || [];
+  const paramNames = extractParamNames(params);
+  const ownVars = collectOwnVarNames(node);
+
+  const original: Record<string, unknown> = {};
+  for (const k of Object.keys(node)) {
+    if (k === "__synthetic") continue;
+    original[k] = node[k];
+  }
+
+  for (const k of Object.keys(node)) {
+    if (k === "start" || k === "end" || k === "loc") continue;
+    delete (node as Record<string, unknown>)[k];
+  }
+
+  node.type = "CallExpression";
+  node.callee = id(CREATE_PROXY);
+  node.arguments = [
+    original,
     literal(funcName),
-    paramArrayLiteral(extractParamNames(funcExpression.params || [])),
-    paramArrayLiteral(collectOwnVarNames(funcExpression)),
-  ]);
+    paramArrayLiteral(paramNames),
+    paramArrayLiteral(ownVars),
+    closureCaptureExpr(enclosingFuncs),
+  ];
+  node.optional = false;
+  node.__synthetic = true;
 }
 
 function guardCall(): AstNode {

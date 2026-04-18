@@ -15,6 +15,7 @@ export type ExecuteResponse = ExecuteSuccessResponse | ExecuteErrorResponse;
 export interface AnalysisResult {
   entryFuncName: string;
   entryParamNames: string[];
+  entryOwnVarNames: string[];
   recursiveFuncName: string | null;
   recursiveParamNames: string[];
   hasRecursion: boolean;

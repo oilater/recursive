@@ -20,6 +20,7 @@ self.onmessage = function(e) {
   var maxSteps = data.maxSteps || 10000;
   var lineOffset = data.lineOffset || 0;
   var userFunc = data.userTopLevelFuncName;
+  var entryOwnVarNames = data.entryOwnVarNames || [];
 
   try {
     var steps = [];
@@ -37,11 +38,27 @@ self.onmessage = function(e) {
       status: 'completed'
     };
 
-    callStack.push({ funcName: entryFuncName, variables: {}, ownVarNames: [] });
+    callStack.push({ funcName: entryFuncName, variables: {}, ownVarNames: entryOwnVarNames });
+
+    var closureMap = new WeakMap();
 
     function deepClone(val) {
       if (val === null || val === undefined) return val;
-      if (typeof val === 'function') return '[Function: ' + (val.name || 'anonymous') + ']';
+      if (typeof val === 'function') {
+        var fnMeta = closureMap.get(val);
+        var closure = {};
+        if (fnMeta && fnMeta.snapshot) {
+          for (var ck in fnMeta.snapshot) {
+            if (fnMeta.snapshot.hasOwnProperty(ck)) closure[ck] = deepClone(fnMeta.snapshot[ck]);
+          }
+        }
+        return {
+          __kind: 'function',
+          funcName: (fnMeta && fnMeta.funcName) || val.name || 'anonymous',
+          params: (fnMeta && fnMeta.paramNames) || [],
+          closure: closure
+        };
+      }
       if (typeof val !== 'object') return val;
       if (Array.isArray(val)) return val.map(deepClone);
       try { return JSON.parse(JSON.stringify(val)); } catch(e) { return String(val); }
@@ -83,15 +100,18 @@ self.onmessage = function(e) {
 
     var originalLineCount = data.originalLineCount || 9999;
 
-    // Snapshot is just a slice — each entry is the frame object that existed
-    // at this moment. Frame objects are replaced (not mutated) below, so old
-    // snapshots keep their original frames even when callStack evolves.
+    // Frames are replaced (not mutated), so a slice keeps each step's view stable.
     function snapshotFrames() {
       return callStack.slice();
     }
 
     function cloneFrame(frame) {
-      var copy = { funcName: frame.funcName, variables: {}, ownVarNames: frame.ownVarNames };
+      var copy = {
+        funcName: frame.funcName,
+        variables: {},
+        ownVarNames: frame.ownVarNames,
+        lastLine: frame.lastLine,
+      };
       for (var k in frame.variables) {
         if (frame.variables.hasOwnProperty(k)) copy.variables[k] = frame.variables[k];
       }
@@ -133,6 +153,9 @@ self.onmessage = function(e) {
         }
       }
 
+      var topClone = getOrClone(topIdx);
+      topClone.lastLine = correctedLine;
+
       for (var idx in modified) {
         if (modified.hasOwnProperty(idx)) callStack[idx] = modified[idx];
       }
@@ -144,10 +167,19 @@ self.onmessage = function(e) {
       }
       if (!currentNodeId) currentNodeId = rootNode.id;
 
+      var callerLine;
+      if (topIdx > 0) {
+        var parentFrame = callStack[topIdx - 1];
+        if (parentFrame.funcName !== top.funcName && typeof parentFrame.lastLine === 'number') {
+          callerLine = parentFrame.lastLine;
+        }
+      }
+
       steps.push({
         id: stepId++,
         type: 'call',
         codeLine: correctedLine,
+        callerLine: callerLine,
         activeNodeId: currentNodeId,
         activePath: getPath(currentNodeId),
         frames: snapshotFrames(),
@@ -155,12 +187,12 @@ self.onmessage = function(e) {
       });
     }
 
-    function __createProxy(originalFunc, funcName, paramNames, ownVarNames) {
+    function __createProxy(originalFunc, funcName, paramNames, ownVarNames, captureClosureFn) {
       funcName = funcName || (hasRecursion ? recursiveFuncName : (originalFunc.name || 'anonymous'));
       paramNames = paramNames || (hasRecursion ? recursiveParamNames : []);
       ownVarNames = ownVarNames || paramNames;
 
-      return new Proxy(originalFunc, {
+      var proxy = new Proxy(originalFunc, {
         apply: function(target, thisArg, argsList) {
           callCount++;
           if (callCount > maxCalls) {
@@ -207,6 +239,17 @@ self.onmessage = function(e) {
           return result;
         }
       });
+
+      var meta = { funcName: funcName, paramNames: paramNames, snapshot: null };
+      if (typeof captureClosureFn === 'function') {
+        try {
+          var snapshot = captureClosureFn();
+          if (snapshot && typeof snapshot === 'object') meta.snapshot = snapshot;
+        } catch (e) {}
+      }
+      closureMap.set(proxy, meta);
+
+      return proxy;
     }
 
     var consoleLogs = [];
