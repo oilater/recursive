@@ -139,6 +139,28 @@ function wrapReturn(retStmt: AstNode, visibleVars: string[]): AstNode {
   return mark(block(body));
 }
 
+function hasNonSyntheticCall(node: AstNode): boolean {
+  if (!node || typeof node !== "object") return false;
+  if (node.type === "CallExpression" && !node.__synthetic) return true;
+  if (FUNC_TYPES.includes(node.type)) return false;
+  for (const key of Object.keys(node)) {
+    if (["type", "start", "end", "loc"].includes(key)) continue;
+    const val = node[key];
+    if (val && typeof val === "object") {
+      if (Array.isArray(val)) {
+        for (const item of val) if (hasNonSyntheticCall(item)) return true;
+      } else if (val.type && hasNonSyntheticCall(val)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function shouldWrapReturn(retStmt: AstNode): boolean {
+  return !!retStmt.argument && hasNonSyntheticCall(retStmt.argument);
+}
+
 function wrapReturnsIn(node: AstNode, visibleVars: string[]): void {
   if (!node || typeof node !== "object" || node.__synthetic) return;
   if (FUNC_TYPES.includes(node.type)) return;
@@ -149,13 +171,13 @@ function wrapReturnsIn(node: AstNode, visibleVars: string[]): void {
       if (Array.isArray(val)) {
         for (let i = 0; i < val.length; i++) {
           const child = val[i];
-          if (child?.type === "ReturnStatement" && !child.__synthetic) {
+          if (child?.type === "ReturnStatement" && !child.__synthetic && shouldWrapReturn(child)) {
             val[i] = wrapReturn(child, visibleVars);
           } else {
             wrapReturnsIn(child, visibleVars);
           }
         }
-      } else if (val.type === "ReturnStatement" && !val.__synthetic) {
+      } else if (val.type === "ReturnStatement" && !val.__synthetic && shouldWrapReturn(val)) {
         node[key] = wrapReturn(val, visibleVars);
       } else {
         wrapReturnsIn(val, visibleVars);
