@@ -45,7 +45,7 @@ date: 2026-04-16
 
 ### Institutional Learnings
 
-- `docs/refactoring-codepanel-highlight.md` — CodePanel은 `React.memo`로 감싸야 하이라이트 유지. embed에서도 동일하게 적용 필요
+- `docs/solutions/codepanel-first-render-highlight-2026-04-15.md` — CodePanel은 `React.memo`로 감싸야 하이라이트 유지. embed에서도 동일하게 적용 필요
 - 시각화 뷰어를 별도 컴포넌트로 분리한 패턴이 이미 있음 (PlaygroundViewer, PresetViewer)
 
 ## Key Technical Decisions
@@ -229,4 +229,4 @@ embed 페이지 흐름:
 
 - Related code: `src/app/[locale]/visualize/playground/PlaygroundViewer.tsx`
 - Related code: `src/engine/executor.ts`
-- Related doc: `docs/refactoring-codepanel-highlight.md`
+- Related doc: `docs/solutions/codepanel-first-render-highlight-2026-04-15.md`
