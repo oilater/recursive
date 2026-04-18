@@ -35,7 +35,11 @@ export function EmbedViewer({
       <div className={styles.vizRow}>
         <div className={styles.leftPanel}>
           <div className={styles.codeSection}>
-            <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
+            <CodePanel
+              html={codeHtml}
+              activeLine={player.currentStep?.codeLine}
+              callerLine={player.currentStep?.callerLine}
+            />
           </div>
         </div>
 

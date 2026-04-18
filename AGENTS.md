@@ -100,3 +100,4 @@ UI 컴포넌트 파일에서 도메인 함수를 export하지 말 것. lib이 UI
 - `docs/how-it-was-built.md` — 프로젝트의 결정 히스토리
 - `docs/architecture-walkthrough.md` — 코드 한 줄 단위 매핑
 - `docs/plans/` — 과거 리팩토링 기록
+- `docs/solutions/` — 과거 문제 해결의 문서화 (frontmatter의 `module`/`tags`/`problem_type`으로 검색 가능). 비슷한 영역에서 작업/디버깅 시 참조

@@ -3,6 +3,7 @@ export type {
   StepType,
   NodeStatus,
   TreeNode,
+  Frame,
   StepGeneratorResult,
   Difficulty,
   PresetAlgorithm,

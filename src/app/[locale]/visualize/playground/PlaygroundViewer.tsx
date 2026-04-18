@@ -6,7 +6,6 @@ import {
   TreeView,
   StepperControls,
   VariablePanel,
-  CallStack,
   ResultPanel,
   CodePanel,
 } from "@/visualizer";
@@ -37,7 +36,11 @@ export function PlaygroundViewer({
       <div className={styles.vizRow}>
         <div className={styles.leftPanel}>
           <div className={styles.codeSection}>
-            <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
+            <CodePanel
+              html={codeHtml}
+              activeLine={player.currentStep?.codeLine}
+              callerLine={player.currentStep?.callerLine}
+            />
           </div>
         </div>
 
@@ -45,7 +48,6 @@ export function PlaygroundViewer({
           <div className={styles.variableSection}>
             <VariablePanel currentStep={player.currentStep} prevStep={prevStep} />
           </div>
-          {hasRecursion && <CallStack currentStep={player.currentStep} tree={result.tree} />}
           <ResultPanel
             steps={result.steps}
             currentIndex={player.currentIndex}

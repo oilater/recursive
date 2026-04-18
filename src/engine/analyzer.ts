@@ -57,27 +57,6 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
-function extractLocalVarNames(funcNode: AstNode): string[] {
-  const names = new Set<string>();
-
-  for (const decl of collectInAst(
-    funcNode,
-    (n) => n.type === "VariableDeclarator" && n.id?.type === "Identifier",
-  )) {
-    names.add(decl.id.name);
-  }
-
-  for (const fn of collectInAst(funcNode, (n) => n.type === "FunctionDeclaration")) {
-    for (const param of fn.params ?? []) {
-      if (param.type === "Identifier" && param.name !== "_") names.add(param.name);
-      if (param.type === "AssignmentPattern" && param.left?.type === "Identifier")
-        names.add(param.left.name);
-    }
-  }
-
-  return [...names];
-}
-
 function findAllFunctions(ast: AstNode): FuncInfo[] {
   const results: FuncInfo[] = [];
 
@@ -167,35 +146,55 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
     locations: true,
   }) as AstNode;
   const wrappedFunctions = findAllFunctions(wrappedAst);
-
-  const entryFunc = wrappedFunctions.find((f) => f.name === ENTRY_FUNC_NAME)!;
+  const entryFunc = wrappedFunctions.find((f) => f.name === ENTRY_FUNC_NAME);
 
   const recursiveFunc =
     wrappedFunctions.find((f) => f.name !== ENTRY_FUNC_NAME && f.isRecursive) ?? null;
-
-  const localVarNames = [
-    ...new Set([...entryFunc.params, ...extractLocalVarNames(entryFunc.node)]),
-  ];
 
   const userFacingParams = topLevelFunc ? topLevelFunc.params : [];
   const hasTopLevelCall = topLevelFunc
     ? hasTopLevelCallTo(originalAst, topLevelFunc.name)
     : false;
+  const entryOwnVarNames = entryFunc ? collectTopLevelVarNames(entryFunc.node) : [];
 
   return {
     strippedCode: wrappedCode,
     analysis: {
       entryFuncName: ENTRY_FUNC_NAME,
       entryParamNames: userFacingParams,
+      entryOwnVarNames,
       recursiveFuncName: recursiveFunc?.name ?? null,
       recursiveParamNames: recursiveFunc?.params ?? [],
-      tracedFuncStartLine: recursiveFunc?.startLine ?? entryFunc.startLine,
-      tracedFuncEndLine: recursiveFunc?.endLine ?? entryFunc.endLine,
-      localVarNames,
       hasRecursion: !!recursiveFunc,
       hasTopLevelCall,
       lineOffset: 1,
       userTopLevelFuncName: topLevelFunc?.name ?? null,
     },
   };
+}
+
+function collectTopLevelVarNames(funcNode: AstNode): string[] {
+  const names = new Set<string>();
+  if (funcNode.body?.type !== "BlockStatement") return [];
+  function walk(n: AstNode) {
+    if (!n || typeof n !== "object") return;
+    if (n.type === "FunctionDeclaration") {
+      if (n.id?.name) names.add(n.id.name);
+      return;
+    }
+    if (n.type === "FunctionExpression" || n.type === "ArrowFunctionExpression") return;
+    if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
+      names.add(n.id.name);
+    }
+    for (const key of Object.keys(n)) {
+      if (["type", "start", "end", "loc"].includes(key)) continue;
+      const val = n[key];
+      if (val && typeof val === "object") {
+        if (Array.isArray(val)) for (const item of val) walk(item);
+        else walk(val);
+      }
+    }
+  }
+  for (const stmt of funcNode.body.body) walk(stmt);
+  return [...names];
 }

@@ -2,31 +2,49 @@
 
 import { memo, useEffect, useRef } from "react";
 import * as styles from "./code-panel.css";
+import {
+  hasActiveHighlight,
+  hasCallerHighlight,
+  syncActiveHighlight,
+  syncCallerHighlight,
+} from "./highlight";
 
 interface CodePanelProps {
   html: string;
   activeLine: number | undefined;
+  callerLine?: number | undefined;
   title?: string;
 }
 
-export const CodePanel = memo(function CodePanel({ html, activeLine, title }: CodePanelProps) {
+export const CodePanel = memo(function CodePanel({
+  html,
+  activeLine,
+  callerLine,
+  title,
+}: CodePanelProps) {
   const codeRef = useRef<HTMLDivElement>(null);
+  const activeLineRef = useRef<number | undefined>(undefined);
+  const callerLineRef = useRef<number | undefined>(undefined);
 
   useEffect(
     function highlightActiveLine() {
-      if (!codeRef.current) return;
+      const root = codeRef.current;
+      if (!root) return;
 
-      codeRef.current.querySelectorAll(".highlighted-line").forEach((el) => {
-        el.classList.remove("highlighted-line");
-      });
+      const prevActive = hasActiveHighlight(root, activeLineRef.current)
+        ? activeLineRef.current
+        : undefined;
+      const prevCaller = hasCallerHighlight(root, callerLineRef.current)
+        ? callerLineRef.current
+        : undefined;
 
-      if (activeLine !== undefined) {
-        const currEl = codeRef.current.querySelector(`[data-line="${activeLine}"]`);
-        currEl?.classList.add("highlighted-line");
-        currEl?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }
+      syncCallerHighlight(root, prevCaller, callerLine);
+      callerLineRef.current = callerLine;
+
+      syncActiveHighlight(root, prevActive, activeLine);
+      activeLineRef.current = activeLine;
     },
-    [activeLine, html],
+    [activeLine, callerLine, html],
   );
 
   return (

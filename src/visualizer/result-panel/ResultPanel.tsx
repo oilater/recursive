@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Step } from "@/algorithm";
+import { getResultFromFrames } from "./get-result-from-frames";
 import * as styles from "./result-panel.css";
 
 interface ConsoleLogEntry {
@@ -25,12 +26,13 @@ export function ResultPanel({
   const allPresetResults = useMemo(() => {
     const results: { value: string; stepIdx: number }[] = [];
     for (const step of steps) {
+      const result = getResultFromFrames(step);
       if (
-        typeof step.variables.result === "string" &&
+        typeof result === "string" &&
         step.description.includes("결과") &&
         step.description.includes("추가")
       ) {
-        results.push({ value: step.variables.result, stepIdx: step.id });
+        results.push({ value: result, stepIdx: step.id });
       }
     }
     return results;

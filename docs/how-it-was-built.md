@@ -414,3 +414,219 @@ Pyodide의 가장 큰 약점은 초기 로딩 시간입니다. CPython 바이너
 **immutable 변수 deepcopy 스킵**. `sys.settrace`의 "line" 이벤트에서 매번 `copy.deepcopy()`를 호출하면 성능이 크게 떨어집니다. `int`, `float`, `str`, `bool`, `None` 같은 immutable 타입은 복사할 필요가 없으므로 바로 저장합니다. `deepcopy`는 리스트, 딕셔너리 같은 mutable 타입에만 적용합니다.
 
 이런 최적화들의 결과, 첫 방문 시 Pyodide 로딩 2-3초를 제외하면 일반적인 교육용 코드(100줄 이내, 재귀 깊이 100 이내)의 실행은 1초 이내에 완료됩니다. 두 번째 실행부터는 JavaScript와 거의 동일한 체감 속도입니다.
+
+---
+
+## 16. 변수 모델: 평면 dict → 콜스택 frame
+
+처음 `Step.variables`는 `Record<string, unknown>` — 한 시점의 모든 변수를 평면 dict로 담았습니다. 단순하고 빨랐지만, 어느 변수가 어느 함수의 것인지 정보가 사라졌습니다.
+
+문제가 드러난 시나리오는 작았어요. 사용자가 `function AddTen(num) { return num + 10 }`를 정의하고 `const a = AddTen(5)`를 호출하는 코드를 시각화했더니, 실행이 끝난 마지막 step에 `num=null`이 남아있었습니다. AddTen은 이미 종료됐는데 그 매개변수가 화면에 잔존한 거죠. 게다가 그 값마저 잘못된 값(`null`은 빈 ArgumentForm이 `JSON.stringify([undefined])`를 거치며 변환된 부산물).
+
+사용자가 직접 디버거 멘탈모델을 요청했습니다. **"각 함수의 지역 변수가 그 함수의 스택 안에 명시적으로 구분되고, 함수가 끝나면 사라져야 한다."** Chrome DevTools, VS Code 디버거가 보여주는 그 모양 그대로요.
+
+### 16-1. 데이터 모델 — `Frame[]`
+
+```typescript
+interface Frame {
+  funcName: string;
+  variables: Record<string, unknown>;
+}
+
+interface Step {
+  // ...
+  frames: Frame[];  // call stack at this moment
+}
+```
+
+`Step.variables` 자체를 제거. 모든 컨슈머(VariablePanel, ResultPanel, Python adapter)를 같은 PR에서 마이그레이션. ResultPanel은 `getResultFromFrames(step)` 헬퍼로 격리해서 frame 모델을 직접 알지 않게 했습니다.
+
+### 16-2. Hybrid binding — Proxy(lifetime) + Transformer(content)
+
+frame을 어떻게 만들지의 설계 분기에서 두 옵션이 있었습니다:
+
+- (A) **Proxy 단독**: 모든 함수를 `__createProxy`로 감싸고, apply 트랩에서 push/pop + 변수 캡처까지.
+- (B) **Transformer 단독**: AST에 `__pushFrame()` / `__popFrame()` 호출을 직접 삽입.
+
+선택은 **둘 다 — 책임 분리**:
+
+| 책임 | 누가 | 어디서 |
+|---|---|---|
+| Frame **lifetime** (push/pop, 예외 cleanup) | runtime — 호출이 일어나는 시점만 알 수 있음 | `__createProxy` apply/finally |
+| Frame **content** (어떤 변수가 보이는가) | static — lexical scope | transformer가 함수마다 자체 `__captureVars` closure 삽입 |
+
+이 분리 덕분에 originally 계획했던 "analyzer가 함수별 변수 이름 사전 수집" 단계가 통째로 사라졌습니다. 각 함수의 captureVars closure가 자기 lexical scope 변수를 자동으로 try-access — JS의 스코프 규칙이 데이터 구조를 대신 만들어준 셈입니다.
+
+### 16-3. Synthetic AST 노드는 단일 marker로
+
+transformer가 자기가 inject한 helper 노드(captureVars의 새 FunctionExpression 등)를 다시 walking하면 그 안에 또 captureVars가 inject되면서 무한 재귀 → stack overflow. 처음엔 case-by-case 마커(`__transformed`, `__captureVarsInjected`)로 막았는데, marker가 늘어날수록 같은 패턴의 누락 버그가 다시 발견됐습니다.
+
+근본 fix:
+
+```typescript
+function mark(node) { node.__synthetic = true; return node; }
+
+function walkAndTransform(node, ...) {
+  if (!node || typeof node !== "object" || node.__synthetic) return;
+  // ... user AST만 처리
+}
+```
+
+helper로 만든 모든 노드에 `__synthetic` 마킹 + walker 첫 줄에서 즉시 return. 사용자 AST와 helper AST의 경계를 한 곳에서 명확히. **마커 누락 patch가 늘어난다는 건 walker가 자기 출력을 다시 처리하고 있다는 신호**입니다.
+
+### 16-4. Worker postMessage는 함수 직렬화 못 함 — 저장 시점에 deepClone
+
+frame 모델 도입 직후 worker가 다음 에러를 뿜었습니다:
+
+```
+Failed to execute 'postMessage' on 'DedicatedWorkerGlobalScope':
+function addTen(num) { ... } could not be cloned.
+```
+
+원인 추적:
+1. `collectVisibleVarNames`가 hoisted FunctionDeclaration 이름까지 lexical scope에 포함 → `__entry__`의 captureVars가 `addTen` 변수를 try-access
+2. `addTen`은 함수 (Proxy로 wrap됨)
+3. `__traceLine`이 active frame.variables에 raw value 저장 — **함수 그대로**
+4. structural sharing으로 parent frame이 reference 공유되면서, 그 raw 함수가 나중 step의 snapshot에 그대로 끌려옴
+5. `postMessage` 시 structured clone algorithm이 함수 만나서 throw
+
+근본 fix는 **수집 시점에 정규화**:
+
+```javascript
+function __traceLine(line, varsSnapshot) {
+  // ...
+  for (var k in varsSnapshot) {
+    top.variables[k] = deepClone(varsSnapshot[k]);  // ← 저장 시점에 clone
+  }
+}
+```
+
+`deepClone`이 함수를 `'[Function: name]'` 문자열로 변환. structural sharing 안전성 회복.
+
+**일반 원칙**: structured clone 통과해야 하는 데이터는 **수집 시점에 정규화**. 직렬화 시점에서 막으려 하면 reference 공유의 미묘한 leak이 따라옵니다.
+
+### 16-5. Structural sharing 함정 — Active frame은 immutable update
+
+처음 snapshot은 단순했어요: parent frame은 reference 공유 (성능), active frame만 deep clone (안전).
+
+```javascript
+function snapshotFrames() {
+  // parent: reference, active: deep clone
+}
+```
+
+결과는 시각적 버그: `combination(4, 2)` step이 dfs 중간인데 `combination.result`에 이미 모든 답이 채워져 보임. **미래의 push가 과거 step에 leak**.
+
+원인은 parent frame이 reference 공유라는 점. 그 frame이 나중에 다시 active가 되면 captureVars가 같은 객체의 variables를 mutate. 이전 step의 snapshot도 같은 reference를 보기 때문에 같이 mutate된 결과를 봅니다.
+
+근본 fix: active frame을 **매 traceLine마다 새 객체로 교체** (immutable update):
+
+```javascript
+callStack[topIdx] = { funcName, variables: { ...새값 } };
+```
+
+옛 snapshot은 옛 reference 그대로. 새 traceLine은 새 객체에만 영향. parent는 여전히 reference 공유 — 이제 안전 (parent가 inactive 동안 mutate 일이 없음).
+
+### 16-6. Closure 변수는 owner frame으로 dispatch
+
+`combination(n, r) { result = []; function dfs(...) { result.push(...) } }` 같은 케이스에서:
+
+- dfs가 active일 때 result는 어디 표시되어야 하나?
+- result.push가 일어나면 어느 frame이 갱신되나?
+
+원래 plan은 "closure 변수 제외" — 즉 dfs.variables에 result 안 넣음. 그러면 dfs가 active인 동안 result.push가 일어나도 combination.variables.result는 갱신 안 됨 (combination이 inactive).
+
+반대로 closure 변수 포함하면 같은 변수가 dfs와 combination 두 frame에 중복 표시 — 산만.
+
+올바른 답은 **owner frame으로 dispatch**:
+
+```javascript
+// 각 frame이 ownVarNames metadata 보유
+{ funcName: "dfs", variables: {...}, ownVarNames: ["start", "current", "i"] }
+
+// __traceLine이 capture된 각 키마다 owner frame을 callStack 위→아래 traverse해서 찾고
+// 그 owner frame을 immutable update
+function __traceLine(line, varsSnapshot) {
+  for (var k in varsSnapshot) {
+    var ownerIdx = ownerFrameIndex(k, topIdx);  // walk down
+    // immutable update of the owner frame
+  }
+}
+```
+
+dfs의 captureVars가 result도 try-access (closure로 보임) → worker가 "result는 combination이 owner"라고 판정 → combination.variables.result 갱신. dfs.variables엔 자기 own만 (start, current, i). **같은 변수가 두 frame에 안 보이고, mutation은 즉시 반영**.
+
+### 16-7. UI — 콜스택 카드 + auto-scroll
+
+VariablePanel 자체도 평면 list에서 **카드 stack**으로 재디자인:
+
+- 활성 frame이 가장 아래 (사용자 의견 — 실제 프로세스 메모리 stack growth 방향과 맞춤)
+- 활성: amber border + 살짝 outer glow + "active" 배지
+- root (visible의 가장 위): blue border — entry point 신호
+- 그 외: dim 0.55 opacity
+- 각 frame 카드 헤더: depth chip (`#1`, `#2`...) + 함수명
+- 카드 사이 2px 수직 connector — stack chain 시각화
+- `__entry__` frame은 변수가 없으면 hide (그냥 노이즈)
+- 활성 frame이 화면 밖이면 `scrollIntoView({ block: "nearest" })`로 자동 스크롤
+
+CallStack 컴포넌트는 frame 모델 도입 후 redundant — 같은 정보가 VariablePanel.frames에 더 자세히 들어있어서 제거.
+
+### 16-8. D12 완전 — inline 함수 표현식도 wrap + closure snapshot
+
+처음 구현은 minimum viable로 **defined names만** wrap했습니다 — `function f() {}`, `const f = () => ...`. inline expression(callback, ReturnStatement.argument 등)은 미뤄둠.
+
+사용자가 currying/HOF 코드를 시각화하려 하니 한계가 드러났습니다:
+
+```typescript
+const add = (num) => (addNum) => num + addNum;
+const addTen = add(10);  // inner arrow는 wrap 안 됨
+addTen(5);                // frame 안 생김
+```
+
+inner arrow는 `ReturnStatement.argument`의 ArrowFunctionExpression이라 wrap 대상에서 빠짐. 결과적으로 `addTen(5)` 호출이 stack에 안 보임.
+
+**근본 fix — in-place AST mutation**:
+
+walker가 ArrowFunctionExpression / FunctionExpression을 만나면, 자식 (body) transform 후 그 노드 자체를 `__createProxy(원래 expr, ...)` CallExpression으로 in-place mutation. 부모는 같은 reference를 가리키지만 그 객체가 이제 wrap된 CallExpression. `__synthetic` 마커로 무한 재처리 방지.
+
+```typescript
+function wrapInPlace(node, funcName, enclosingFuncs) {
+  const original = { ...node };
+  for (const k of Object.keys(node)) delete node[k];
+  node.type = "CallExpression";
+  node.callee = id(CREATE_PROXY);
+  node.arguments = [original, literal(funcName), ..., closureCaptureExpr(enclosingFuncs)];
+  node.__synthetic = true;
+}
+```
+
+같이 도입한 게 **closure snapshot 표시**. wrap 시점에 enclosing scope의 변수들을 capture하는 함수를 5번째 인자로 같이 전달:
+
+```javascript
+__createProxy(
+  fn, "internal", ["addNum"], ["addNum"],
+  function() { try { return { num: num }; } catch(e) { return null; } }  // closure capture
+);
+```
+
+worker가 wrap 시점에 그 함수를 호출해서 snapshot을 만들고, `WeakMap`에 (proxy → snapshot) 저장. `deepClone`이 함수를 만나면 그 map을 lookup해서:
+
+```
+addTen  →  [Function: internal | num=10]
+addFive →  [Function: internal | num=5]
+```
+
+closure가 잡은 값이 함수 표시에 inline으로 보임. JS의 함수 객체에서 closure scope를 직접 inspect하는 표준 방법은 없지만, transformer가 wrap 시점에 capture function을 같이 inject해주면 사실상 같은 효과를 얻을 수 있습니다.
+
+### 16-9. 결정 표 (이 섹션 추가분)
+
+| 결정 | 이유 |
+|------|------|
+| Step.variables → Step.frames | 디버거 멘탈모델, 스코프 정보 보존 |
+| Hybrid: Proxy=lifetime, Transformer=content | 동적/정적 책임 자연 분리. analyzer 사전수집 단계 제거 |
+| 단일 `__synthetic` 마커 | helper와 user AST 경계를 한 곳에서 |
+| `__traceLine` 시점 deepClone | postMessage 직전 leak 방지의 근본 |
+| Active frame immutable update | structural sharing으로 인한 future→past leak 방지 |
+| ownVarNames + dispatch | closure 변수가 owner frame에만 표시되되 즉시 반영 |
+| 모든 함수 expression in-place wrap | callback/HOF/currying까지 frame 추적 |
+| Closure snapshot WeakMap | 함수 표시에 잡힌 변수 inline 표시 |

@@ -46,7 +46,9 @@ globalStyle(`${container} span`, {
 
 globalStyle(`${container} span.line`, {
   display: "block",
+  position: "relative",
   paddingLeft: vars.space.sm,
+  paddingRight: "80px",
   borderLeft: "3px solid transparent",
   fontSize: "14px", // code의 fontSize:0에서 복원
   lineHeight: 1.5,
@@ -56,4 +58,22 @@ globalStyle(`${container} span.line`, {
 globalStyle(`${container} .line.highlighted-line`, {
   backgroundColor: "rgba(251, 191, 36, 0.15)",
   borderLeftColor: "#fbbf24",
+});
+
+globalStyle(`${container} .caller-badge`, {
+  position: "absolute",
+  right: vars.space.md,
+  top: "50%",
+  transform: "translateY(-50%)",
+  padding: `0 ${vars.space.xs}`,
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  color: "#60a5fa",
+  backgroundColor: "rgba(96, 165, 250, 0.12)",
+  border: "1px solid rgba(96, 165, 250, 0.4)",
+  borderRadius: vars.radius.sm,
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  userSelect: "none",
+  pointerEvents: "none",
 });
