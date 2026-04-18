@@ -128,8 +128,10 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
     );
   }
 
-  const visibleVars = omit(currentStep.variables, HIDDEN_KEYS);
-  const prevVars = prevStep ? omit(prevStep.variables, HIDDEN_KEYS) : {};
+  const activeFrame = currentStep.frames[currentStep.frames.length - 1];
+  const prevActiveFrame = prevStep ? prevStep.frames[prevStep.frames.length - 1] : undefined;
+  const visibleVars = activeFrame ? omit(activeFrame.variables, HIDDEN_KEYS) : {};
+  const prevVars = prevActiveFrame ? omit(prevActiveFrame.variables, HIDDEN_KEYS) : {};
   const entries = Object.entries(visibleVars);
 
   return (

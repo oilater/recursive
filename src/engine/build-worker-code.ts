@@ -107,7 +107,7 @@ self.onmessage = function(e) {
         codeLine: correctedLine,
         activeNodeId: currentNodeId,
         activePath: activePath.slice(),
-        variables: variables,
+        frames: [{ funcName: userFunc || entryFuncName, variables: variables }],
         description: ''
       });
     }
@@ -141,7 +141,8 @@ self.onmessage = function(e) {
 
           var entryLine = Math.max(1, funcStartLine - lineOffset);
           if (entryLine >= 1 && entryLine <= originalLineCount) {
-            var prevVars = steps.length > 0 ? Object.assign({}, steps[steps.length - 1].variables) : {};
+            var prevFrame = steps.length > 0 ? steps[steps.length - 1].frames[0] : null;
+            var prevVars = prevFrame ? Object.assign({}, prevFrame.variables) : {};
             for (var i = 0; i < recursiveParamNames.length; i++) {
               prevVars[recursiveParamNames[i]] = deepClone(argsList[i]);
             }
@@ -151,7 +152,7 @@ self.onmessage = function(e) {
               codeLine: entryLine,
               activeNodeId: nodeId,
               activePath: getPath(callStack, nodeId),
-              variables: prevVars,
+              frames: [{ funcName: recursiveFuncName, variables: prevVars }],
               description: recursiveFuncName + '(' + formatArgs(argsList) + ')'
             });
           }

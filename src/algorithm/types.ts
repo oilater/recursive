@@ -2,13 +2,18 @@ export type StepType = "call" | "return";
 
 export type NodeStatus = "idle" | "active" | "completed" | "backtracked";
 
+export interface Frame {
+  funcName: string;
+  variables: Record<string, unknown>;
+}
+
 export interface Step {
   id: number;
   type: StepType;
   codeLine: number;
   activeNodeId: string;
   activePath: string[];
-  variables: Record<string, unknown>;
+  frames: Frame[];
   description: string;
 }
 
