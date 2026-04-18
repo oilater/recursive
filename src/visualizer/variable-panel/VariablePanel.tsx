@@ -139,11 +139,10 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
     );
   }
 
-  // Reverse so the active (top of stack) frame renders first — debugger convention
+  // Caller at top, most recent push at bottom — matches how a process stack
+  // grows visually and the natural reading order for following execution.
   const lastIdx = currentStep.frames.length - 1;
-  const orderedFrames = currentStep.frames
-    .map((frame, depth) => ({ frame, depth }))
-    .reverse();
+  const orderedFrames = currentStep.frames.map((frame, depth) => ({ frame, depth }));
 
   return (
     <div className={styles.container}>
