@@ -83,7 +83,7 @@ self.onmessage = async function(e) {
           codeLine: s.codeLine,
           activeNodeId: s.activeNodeId,
           activePath: s.activePath || [],
-          frames: [{ funcName: "<python>", variables: s.variables || {} }],
+          frames: [{ funcName: "<python>", variables: s.variables || {}, ownVarNames: Object.keys(s.variables || {}) }],
           description: s.description || ""
         };
       });

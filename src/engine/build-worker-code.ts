@@ -37,7 +37,7 @@ self.onmessage = function(e) {
       status: 'completed'
     };
 
-    callStack.push({ funcName: entryFuncName, variables: {} });
+    callStack.push({ funcName: entryFuncName, variables: {}, ownVarNames: [] });
 
     function deepClone(val) {
       if (val === null || val === undefined) return val;
@@ -90,6 +90,23 @@ self.onmessage = function(e) {
       return callStack.slice();
     }
 
+    function cloneFrame(frame) {
+      var copy = { funcName: frame.funcName, variables: {}, ownVarNames: frame.ownVarNames };
+      for (var k in frame.variables) {
+        if (frame.variables.hasOwnProperty(k)) copy.variables[k] = frame.variables[k];
+      }
+      if (frame.nodeId) { copy.nodeId = frame.nodeId; copy.node = frame.node; }
+      return copy;
+    }
+
+    function ownerFrameIndex(varName, fromIdx) {
+      for (var i = fromIdx; i >= 0; i--) {
+        var owns = callStack[i].ownVarNames;
+        if (owns && owns.indexOf(varName) !== -1) return i;
+      }
+      return -1;
+    }
+
     function __traceLine(line, varsSnapshot) {
       if (steps.length >= maxSteps) {
         throw new Error('Step limit exceeded (' + maxSteps + '). Try smaller input.');
@@ -98,22 +115,28 @@ self.onmessage = function(e) {
       if (correctedLine < 1 || correctedLine > originalLineCount) return;
 
       var topIdx = callStack.length - 1;
-      var top = callStack[topIdx];
-      var nextVars = {};
-      for (var prevK in top.variables) {
-        if (top.variables.hasOwnProperty(prevK)) nextVars[prevK] = top.variables[prevK];
+      var modified = {};
+
+      function getOrClone(idx) {
+        if (modified[idx]) return modified[idx];
+        var clone = cloneFrame(callStack[idx]);
+        modified[idx] = clone;
+        return clone;
       }
+
       if (varsSnapshot) {
         for (var k in varsSnapshot) {
-          if (varsSnapshot.hasOwnProperty(k)) {
-            nextVars[k] = deepClone(varsSnapshot[k]);
-          }
+          if (!varsSnapshot.hasOwnProperty(k)) continue;
+          var ownerIdx = ownerFrameIndex(k, topIdx);
+          if (ownerIdx === -1) ownerIdx = topIdx;
+          getOrClone(ownerIdx).variables[k] = deepClone(varsSnapshot[k]);
         }
       }
-      var newTop = { funcName: top.funcName, variables: nextVars };
-      if (top.nodeId) { newTop.nodeId = top.nodeId; newTop.node = top.node; }
-      callStack[topIdx] = newTop;
-      top = newTop;
+
+      for (var idx in modified) {
+        if (modified.hasOwnProperty(idx)) callStack[idx] = modified[idx];
+      }
+      var top = callStack[topIdx];
 
       var currentNodeId = null;
       for (var j = callStack.length - 1; j >= 0; j--) {
@@ -132,9 +155,10 @@ self.onmessage = function(e) {
       });
     }
 
-    function __createProxy(originalFunc, funcName, paramNames) {
+    function __createProxy(originalFunc, funcName, paramNames, ownVarNames) {
       funcName = funcName || (hasRecursion ? recursiveFuncName : (originalFunc.name || 'anonymous'));
       paramNames = paramNames || (hasRecursion ? recursiveParamNames : []);
+      ownVarNames = ownVarNames || paramNames;
 
       return new Proxy(originalFunc, {
         apply: function(target, thisArg, argsList) {
@@ -143,7 +167,6 @@ self.onmessage = function(e) {
             throw new Error('Function call count exceeded ' + maxCalls + ' calls.');
           }
 
-          // TreeNode only for the recursive function — keeps the call tree visualization scoped
           var nodeId = null;
           var node = null;
           if (hasRecursion && funcName === recursiveFuncName) {
@@ -166,7 +189,7 @@ self.onmessage = function(e) {
           for (var i = 0; i < paramNames.length; i++) {
             seedVars[paramNames[i]] = deepClone(argsList[i]);
           }
-          var frame = { funcName: funcName, variables: seedVars };
+          var frame = { funcName: funcName, variables: seedVars, ownVarNames: ownVarNames };
           if (nodeId) { frame.nodeId = nodeId; frame.node = node; }
           callStack.push(frame);
 

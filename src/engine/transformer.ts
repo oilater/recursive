@@ -110,7 +110,9 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
       stmt.id?.name &&
       stmt.id.name !== ENTRY_FUNC_NAME
     ) {
-      newBody.push(proxyReassignment(stmt.id.name, extractParamNames(stmt.params)));
+      newBody.push(
+        proxyReassignment(stmt.id.name, extractParamNames(stmt.params), collectOwnVarNames(stmt)),
+      );
     }
 
     if (stmt.type === "VariableDeclaration" && stmt.declarations) {
@@ -146,6 +148,35 @@ function extractParamNames(params: AstNode[]): string[] {
     if (p.type === "AssignmentPattern" && p.left?.type === "Identifier") return p.left.name;
     return "arg";
   });
+}
+
+function collectOwnVarNames(funcNode: AstNode): string[] {
+  const names = new Set<string>();
+  for (const name of extractParamNames(funcNode.params || [])) {
+    if (name && name !== "_" && name !== "arg") names.add(name);
+  }
+  if (funcNode.body?.type !== "BlockStatement") return [...names];
+
+  function walk(n: AstNode) {
+    if (!n || typeof n !== "object" || n.__synthetic) return;
+    if (FUNC_TYPES.includes(n.type)) return;
+    if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
+      names.add(n.id.name);
+    }
+    for (const key of Object.keys(n)) {
+      if (["type", "start", "end", "loc"].includes(key)) continue;
+      const val = n[key];
+      if (val && typeof val === "object") {
+        if (Array.isArray(val)) {
+          for (const item of val) walk(item);
+        } else {
+          walk(val);
+        }
+      }
+    }
+  }
+  for (const stmt of funcNode.body.body) walk(stmt);
+  return [...names];
 }
 
 function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
@@ -217,12 +248,17 @@ function paramArrayLiteral(paramNames: string[]): AstNode {
   });
 }
 
-function proxyReassignment(funcName: string, paramNames: string[]): AstNode {
+function proxyReassignment(funcName: string, paramNames: string[], ownVars: string[]): AstNode {
   return mark(
     expr(
       assign(
         id(funcName),
-        call(id(CREATE_PROXY), [id(funcName), literal(funcName), paramArrayLiteral(paramNames)]),
+        call(id(CREATE_PROXY), [
+          id(funcName),
+          literal(funcName),
+          paramArrayLiteral(paramNames),
+          paramArrayLiteral(ownVars),
+        ]),
       ),
     ),
   );
@@ -233,6 +269,7 @@ function wrapFunctionInProxy(funcExpression: AstNode, funcName: string): AstNode
     funcExpression,
     literal(funcName),
     paramArrayLiteral(extractParamNames(funcExpression.params || [])),
+    paramArrayLiteral(collectOwnVarNames(funcExpression)),
   ]);
 }
 
