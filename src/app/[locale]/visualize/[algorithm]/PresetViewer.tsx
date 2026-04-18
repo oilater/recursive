@@ -60,7 +60,11 @@ export function PresetViewer({
             </button>
           </div>
           <div className={styles.codeSection}>
-            <CodePanel html={codeHtml} activeLine={player.currentStep?.codeLine} />
+            <CodePanel
+              html={codeHtml}
+              activeLine={player.currentStep?.codeLine}
+              callerLine={player.currentStep?.callerLine}
+            />
           </div>
         </div>
 
