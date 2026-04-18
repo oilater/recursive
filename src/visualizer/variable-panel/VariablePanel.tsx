@@ -141,15 +141,31 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
 
   // Caller at top, most recent push at bottom — matches how a process stack
   // grows visually and the natural reading order for following execution.
+  // Hide the synthesized global frame when the user code has no top-level
+  // variables — it's just noise in that case.
   const lastIdx = currentStep.frames.length - 1;
-  const orderedFrames = currentStep.frames.map((frame, depth) => ({ frame, depth }));
+  const orderedFrames = currentStep.frames
+    .map((frame, depth) => ({ frame, depth }))
+    .filter(
+      ({ frame }) =>
+        frame.funcName !== ENTRY_FRAME_NAME || Object.keys(frame.variables).length > 0,
+    );
+
+  if (orderedFrames.length === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.title}>Call Stack</div>
+        <EmptyState message={t("variablesEmpty")} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.titleRow}>
         <span className={styles.title}>Call Stack</span>
         <span className={styles.depthBadge}>
-          {currentStep.frames.length} {currentStep.frames.length === 1 ? "frame" : "frames"}
+          {orderedFrames.length} {orderedFrames.length === 1 ? "frame" : "frames"}
         </span>
       </div>
 
