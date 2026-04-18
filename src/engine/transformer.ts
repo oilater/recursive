@@ -154,10 +154,7 @@ function collectFunctionVarNames(funcNode: AstNode): string[] {
 
   function walk(n: AstNode) {
     if (!n || typeof n !== "object") return;
-    if (FUNC_TYPES.includes(n.type)) {
-      if (n.type === "FunctionDeclaration" && n.id?.name) names.add(n.id.name);
-      return;
-    }
+    if (FUNC_TYPES.includes(n.type)) return;
     if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
       names.add(n.id.name);
     }

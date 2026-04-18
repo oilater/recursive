@@ -3,19 +3,136 @@ import { vars } from "@/shared/styles/theme.css";
 import { panelContainer, panelTitle } from "@/shared/styles/panel.css";
 
 export const container = panelContainer;
-
 export const title = panelTitle;
+
+export const titleRow = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  marginBottom: vars.space.md,
+});
+
+export const depthBadge = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  padding: `2px ${vars.space.sm}`,
+  backgroundColor: vars.color.surfaceAlt,
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+});
+
+// ── Stack ──
+
+export const stack = style({
+  display: "flex",
+  flexDirection: "column",
+});
+
+export const frameWrapper = style({
+  display: "flex",
+  flexDirection: "column",
+});
+
+export const stackConnector = style({
+  width: "2px",
+  height: vars.space.md,
+  backgroundColor: vars.color.border,
+  marginLeft: vars.space.lg,
+});
+
+// ── Frame card ──
+
+export const frameCard = style({
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.surfaceAlt,
+  overflow: "hidden",
+  opacity: 0.55,
+  transition: "opacity 0.15s ease, border-color 0.15s ease",
+});
+
+export const frameCardActive = style([
+  frameCard,
+  {
+    opacity: 1,
+    borderColor: "#fbbf24",
+    borderWidth: "1.5px",
+    boxShadow: "0 0 0 2px rgba(251, 191, 36, 0.12)",
+  },
+]);
+
+export const frameHeader = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space.sm,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  backgroundColor: "rgba(0, 0, 0, 0.18)",
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const frameDepth = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  padding: `2px ${vars.space.xs}`,
+  backgroundColor: "rgba(0, 0, 0, 0.25)",
+  borderRadius: vars.radius.sm,
+});
+
+export const frameName = style({
+  fontSize: vars.fontSize.md,
+  color: vars.color.text,
+  fontFamily: vars.font.mono,
+  fontWeight: 600,
+  flex: 1,
+});
+
+export const activeBadge = style({
+  fontSize: vars.fontSize.xs,
+  fontFamily: vars.font.mono,
+  color: "#fbbf24",
+  backgroundColor: "rgba(251, 191, 36, 0.15)",
+  border: "1px solid rgba(251, 191, 36, 0.4)",
+  borderRadius: vars.radius.sm,
+  padding: `2px ${vars.space.sm}`,
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+});
+
+export const frameBody = style({
+  padding: `${vars.space.sm} ${vars.space.md}`,
+});
+
+export const frameEmpty = style({
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  fontStyle: "italic",
+});
+
+// ── Variable row ──
 
 export const row = style({
   display: "flex",
   alignItems: "flex-start",
   gap: vars.space.sm,
   padding: `${vars.space.xs} 0`,
-  borderBottom: `1px solid ${vars.color.border}`,
+  borderBottom: `1px dashed ${vars.color.border}`,
   ":last-child": {
     borderBottom: "none",
   },
 });
+
+export const rowChanged = style([
+  row,
+  {
+    backgroundColor: "rgba(251, 191, 36, 0.06)",
+    borderRadius: vars.radius.sm,
+    padding: `${vars.space.xs} ${vars.space.xs}`,
+  },
+]);
 
 export const varName = style({
   fontSize: vars.fontSize.md,
@@ -33,25 +150,13 @@ export const varValue = style({
   wordBreak: "break-all",
 });
 
-export const rowChanged = style([
-  row,
-  {
-    backgroundColor: "rgba(251, 191, 36, 0.06)",
-    borderRadius: vars.radius.sm,
-    padding: `${vars.space.xs} ${vars.space.xs}`,
-    transition: "background-color 0.3s ease",
-  },
-]);
-
-// ── Grid (1D array) ──
+// ── Grid ──
 
 export const grid = style({
   display: "flex",
   gap: "2px",
   flexWrap: "wrap",
 });
-
-// ── Grid (2D array) ──
 
 export const grid2d = style({
   display: "flex",
@@ -63,8 +168,6 @@ export const gridRow = style({
   display: "flex",
   gap: "2px",
 });
-
-// ── Cell ──
 
 export const cell = style({
   display: "inline-flex",
@@ -91,49 +194,3 @@ export const cellChanged = style([
     fontWeight: 600,
   },
 ]);
-
-// ── Frame stack ──
-
-export const frame = style({
-  marginTop: vars.space.sm,
-  paddingLeft: vars.space.sm,
-  borderLeft: `2px solid ${vars.color.border}`,
-  opacity: 0.55,
-  transition: "opacity 0.15s ease",
-});
-
-export const frameActive = style([
-  frame,
-  {
-    opacity: 1,
-    borderLeftColor: "#fbbf24",
-  },
-]);
-
-export const frameHeader = style({
-  display: "flex",
-  alignItems: "center",
-  gap: vars.space.xs,
-  fontSize: vars.fontSize.sm,
-  color: vars.color.textMuted,
-  fontFamily: vars.font.mono,
-  padding: `${vars.space.xs} 0`,
-});
-
-export const frameArrow = style({
-  color: vars.color.textMuted,
-  fontFamily: vars.font.mono,
-});
-
-export const frameName = style({
-  color: vars.color.text,
-  fontWeight: 600,
-});
-
-export const frameEmpty = style({
-  fontSize: vars.fontSize.sm,
-  color: vars.color.textMuted,
-  fontFamily: vars.font.mono,
-  paddingLeft: vars.space.md,
-  paddingBottom: vars.space.xs,
-});

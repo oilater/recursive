@@ -10,6 +10,9 @@ interface VariablePanelProps {
   prevStep?: Step | undefined;
 }
 
+const ENTRY_FRAME_NAME = "__entry__";
+const ENTRY_LABEL = "global";
+
 function didChange(prev: unknown, curr: unknown): boolean {
   if (prev === curr) return false;
   if (typeof prev !== typeof curr) return true;
@@ -121,6 +124,10 @@ function findPrevFrame(prevStep: Step | undefined, depth: number, funcName: stri
   return undefined;
 }
 
+function frameLabel(frame: Frame): string {
+  return frame.funcName === ENTRY_FRAME_NAME ? ENTRY_LABEL : frame.funcName;
+}
+
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   const t = useTranslations("visualizer");
   if (!currentStep || currentStep.frames.length === 0) {
@@ -132,41 +139,58 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
     );
   }
 
+  // Reverse so the active (top of stack) frame renders first — debugger convention
   const lastIdx = currentStep.frames.length - 1;
+  const orderedFrames = currentStep.frames
+    .map((frame, depth) => ({ frame, depth }))
+    .reverse();
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Variables</div>
-      {currentStep.frames.map((frame, depth) => {
-        const isActive = depth === lastIdx;
-        const prevFrame = findPrevFrame(prevStep, depth, frame.funcName);
-        const entries = Object.entries(frame.variables);
+      <div className={styles.titleRow}>
+        <span className={styles.title}>Call Stack</span>
+        <span className={styles.depthBadge}>
+          {currentStep.frames.length} {currentStep.frames.length === 1 ? "frame" : "frames"}
+        </span>
+      </div>
 
-        return (
-          <div
-            key={`${depth}:${frame.funcName}`}
-            className={isActive ? styles.frameActive : styles.frame}
-          >
-            <div className={styles.frameHeader}>
-              <span className={styles.frameArrow}>{isActive ? ">" : "|"}</span>
-              <span className={styles.frameName}>{frame.funcName}</span>
-            </div>
-            {entries.length === 0 ? (
-              <div className={styles.frameEmpty}>—</div>
-            ) : (
-              entries.map(([key, value]) => {
-                const changed = prevFrame !== undefined && didChange(prevFrame.variables[key], value);
-                return (
-                  <div key={key} className={changed ? styles.rowChanged : styles.row}>
-                    <span className={styles.varName}>{key}</span>
-                    {renderValue(value, changed, prevFrame?.variables[key])}
+      <div className={styles.stack}>
+        {orderedFrames.map(({ frame, depth }, renderIdx) => {
+          const isActive = depth === lastIdx;
+          const isLast = renderIdx === orderedFrames.length - 1;
+          const prevFrame = findPrevFrame(prevStep, depth, frame.funcName);
+          const entries = Object.entries(frame.variables);
+
+          return (
+            <div key={`${depth}:${frame.funcName}`} className={styles.frameWrapper}>
+              <div className={isActive ? styles.frameCardActive : styles.frameCard}>
+                <div className={styles.frameHeader}>
+                  <span className={styles.frameDepth}>#{depth}</span>
+                  <span className={styles.frameName}>{frameLabel(frame)}</span>
+                  {isActive && <span className={styles.activeBadge}>active</span>}
+                </div>
+                {entries.length === 0 ? (
+                  <div className={styles.frameEmpty}>(no locals)</div>
+                ) : (
+                  <div className={styles.frameBody}>
+                    {entries.map(([key, value]) => {
+                      const changed =
+                        prevFrame !== undefined && didChange(prevFrame.variables[key], value);
+                      return (
+                        <div key={key} className={changed ? styles.rowChanged : styles.row}>
+                          <span className={styles.varName}>{key}</span>
+                          {renderValue(value, changed, prevFrame?.variables[key])}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })
-            )}
-          </div>
-        );
-      })}
+                )}
+              </div>
+              {!isLast && <div className={styles.stackConnector} />}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
