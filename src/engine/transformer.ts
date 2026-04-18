@@ -57,10 +57,16 @@ function walkAndTransform(
     node.body &&
     node.body.type !== "BlockStatement"
   ) {
-    node.body = block([ret(node.body)]);
+    const exprLoc = node.body.loc;
+    const retStmt = ret(node.body);
+    if (exprLoc) retStmt.loc = exprLoc;
+    node.body = block([retStmt]);
   }
 
   const isFuncWithBlock = FUNC_TYPES.includes(node.type) && node.body?.type === "BlockStatement";
+  if (isFuncWithBlock && !node.__synthetic && !node.__funcName) {
+    node.__funcName = determineFuncName(node, parentInfo, enclosingFuncs);
+  }
   const nextEnclosing = isFuncWithBlock ? [...enclosingFuncs, node] : enclosingFuncs;
 
   if (Array.isArray(node.body)) {
@@ -87,7 +93,7 @@ function walkAndTransform(
     (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") &&
     !node.__synthetic
   ) {
-    const funcName = determineFuncName(node, parentInfo);
+    const funcName = node.__funcName ?? determineFuncName(node, parentInfo, enclosingFuncs);
     if (funcName !== ENTRY_FUNC_NAME) {
       wrapInPlace(node, funcName, enclosingFuncs);
     }
@@ -218,7 +224,11 @@ function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
   return [...names];
 }
 
-function determineFuncName(node: AstNode, parentInfo: ParentInfo | null): string {
+function determineFuncName(
+  node: AstNode,
+  parentInfo: ParentInfo | null,
+  enclosingFuncs: AstNode[] = [],
+): string {
   if (node.id?.name) return node.id.name;
   const parent = parentInfo?.parent;
   if (parent) {
@@ -230,6 +240,12 @@ function determineFuncName(node: AstNode, parentInfo: ParentInfo | null): string
     }
     if (parent.type === "AssignmentExpression" && parent.left?.type === "Identifier") {
       return parent.left.name;
+    }
+  }
+  for (let i = enclosingFuncs.length - 1; i >= 0; i--) {
+    const enclosingName = enclosingFuncs[i].__funcName;
+    if (enclosingName && enclosingName !== ENTRY_FUNC_NAME) {
+      return `${enclosingName}$inner`;
     }
   }
   const line = node.loc?.start?.line ?? 0;
