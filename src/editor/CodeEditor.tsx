@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { placeholder as placeholderExt } from "@codemirror/view";
 import type { CodeLanguage } from "@/engine";
-import { getCodeLanguageAdapter } from "@/engine";
+import { getEditorExtension } from "./language-extensions";
 
 import * as styles from "./code-editor.css";
 
@@ -31,10 +31,7 @@ interface CodeEditorProps {
 export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "javascript" }: CodeEditorProps) {
   const t = useTranslations("editor");
   const extensions = useMemo(
-    () => [
-      getCodeLanguageAdapter(codeLanguage).editorExtension(),
-      placeholderExt(t("placeholder")),
-    ],
+    () => [getEditorExtension(codeLanguage), placeholderExt(t("placeholder"))],
     [t, codeLanguage],
   );
 
