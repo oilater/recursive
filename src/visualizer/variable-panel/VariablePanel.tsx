@@ -172,13 +172,20 @@ export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
       <div className={styles.stack}>
         {orderedFrames.map(({ frame, depth }, renderIdx) => {
           const isActive = depth === lastIdx;
+          const isRoot = renderIdx === 0 && !isActive;
           const isLast = renderIdx === orderedFrames.length - 1;
           const prevFrame = findPrevFrame(prevStep, depth, frame.funcName);
           const entries = Object.entries(frame.variables);
 
+          const cardClass = isActive
+            ? styles.frameCardActive
+            : isRoot
+              ? styles.frameCardRoot
+              : styles.frameCard;
+
           return (
             <div key={`${depth}:${frame.funcName}`} className={styles.frameWrapper}>
-              <div className={isActive ? styles.frameCardActive : styles.frameCard}>
+              <div className={cardClass}>
                 <div className={styles.frameHeader}>
                   <span className={styles.frameDepth}>#{depth}</span>
                   <span className={styles.frameName}>{frameLabel(frame)}</span>

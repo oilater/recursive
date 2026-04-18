@@ -62,6 +62,15 @@ export const frameCardActive = style([
   },
 ]);
 
+export const frameCardRoot = style([
+  frameCard,
+  {
+    opacity: 0.85,
+    borderColor: "#60a5fa",
+    borderWidth: "1.5px",
+  },
+]);
+
 export const frameHeader = style({
   display: "flex",
   alignItems: "center",
