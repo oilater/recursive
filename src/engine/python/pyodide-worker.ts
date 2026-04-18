@@ -76,16 +76,18 @@ self.onmessage = async function(e) {
       var resultJson = pyodide.globals.get("_result_json");
       var result = JSON.parse(resultJson);
 
-      var steps = (result.steps || []).map(function(s, i) {
-        return {
+      var steps = (result.steps || []).map(function(s) {
+        var step = {
           id: s.id,
           type: s.type,
           codeLine: s.codeLine,
           activeNodeId: s.activeNodeId,
           activePath: s.activePath || [],
-          frames: [{ funcName: "<python>", variables: s.variables || {}, ownVarNames: Object.keys(s.variables || {}) }],
+          frames: s.frames || [],
           description: s.description || ""
         };
+        if (s.callerLine != null) step.callerLine = s.callerLine;
+        return step;
       });
 
       function convertTree(node) {

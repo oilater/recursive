@@ -69,13 +69,36 @@ def _safe_value(val, depth=0):
     except:
         return "?"
 
+def _capture_closure(fn):
+    closure = {}
+    if fn.__closure__:
+        free_vars = fn.__code__.co_freevars
+        for name, cell in zip(free_vars, fn.__closure__):
+            try:
+                closure[name] = _safe_value(cell.cell_contents)
+            except:
+                pass
+    return closure
+
+def _function_marker(fn):
+    argcount = fn.__code__.co_argcount
+    params = list(fn.__code__.co_varnames[:argcount])
+    return {
+        "__kind": "function",
+        "funcName": fn.__name__,
+        "params": params,
+        "closure": _capture_closure(fn),
+    }
+
 def _capture_vars(frame):
     result = {}
     for k, v in frame.f_locals.items():
         if k.startswith("_"):
             continue
-        if isinstance(v, (_types_module.FunctionType, _types_module.BuiltinFunctionType,
-                          _types_module.ModuleType, type)):
+        if isinstance(v, _types_module.FunctionType):
+            result[k] = _function_marker(v)
+            continue
+        if isinstance(v, (_types_module.BuiltinFunctionType, _types_module.ModuleType, type)):
             continue
         if callable(v) and not isinstance(v, (list, dict, set, tuple)):
             continue
@@ -90,6 +113,31 @@ def _capture_vars(frame):
             except:
                 result[k] = "?"
     return result
+
+def _frame_label(frame):
+    name = frame.f_code.co_name
+    return "__entry__" if name == "<module>" else name
+
+def _capture_frames(frame):
+    chain = []
+    f = frame
+    while f is not None:
+        if f.f_code.co_filename == "<user>":
+            chain.append({
+                "funcName": _frame_label(f),
+                "variables": _capture_vars(f),
+            })
+        f = f.f_back
+    chain.reverse()
+    return chain
+
+def _caller_line(frame):
+    f = frame.f_back
+    while f is not None:
+        if f.f_code.co_filename == "<user>":
+            return f.f_lineno
+        f = f.f_back
+    return None
 
 def _get_active_path():
     path = [_root_node["id"]]
@@ -135,15 +183,19 @@ def _tracer(frame, event, arg):
         if len(_call_stack) > _max_depth:
             raise RuntimeError("Recursion depth exceeded (" + str(_max_depth) + ")")
 
-        _steps.append({
+        caller_line = _caller_line(frame)
+        step = {
             "id": _step_id,
             "type": "call",
             "codeLine": frame.f_lineno,
             "activeNodeId": node["id"],
             "activePath": _get_active_path(),
-            "variables": _capture_vars(frame),
+            "frames": _capture_frames(frame),
             "description": fn_name + "(" + args_str + ")"
-        })
+        }
+        if caller_line is not None and caller_line != frame.f_lineno:
+            step["callerLine"] = caller_line
+        _steps.append(step)
         _step_id += 1
         return _tracer
 
@@ -153,15 +205,19 @@ def _tracer(frame, event, arg):
 
         current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
 
-        _steps.append({
+        caller_line = _caller_line(frame)
+        step = {
             "id": _step_id,
             "type": "return",
             "codeLine": frame.f_lineno,
             "activeNodeId": current_id,
             "activePath": _get_active_path(),
-            "variables": _capture_vars(frame),
+            "frames": _capture_frames(frame),
             "description": "return " + str(_safe_value(arg))
-        })
+        }
+        if caller_line is not None and caller_line != frame.f_lineno:
+            step["callerLine"] = caller_line
+        _steps.append(step)
         _step_id += 1
         return _tracer
 
@@ -170,18 +226,22 @@ def _tracer(frame, event, arg):
         line_no = frame.f_lineno
 
         if line_no == _last_traced_line and _steps:
-            _steps[-1]["variables"] = _capture_vars(frame)
+            _steps[-1]["frames"] = _capture_frames(frame)
         else:
             current_id = _call_stack[-1]["node"]["id"] if _call_stack else _root_node["id"]
-            _steps.append({
+            caller_line = _caller_line(frame)
+            step = {
                 "id": _step_id,
                 "type": "call",
                 "codeLine": line_no,
                 "activeNodeId": current_id,
                 "activePath": _get_active_path(),
-                "variables": _capture_vars(frame),
+                "frames": _capture_frames(frame),
                 "description": ""
-            })
+            }
+            if caller_line is not None and caller_line != line_no:
+                step["callerLine"] = caller_line
+            _steps.append(step)
             _step_id += 1
             _last_traced_line = line_no
 
@@ -247,14 +307,14 @@ def _run_traced(source, args_list):
             # add final step with return value
             if _steps:
                 last_line = _steps[-1]["codeLine"]
-                last_vars = dict(_steps[-1]["variables"])
+                last_frames = [dict(f) for f in _steps[-1]["frames"]]
                 _steps.append({
                     "id": _step_id,
                     "type": "call",
                     "codeLine": last_line,
                     "activeNodeId": _root_node["id"],
                     "activePath": [_root_node["id"]],
-                    "variables": last_vars,
+                    "frames": last_frames,
                     "description": ""
                 })
                 _step_id += 1
@@ -272,8 +332,10 @@ def _run_traced(source, args_list):
             for k, v in exec_globals.items():
                 if k.startswith("_") or k == "__builtins__":
                     continue
-                if isinstance(v, (_types_module.FunctionType, _types_module.BuiltinFunctionType,
-                                  _types_module.ModuleType, type)):
+                if isinstance(v, _types_module.FunctionType):
+                    final_vars[k] = _function_marker(v)
+                    continue
+                if isinstance(v, (_types_module.BuiltinFunctionType, _types_module.ModuleType, type)):
                     continue
                 if callable(v) and not isinstance(v, (list, dict, set, tuple)):
                     continue
@@ -292,7 +354,7 @@ def _run_traced(source, args_list):
                 "codeLine": last_line,
                 "activeNodeId": _root_node["id"],
                 "activePath": [_root_node["id"]],
-                "variables": final_vars,
+                "frames": [{"funcName": "__entry__", "variables": final_vars}],
                 "description": ""
             })
             _step_id += 1
