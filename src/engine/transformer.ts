@@ -162,7 +162,7 @@ function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
   for (const func of enclosingFuncs) {
     if (func.body?.type !== "BlockStatement") continue;
     function walk(n: AstNode) {
-      if (!n || typeof n !== "object") return;
+      if (!n || typeof n !== "object" || n.__synthetic) return;
       if (FUNC_TYPES.includes(n.type)) return;
       if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
         names.add(n.id.name);
