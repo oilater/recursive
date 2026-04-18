@@ -1,4 +1,5 @@
-import { initializeAlgorithms, getPreset } from "@/algorithm";
+import { getPreset } from "@/algorithm";
+import { initializeAlgorithms } from "@/algorithm/presets";
 import { EmbedClient } from "./EmbedClient";
 
 initializeAlgorithms();

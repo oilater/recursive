@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { initializeAlgorithms } from "@/algorithm";
 import { getPreset } from "@/algorithm";
+import { initializeAlgorithms } from "@/algorithm/presets";
 import { VisualizerClient } from "./VisualizerClient";
 
 initializeAlgorithms();

@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import { initializeAlgorithms } from "@/algorithm";
-import { getCardDataByCategory, AlgorithmCard } from "@/algorithm";
+import { getCardDataByCategory } from "@/algorithm";
+import { initializeAlgorithms } from "@/algorithm/presets";
+import { AlgorithmCard } from "@/algorithm/ui/AlgorithmCard";
 import { Header } from "@/shared/ui";
 import * as styles from "./algorithms.css";
 
