@@ -41,12 +41,44 @@ export function transformCode(strippedCode: string, _analysis: AnalysisResult): 
     sourceType: "script",
     locations: true,
   }) as AstNode;
+  const userFuncs = collectUserFuncNames(ast);
   walkAndTransform(ast, [], null);
-  wrapAllReturns(ast, []);
+  wrapAllReturns(ast, [], userFuncs);
   return generate(ast);
 }
 
-function wrapAllReturns(node: AstNode, enclosingFuncs: AstNode[]): void {
+function collectUserFuncNames(node: AstNode, acc: Set<string> = new Set()): Set<string> {
+  if (!node || typeof node !== "object") return acc;
+  if (node.type === "FunctionDeclaration" && node.id?.name) {
+    acc.add(node.id.name);
+  }
+  if (
+    node.type === "VariableDeclarator" &&
+    node.id?.type === "Identifier" &&
+    node.init &&
+    FUNC_TYPES.includes(node.init.type)
+  ) {
+    acc.add(node.id.name);
+  }
+  for (const key of Object.keys(node)) {
+    if (["type", "start", "end", "loc"].includes(key)) continue;
+    const val = node[key];
+    if (val && typeof val === "object") {
+      if (Array.isArray(val)) {
+        for (const item of val) collectUserFuncNames(item, acc);
+      } else if (val.type) {
+        collectUserFuncNames(val, acc);
+      }
+    }
+  }
+  return acc;
+}
+
+function wrapAllReturns(
+  node: AstNode,
+  enclosingFuncs: AstNode[],
+  userFuncs: Set<string>,
+): void {
   if (!node || typeof node !== "object") return;
   const isFunction =
     FUNC_TYPES.includes(node.type) &&
@@ -58,14 +90,14 @@ function wrapAllReturns(node: AstNode, enclosingFuncs: AstNode[]): void {
     const val = node[key];
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {
-        for (const item of val) wrapAllReturns(item, nextEnclosing);
+        for (const item of val) wrapAllReturns(item, nextEnclosing, userFuncs);
       } else if (val.type) {
-        wrapAllReturns(val, nextEnclosing);
+        wrapAllReturns(val, nextEnclosing, userFuncs);
       }
     }
   }
   if (isFunction && node.__funcName !== ENTRY_FUNC_NAME) {
-    wrapReturnsIn(node.body, collectVisibleVarNames(nextEnclosing));
+    wrapReturnsIn(node.body, collectVisibleVarNames(nextEnclosing), userFuncs);
   }
 }
 
@@ -139,17 +171,24 @@ function wrapReturn(retStmt: AstNode, visibleVars: string[]): AstNode {
   return mark(block(body));
 }
 
-function hasNonSyntheticCall(node: AstNode): boolean {
+function hasUserFunctionCall(node: AstNode, userFuncs: Set<string>): boolean {
   if (!node || typeof node !== "object") return false;
-  if (node.type === "CallExpression" && !node.__synthetic) return true;
+  if (
+    node.type === "CallExpression" &&
+    !node.__synthetic &&
+    node.callee?.type === "Identifier" &&
+    userFuncs.has(node.callee.name)
+  ) {
+    return true;
+  }
   if (FUNC_TYPES.includes(node.type)) return false;
   for (const key of Object.keys(node)) {
     if (["type", "start", "end", "loc"].includes(key)) continue;
     const val = node[key];
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {
-        for (const item of val) if (hasNonSyntheticCall(item)) return true;
-      } else if (val.type && hasNonSyntheticCall(val)) {
+        for (const item of val) if (hasUserFunctionCall(item, userFuncs)) return true;
+      } else if (val.type && hasUserFunctionCall(val, userFuncs)) {
         return true;
       }
     }
@@ -157,11 +196,11 @@ function hasNonSyntheticCall(node: AstNode): boolean {
   return false;
 }
 
-function shouldWrapReturn(retStmt: AstNode): boolean {
-  return !!retStmt.argument && hasNonSyntheticCall(retStmt.argument);
+function shouldWrapReturn(retStmt: AstNode, userFuncs: Set<string>): boolean {
+  return !!retStmt.argument && hasUserFunctionCall(retStmt.argument, userFuncs);
 }
 
-function wrapReturnsIn(node: AstNode, visibleVars: string[]): void {
+function wrapReturnsIn(node: AstNode, visibleVars: string[], userFuncs: Set<string>): void {
   if (!node || typeof node !== "object" || node.__synthetic) return;
   if (FUNC_TYPES.includes(node.type)) return;
   for (const key of Object.keys(node)) {
@@ -171,16 +210,24 @@ function wrapReturnsIn(node: AstNode, visibleVars: string[]): void {
       if (Array.isArray(val)) {
         for (let i = 0; i < val.length; i++) {
           const child = val[i];
-          if (child?.type === "ReturnStatement" && !child.__synthetic && shouldWrapReturn(child)) {
+          if (
+            child?.type === "ReturnStatement" &&
+            !child.__synthetic &&
+            shouldWrapReturn(child, userFuncs)
+          ) {
             val[i] = wrapReturn(child, visibleVars);
           } else {
-            wrapReturnsIn(child, visibleVars);
+            wrapReturnsIn(child, visibleVars, userFuncs);
           }
         }
-      } else if (val.type === "ReturnStatement" && !val.__synthetic && shouldWrapReturn(val)) {
+      } else if (
+        val.type === "ReturnStatement" &&
+        !val.__synthetic &&
+        shouldWrapReturn(val, userFuncs)
+      ) {
         node[key] = wrapReturn(val, visibleVars);
       } else {
-        wrapReturnsIn(val, visibleVars);
+        wrapReturnsIn(val, visibleVars, userFuncs);
       }
     }
   }
