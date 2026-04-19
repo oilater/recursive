@@ -35,6 +35,21 @@ const LOOP_TYPES = [
 
 const FUNC_TYPES = ["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"];
 
+const SKIP_KEYS = new Set(["type", "start", "end", "loc"]);
+
+function walkChildren(node: AstNode, visit: (child: AstNode) => void): void {
+  for (const key of Object.keys(node)) {
+    if (SKIP_KEYS.has(key)) continue;
+    const val = node[key];
+    if (!val || typeof val !== "object") continue;
+    if (Array.isArray(val)) {
+      for (const item of val) if (item?.type) visit(item);
+    } else if (val.type) {
+      visit(val);
+    }
+  }
+}
+
 export function transformCode(strippedCode: string, _analysis: AnalysisResult): string {
   const ast = acorn.parse(strippedCode, {
     ecmaVersion: 2022,
@@ -60,17 +75,7 @@ function collectUserFuncNames(node: AstNode, acc: Set<string> = new Set()): Set<
   ) {
     acc.add(node.id.name);
   }
-  for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
-    const val = node[key];
-    if (val && typeof val === "object") {
-      if (Array.isArray(val)) {
-        for (const item of val) collectUserFuncNames(item, acc);
-      } else if (val.type) {
-        collectUserFuncNames(val, acc);
-      }
-    }
-  }
+  walkChildren(node, (child) => collectUserFuncNames(child, acc));
   return acc;
 }
 
@@ -85,17 +90,7 @@ function wrapAllReturns(
     node.body?.type === "BlockStatement" &&
     !node.__synthetic;
   const nextEnclosing = isFunction ? [...enclosingFuncs, node] : enclosingFuncs;
-  for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
-    const val = node[key];
-    if (val && typeof val === "object") {
-      if (Array.isArray(val)) {
-        for (const item of val) wrapAllReturns(item, nextEnclosing, userFuncs);
-      } else if (val.type) {
-        wrapAllReturns(val, nextEnclosing, userFuncs);
-      }
-    }
-  }
+  walkChildren(node, (child) => wrapAllReturns(child, nextEnclosing, userFuncs));
   if (isFunction && node.__funcName !== ENTRY_FUNC_NAME) {
     wrapReturnsIn(node.body, collectVisibleVarNames(nextEnclosing), userFuncs);
   }
@@ -182,18 +177,12 @@ function hasUserFunctionCall(node: AstNode, userFuncs: Set<string>): boolean {
     return true;
   }
   if (FUNC_TYPES.includes(node.type)) return false;
-  for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
-    const val = node[key];
-    if (val && typeof val === "object") {
-      if (Array.isArray(val)) {
-        for (const item of val) if (hasUserFunctionCall(item, userFuncs)) return true;
-      } else if (val.type && hasUserFunctionCall(val, userFuncs)) {
-        return true;
-      }
-    }
-  }
-  return false;
+  let found = false;
+  walkChildren(node, (child) => {
+    if (found) return;
+    if (hasUserFunctionCall(child, userFuncs)) found = true;
+  });
+  return found;
 }
 
 function shouldWrapReturn(retStmt: AstNode, userFuncs: Set<string>): boolean {
@@ -300,17 +289,7 @@ function collectOwnVarNames(funcNode: AstNode): string[] {
     if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
       names.add(n.id.name);
     }
-    for (const key of Object.keys(n)) {
-      if (["type", "start", "end", "loc"].includes(key)) continue;
-      const val = n[key];
-      if (val && typeof val === "object") {
-        if (Array.isArray(val)) {
-          for (const item of val) walk(item);
-        } else {
-          walk(val);
-        }
-      }
-    }
+    walkChildren(n, walk);
   }
   for (const stmt of funcNode.body.body) walk(stmt);
   return [...names];
@@ -335,17 +314,7 @@ function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
       if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
         names.add(n.id.name);
       }
-      for (const key of Object.keys(n)) {
-        if (["type", "start", "end", "loc"].includes(key)) continue;
-        const val = n[key];
-        if (val && typeof val === "object") {
-          if (Array.isArray(val)) {
-            for (const item of val) walk(item);
-          } else {
-            walk(val);
-          }
-        }
-      }
+      walkChildren(n, walk);
     }
     for (const stmt of func.body.body) walk(stmt);
   }
@@ -425,14 +394,7 @@ function closureCaptureExpr(enclosingFuncs: AstNode[]): AstNode {
       if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
         closureNames.add(n.id.name);
       }
-      for (const key of Object.keys(n)) {
-        if (["type", "start", "end", "loc"].includes(key)) continue;
-        const val = n[key];
-        if (val && typeof val === "object") {
-          if (Array.isArray(val)) for (const item of val) walk(item);
-          else walk(val);
-        }
-      }
+      walkChildren(n, walk);
     }
     for (const stmt of func.body.body) walk(stmt);
   }
