@@ -1,14 +1,19 @@
-# Recursive
+<img width="2400" height="1260" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
 [English](./README.md) | 한국어
 
-<img width="2400" height="1260" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
-
 > 🎉 **Recursive가 [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) (25K+ ⭐️)의 _Interactive Learning & Visualization_ 섹션에 소개됐어요!**
 
-코드를 붙여넣으면 실행 흐름을 단계별로 보여줘요. 라인 하이라이팅, 변수 추적, 재귀 호출 트리까지 시각화해요.
+# Why Recursive?
 
-[![사용해보기](https://img.shields.io/badge/%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0-recursive.oilater.com-38bdf8?style=for-the-badge)](https://recursive.oilater.com)
+- **breakpoint 없이 편한 디버깅** — 코드를 붙여넣으면 모든 스탭을 시각화해줘요. 알고리즘 디버깅 뿐만 아니라 Playground로 사용해보세요!
+- **한눈에 보이는 재귀 흐름** — 호출 하나 하나가 트리 노드로 펼쳐져요.
+- **시간에 따른 변수 변화** — 매 스텝마다 변수의 변화를 볼 수 있어요.
+- **블로그 또는 Notion, Obsidian 임베드 기능** — 블로그, Notion, Obsidian에 코드를 실행할 수 있도록 임베드 기능을 제공해요.
+
+### [사용해보기 →](https://recursive.oilater.com)
+
+https://github.com/user-attachments/assets/fea5b9a6-f48c-455f-9f6f-a4f91d0b372e
 
 ## 지원 언어
 
@@ -42,7 +47,7 @@ pnpm fix          # oxlint + oxfmt
 
 ## 후원
 
-후원은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 됩니다.
+후원은 Java, C++ 등 더 많은 언어를 지원하는 데 큰 힘이 돼요.
 
 [![후원하기](https://img.shields.io/badge/%ED%9B%84%EC%9B%90%ED%95%98%EA%B8%B0-♥-db61a2?style=for-the-badge)](https://github.com/sponsors/oilater)
 
