@@ -1,12 +1,14 @@
 /// <reference lib="webworker" />
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Step, TreeNode, Frame } from "@/algorithm/types";
+import type { Step, TreeNode } from "@/algorithm/types";
 import type {
   JsWorkerInboundMessage,
   JsWorkerOutboundMessage,
   JsWorkerConsoleEntry,
 } from "./worker-types";
+import { cloneFrame, formatArgs } from "./worker-helpers";
+import type { WorkerFrame } from "./worker-helpers";
 
 // Security shims — must run before any call to `new Function(...)` that
 // executes user-transformed code below. No imports emit runtime code above
@@ -16,13 +18,6 @@ import type {
 (self as any).importScripts = undefined;
 (self as any).WebSocket = undefined;
 (self as any).EventSource = undefined;
-
-interface WorkerFrame extends Frame {
-  ownVarNames?: string[];
-  lastLine?: number;
-  nodeId?: string;
-  node?: TreeNode;
-}
 
 interface ClosureMeta {
   funcName: string;
@@ -83,26 +78,6 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
       }
     }
 
-    function formatArgs(argsList: unknown[]): string {
-      return argsList
-        .map(function (a: unknown): string {
-          if (a === undefined) return "undefined";
-          if (a === null) return "null";
-          if (Array.isArray(a)) {
-            if (a.length > 8) return "[" + a.slice(0, 3).join(",") + ",...(" + a.length + ")]";
-            if (a.length > 0 && Array.isArray(a[0]))
-              return "[[...]](" + a.length + "x" + (a[0] as unknown[]).length + ")";
-            return "[" + a.join(",") + "]";
-          }
-          if (typeof a === "object") {
-            const s = JSON.stringify(a);
-            return s.length > 20 ? s.slice(0, 17) + "..." : s;
-          }
-          return String(a);
-        })
-        .join(", ");
-    }
-
     const rootNode: TreeNode = {
       id: "node-" + nodeIdCounter++,
       label: userFunc || entryFuncName,
@@ -134,25 +109,6 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
     // Frames are replaced (not mutated), so a slice keeps each step's view stable.
     function snapshotFrames(): WorkerFrame[] {
       return callStack.slice();
-    }
-
-    function cloneFrame(frame: WorkerFrame): WorkerFrame {
-      const copy: WorkerFrame = {
-        funcName: frame.funcName,
-        variables: {},
-        ownVarNames: frame.ownVarNames,
-        lastLine: frame.lastLine,
-      };
-      for (const k in frame.variables) {
-        if (Object.prototype.hasOwnProperty.call(frame.variables, k)) {
-          copy.variables[k] = frame.variables[k];
-        }
-      }
-      if (frame.nodeId) {
-        copy.nodeId = frame.nodeId;
-        copy.node = frame.node;
-      }
-      return copy;
     }
 
     function ownerFrameIndex(varName: string, fromIdx: number): number {
