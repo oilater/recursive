@@ -6,6 +6,11 @@ import type {
   JsWorkerInboundMessage,
   JsWorkerOutboundMessage,
   JsWorkerConsoleEntry,
+  GuardFn,
+  TraceLineFn,
+  CreateProxyFn,
+  WorkerConsole,
+  WorkerRuntime,
 } from "./worker-types";
 import { cloneFrame, formatArgs, ownerFrameIndex } from "./worker-helpers";
 import type { WorkerFrame } from "./worker-helpers";
@@ -99,19 +104,19 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
       return path;
     }
 
-    function __guard(): void {
+    const __guard: GuardFn = () => {
       loopCount++;
       if (loopCount > maxLoopIterations) {
         throw new Error("Loop iteration limit exceeded (" + maxLoopIterations + ").");
       }
-    }
+    };
 
     // Frames are replaced (not mutated), so a slice keeps each step's view stable.
     function snapshotFrames(): WorkerFrame[] {
       return callStack.slice();
     }
 
-    function __traceLine(line: number, varsSnapshot: Record<string, unknown> | undefined): void {
+    const __traceLine: TraceLineFn = (line, varsSnapshot) => {
       if (steps.length >= maxSteps) {
         throw new Error("Step limit exceeded (" + maxSteps + "). Try smaller input.");
       }
@@ -174,15 +179,15 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
         frames: snapshotFrames(),
         description: "",
       });
-    }
+    };
 
-    function __createProxy(
-      originalFunc: Function,
-      funcName: string,
-      paramNames: string[],
-      ownVarNames: string[],
-      captureClosureFn?: () => Record<string, unknown> | null,
-    ): Function {
+    const __createProxy: CreateProxyFn = (
+      originalFunc,
+      funcName,
+      paramNames,
+      ownVarNames,
+      captureClosureFn,
+    ) => {
       funcName = funcName || (hasRecursion ? (recursiveFuncName as string) : originalFunc.name || "anonymous");
       paramNames = paramNames || (hasRecursion ? recursiveParamNames : []);
       ownVarNames = ownVarNames || paramNames;
@@ -258,23 +263,23 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
       closureMap.set(proxy, meta);
 
       return proxy;
-    }
+    };
 
     const consoleLogs: JsWorkerConsoleEntry[] = [];
-    const fakeConsole = {
-      log: (...callArgs: unknown[]): void => {
+    const fakeConsole: WorkerConsole = {
+      log: (...callArgs) => {
         const text = callArgs
-          .map((a: unknown) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
+          .map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a)))
           .join(" ");
         consoleLogs.push({ text, stepIdx: stepId - 1 });
       },
-      warn: (...callArgs: unknown[]): void => {
+      warn: (...callArgs) => {
         fakeConsole.log(...callArgs);
       },
-      error: (...callArgs: unknown[]): void => {
+      error: (...callArgs) => {
         fakeConsole.log(...callArgs);
       },
-      info: (...callArgs: unknown[]): void => {
+      info: (...callArgs) => {
         fakeConsole.log(...callArgs);
       },
     };
@@ -286,8 +291,25 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
     } else {
       runCode = transformedCode + "\n__entry__();\n";
     }
+    // Contract check: the bag of globals handed to user-transformed code
+    // must match the WorkerRuntime interface shape. Any drift in one of the
+    // runtime functions above surfaces here as a tsc error.
+    const runtime = {
+      __guard,
+      __createProxy,
+      __traceLine,
+      __args: args,
+      console: fakeConsole,
+    } satisfies WorkerRuntime;
+
     const runFn = new Function("__guard", "__createProxy", "__traceLine", "__args", "console", runCode);
-    const finalReturnValue: unknown = runFn(__guard, __createProxy, __traceLine, args, fakeConsole);
+    const finalReturnValue: unknown = runFn(
+      runtime.__guard,
+      runtime.__createProxy,
+      runtime.__traceLine,
+      runtime.__args,
+      runtime.console,
+    );
 
     const successMessage: JsWorkerOutboundMessage = {
       type: "success",
