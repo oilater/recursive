@@ -1,17 +1,3 @@
-import type { StepGeneratorResult } from "@/algorithm/types";
-
-export interface ExecuteSuccessResponse {
-  type: "success";
-  result: StepGeneratorResult;
-}
-
-export interface ExecuteErrorResponse {
-  type: "error";
-  message: string;
-}
-
-export type ExecuteResponse = ExecuteSuccessResponse | ExecuteErrorResponse;
-
 export interface AnalysisResult {
   entryFuncName: string;
   entryParamNames: string[];
