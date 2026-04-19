@@ -4,9 +4,16 @@
 
 > 🎉 **Recursive has been featured in [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) (25K+ ⭐️) — _Interactive Learning & Visualization_ section!**
 
-Paste your code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
+# Why Recursive?
 
-[![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive.oilater.com-38bdf8?style=for-the-badge)](https://recursive.oilater.com)
+- **No setup, no breakpoints** — paste your code, see every step instantly.                                
+- **Recursion made visible** — each call is a tree node, not a mystery.                                   
+- **Variables over time** — what every variable held, at every step.                                         
+- **Embed anywhere** — blogs, Notion, Obsidian.
+
+### [Try it out →](https://recursive.oilater.com)
+
+https://github.com/user-attachments/assets/fea5b9a6-f48c-455f-9f6f-a4f91d0b372e
 
 ## Supported Languages
 
