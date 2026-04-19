@@ -161,9 +161,9 @@ function wrapReturn(retStmt: AstNode, visibleVars: string[]): AstNode {
     body.push(ret(id("__ret")));
   } else {
     body.push(traceCall);
-    body.push(mark({ type: "ReturnStatement", argument: null, start: 0, end: 0 }));
+    body.push(markSynthetic({ type: "ReturnStatement", argument: null, start: 0, end: 0 }));
   }
-  return mark(block(body));
+  return markSynthetic(block(body));
 }
 
 function hasUserFunctionCall(node: AstNode, userFuncs: Set<string>): boolean {
@@ -276,49 +276,46 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
-function collectOwnVarNames(funcNode: AstNode): string[] {
-  const names = new Set<string>();
-  for (const name of extractParamNames(funcNode.params || [])) {
-    if (name && name !== "_" && name !== "arg") names.add(name);
-  }
-  if (funcNode.body?.type !== "BlockStatement") return [...names];
-
+function walkFuncBody(func: AstNode, visit: (n: AstNode) => void): void {
+  if (func.body?.type !== "BlockStatement") return;
   function walk(n: AstNode) {
     if (!n || typeof n !== "object" || n.__synthetic) return;
     if (FUNC_TYPES.includes(n.type)) return;
-    if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
-      names.add(n.id.name);
-    }
+    visit(n);
     walkChildren(n, walk);
   }
-  for (const stmt of funcNode.body.body) walk(stmt);
-  return [...names];
+  for (const stmt of func.body.body) walk(stmt);
+}
+
+function collectVarNamesInFuncs(
+  funcs: AstNode[],
+  options: { skipEntryParams?: boolean; skipEntryBody?: boolean } = {},
+): Set<string> {
+  const names = new Set<string>();
+  for (const func of funcs) {
+    const isEntry = func.id?.name === ENTRY_FUNC_NAME;
+    if (!(isEntry && options.skipEntryParams)) {
+      for (const name of extractParamNames(func.params || [])) {
+        if (name && name !== "_" && name !== "arg") names.add(name);
+      }
+    }
+    if (!(isEntry && options.skipEntryBody)) {
+      walkFuncBody(func, (n) => {
+        if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
+          names.add(n.id.name);
+        }
+      });
+    }
+  }
+  return names;
+}
+
+function collectOwnVarNames(funcNode: AstNode): string[] {
+  return [...collectVarNamesInFuncs([funcNode])];
 }
 
 function collectVisibleVarNames(enclosingFuncs: AstNode[]): string[] {
-  const names = new Set<string>();
-  for (const func of enclosingFuncs) {
-    if (func.id?.name === ENTRY_FUNC_NAME) continue;
-    for (const name of extractParamNames(func.params || [])) {
-      if (name && name !== "_" && name !== "arg") names.add(name);
-    }
-  }
-  const innermost = enclosingFuncs[enclosingFuncs.length - 1];
-  if (!innermost || innermost.body?.type !== "BlockStatement") return [...names];
-
-  for (const func of enclosingFuncs) {
-    if (func.body?.type !== "BlockStatement") continue;
-    function walk(n: AstNode) {
-      if (!n || typeof n !== "object" || n.__synthetic) return;
-      if (FUNC_TYPES.includes(n.type)) return;
-      if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
-        names.add(n.id.name);
-      }
-      walkChildren(n, walk);
-    }
-    for (const stmt of func.body.body) walk(stmt);
-  }
-  return [...names];
+  return [...collectVarNamesInFuncs(enclosingFuncs, { skipEntryParams: true })];
 }
 
 function determineFuncName(
@@ -350,7 +347,7 @@ function determineFuncName(
   return `<anon@${line}:${col}>`;
 }
 
-function mark(node: AstNode): AstNode {
+function markSynthetic(node: AstNode): AstNode {
   node.__synthetic = true;
   return node;
 }
@@ -362,17 +359,17 @@ function captureVarsExpr(varNames: string[]): AstNode {
       [expr(assign(member(id("__v"), id(name)), literal("-")))],
     ),
   );
-  return mark(
+  return markSynthetic(
     call(funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])), []),
   );
 }
 
 function traceLineCall(line: number, varNames: string[]): AstNode {
-  return mark(expr(call(id(TRACE_LINE), [literal(line), captureVarsExpr(varNames)])));
+  return markSynthetic(expr(call(id(TRACE_LINE), [literal(line), captureVarsExpr(varNames)])));
 }
 
 function paramArrayLiteral(paramNames: string[]): AstNode {
-  return mark({
+  return markSynthetic({
     type: "ArrayExpression",
     elements: paramNames.map((p) => literal(p)),
     start: 0,
@@ -381,25 +378,12 @@ function paramArrayLiteral(paramNames: string[]): AstNode {
 }
 
 function closureCaptureExpr(enclosingFuncs: AstNode[]): AstNode {
-  const closureNames = new Set<string>();
-  for (const func of enclosingFuncs) {
-    if (func.id?.name === ENTRY_FUNC_NAME) continue;
-    for (const name of extractParamNames(func.params || [])) {
-      if (name && name !== "_" && name !== "arg") closureNames.add(name);
-    }
-    if (func.body?.type !== "BlockStatement") continue;
-    function walk(n: AstNode) {
-      if (!n || typeof n !== "object" || n.__synthetic) return;
-      if (FUNC_TYPES.includes(n.type)) return;
-      if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
-        closureNames.add(n.id.name);
-      }
-      walkChildren(n, walk);
-    }
-    for (const stmt of func.body.body) walk(stmt);
-  }
+  const closureNames = collectVarNamesInFuncs(enclosingFuncs, {
+    skipEntryParams: true,
+    skipEntryBody: true,
+  });
 
-  if (closureNames.size === 0) return mark(literal(null));
+  if (closureNames.size === 0) return markSynthetic(literal(null));
 
   const tryBlocks = [...closureNames].map((name) =>
     tryCatch(
@@ -407,7 +391,7 @@ function closureCaptureExpr(enclosingFuncs: AstNode[]): AstNode {
       [],
     ),
   );
-  return mark(
+  return markSynthetic(
     funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
   );
 }
@@ -418,7 +402,7 @@ function proxyReassignment(
   ownVars: string[],
   enclosingFuncs: AstNode[],
 ): AstNode {
-  return mark(
+  return markSynthetic(
     expr(
       assign(
         id(funcName),
@@ -464,5 +448,5 @@ function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[])
 }
 
 function guardCall(): AstNode {
-  return mark(expr(call(id(GUARD))));
+  return markSynthetic(expr(call(id(GUARD))));
 }
