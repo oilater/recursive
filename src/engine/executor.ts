@@ -2,7 +2,10 @@ import type { StepGeneratorResult } from "@/algorithm/types";
 import type { ExecuteOptions, AnalysisResult } from "./types";
 import { analyzeCode } from "./analyzer";
 import { transformCode } from "./transformer";
-import { buildWorkerCode } from "./build-worker-code";
+import type {
+  JsWorkerInboundMessage,
+  JsWorkerOutboundMessage,
+} from "./javascript/worker-types";
 import {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_MAX_CALLS,
@@ -33,17 +36,20 @@ export async function executeCustomCode(
   const transformedCode = transformCode(strippedCode, analysis);
 
   return new Promise<ExecuteResult>((resolve, reject) => {
-    const blob = new Blob([buildWorkerCode()], { type: "application/javascript" });
-    const url = URL.createObjectURL(blob);
-    const worker = new Worker(url);
-    URL.revokeObjectURL(url);
+    // Webpack static-analyses this exact `new URL(..., import.meta.url)` form —
+    // it must be a literal expression passed directly to `new Worker(...)`.
+    // Do not factor the URL out to a variable; bundling will break.
+    const worker = new Worker(
+      new URL("./javascript/worker.ts", import.meta.url),
+      { type: "module" },
+    );
 
     const timer = setTimeout(() => {
       worker.terminate();
       reject(new Error(`Execution timed out after ${timeoutMs / 1000} seconds.`));
     }, timeoutMs);
 
-    worker.onmessage = (e) => {
+    worker.onmessage = (e: MessageEvent<JsWorkerOutboundMessage>) => {
       clearTimeout(timer);
       worker.terminate();
       const response = e.data;
@@ -65,7 +71,7 @@ export async function executeCustomCode(
       reject(new Error(e.message || "An unknown execution error occurred."));
     };
 
-    worker.postMessage({
+    const message: JsWorkerInboundMessage = {
       transformedCode,
       entryFuncName: analysis.entryFuncName,
       hasRecursion: analysis.hasRecursion,
@@ -79,6 +85,7 @@ export async function executeCustomCode(
       userTopLevelFuncName: analysis.userTopLevelFuncName,
       entryOwnVarNames: analysis.entryOwnVarNames,
       originalLineCount: code.split("\n").length,
-    });
+    };
+    worker.postMessage(message);
   });
 }

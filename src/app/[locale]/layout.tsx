@@ -7,7 +7,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
-import { PostHogProvider } from "@/shared/lib/analytics/PostHogProvider";
 import { routing } from "@/i18n/routing";
 
 const geistMono = Geist_Mono({
@@ -97,9 +96,7 @@ export default async function LocaleLayout({
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <NextIntlClientProvider>
-          <PostHogProvider>
-            {children}
-          </PostHogProvider>
+          {children}
         </NextIntlClientProvider>
         <Analytics />
       </body>

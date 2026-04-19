@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { StepGeneratorResult, PresetAlgorithm } from "@/algorithm";
 import { executeCustomCodeLazy, analyzeCodeLazy } from "@/engine/lazy";
-import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { highlightCode } from "@/shared/lib/shiki";
 import { buildEmbedUrl } from "@/shared/lib/embed-url";
 import { Badge, Header, StatusMessage, EmbedDropdown } from "@/shared/ui";
@@ -56,12 +55,6 @@ export function VisualizerClient({ preset }: VisualizerClientProps) {
         result: execResult.result,
         hasRecursion: execResult.analysis.hasRecursion,
         codeHtml: html,
-      });
-      trackEvent("code_executed", {
-        source: "preset",
-        presetId: preset.id,
-        args: JSON.stringify(args),
-        stepCount: execResult.result.steps.length,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
