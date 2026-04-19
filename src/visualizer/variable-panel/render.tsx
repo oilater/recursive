@@ -1,4 +1,5 @@
-import { cellChanged, cell2dChanged } from "./diff";
+import { itemAt } from "@/shared/lib/array";
+import { didChange } from "./diff";
 import * as styles from "./variable-panel.css";
 
 export interface FunctionMarker {
@@ -20,12 +21,12 @@ export function isFunctionMarker(v: unknown): v is FunctionMarker {
 function renderGrid1D(value: unknown[], prevValue: unknown): React.ReactNode {
   return (
     <div className={styles.grid}>
-      {value.map((item, i) => (
+      {value.map((cellValue, cellIndex) => (
         <span
-          key={i}
-          className={cellChanged(prevValue, value, i) ? styles.cellChanged : styles.cell}
+          key={cellIndex}
+          className={didChange(itemAt(prevValue, cellIndex), cellValue) ? styles.cellChanged : styles.cell}
         >
-          {String(item)}
+          {String(cellValue)}
         </span>
       ))}
     </div>
@@ -35,14 +36,14 @@ function renderGrid1D(value: unknown[], prevValue: unknown): React.ReactNode {
 function renderGrid2D(value: unknown[][], prevValue: unknown): React.ReactNode {
   return (
     <div className={styles.grid2d}>
-      {value.map((row, r) => (
-        <div key={r} className={styles.gridRow}>
-          {Array.isArray(row) ? row.map((item, c) => (
+      {value.map((row, rowIndex) => (
+        <div key={rowIndex} className={styles.gridRow}>
+          {Array.isArray(row) ? row.map((cellValue, colIndex) => (
             <span
-              key={c}
-              className={cell2dChanged(prevValue, r, c, item) ? styles.cellChanged : styles.cell}
+              key={colIndex}
+              className={didChange(itemAt(itemAt(prevValue, rowIndex), colIndex), cellValue) ? styles.cellChanged : styles.cell}
             >
-              {String(item)}
+              {String(cellValue)}
             </span>
           )) : (
             <span className={styles.cell}>{String(row)}</span>
@@ -68,10 +69,10 @@ function renderFunctionCard(value: FunctionMarker, changed: boolean): React.Reac
       </div>
       {closureEntries.length > 0 && (
         <div className={styles.functionCardBody}>
-          {closureEntries.map(([k, v]) => (
-            <div key={k} className={styles.functionRow}>
-              <span className={styles.functionVarName}>{k}</span>
-              {renderValue(v, false)}
+          {closureEntries.map(([varName, varValue]) => (
+            <div key={varName} className={styles.functionRow}>
+              <span className={styles.functionVarName}>{varName}</span>
+              {renderValue(varValue, false)}
             </div>
           ))}
         </div>
