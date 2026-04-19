@@ -8,7 +8,6 @@ import { getCodeLanguageAdapter } from "@/engine";
 import { executeCodeLazy } from "@/engine/lazy";
 import type { ArgumentFormHandle } from "@/editor";
 import { highlightCode } from "@/shared/lib/shiki";
-import { trackEvent } from "@/shared/lib/analytics/posthog";
 import { useCodeLanguage } from "@/shared/hooks/useCodeLanguage";
 import { Header, StatusMessage, EmbedDropdown, CodeLanguageSelect } from "@/shared/ui";
 import { ChevronLeftIcon } from "@/shared/ui/icons";
@@ -97,13 +96,6 @@ export function CustomVisualizerClient({ initialCode, initialArgs }: CustomVisua
         codeHtml: html,
       });
       setMode("visualize");
-      trackEvent("code_executed", {
-        source: "playground",
-        code: cleanCode.slice(0, 500),
-        language: codeLanguage,
-        hasRecursion: execResult.hasRecursion,
-        stepCount: execResult.result.steps.length,
-      });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setMode("error");
