@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { tokyoNight } from "@uiw/codemirror-theme-tokyo-night";
 import { placeholder as placeholderExt } from "@codemirror/view";
+import type { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import type { CodeLanguage } from "@/engine";
 import { getEditorExtension } from "./language-extensions";
 
@@ -28,8 +29,21 @@ interface CodeEditorProps {
   codeLanguage?: CodeLanguage;
 }
 
-export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "javascript" }: CodeEditorProps) {
+export interface CodeEditorHandle {
+  focus: () => void;
+}
+
+export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function CodeEditor(
+  { value, onChange, readOnly = false, codeLanguage = "javascript" },
+  ref,
+) {
   const t = useTranslations("editor");
+  const cmRef = useRef<ReactCodeMirrorRef>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => cmRef.current?.view?.focus(),
+  }));
+
   const extensions = useMemo(
     () => [getEditorExtension(codeLanguage), placeholderExt(t("placeholder"))],
     [t, codeLanguage],
@@ -38,6 +52,7 @@ export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "
   return (
     <div className={styles.editorRoot}>
       <ReactCodeMirror
+        ref={cmRef}
         value={value}
         onChange={onChange}
         readOnly={readOnly}
@@ -57,4 +72,4 @@ export function CodeEditor({ value, onChange, readOnly = false, codeLanguage = "
       />
     </div>
   );
-}
+});

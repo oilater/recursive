@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { CodeEditor, ArgumentForm, CODE_EXAMPLES } from "@/editor";
-import type { ArgumentFormHandle } from "@/editor";
+import type { ArgumentFormHandle, CodeEditorHandle } from "@/editor";
 import { getCodeLanguageAdapter } from "@/engine";
 import type { CodeLanguage } from "@/engine";
 import { useCodeLanguage } from "@/shared/hooks/useCodeLanguage";
+import { useEditorSession } from "@/shared/hooks/useEditorSession";
 import { CodeLanguageSelect } from "@/shared/ui";
-import {
-  loadEditorSession,
-  saveEditorSession,
-} from "@/shared/lib/editor-session-storage";
+import { buildVisualizeRunUrl } from "@/shared/lib/visualize-url";
 import * as styles from "./home.css";
 
 export function HomeEditor() {
@@ -21,66 +19,30 @@ export function HomeEditor() {
   const { codeLanguage, defaultCodeLanguage, setCodeLanguage, setDefaultCodeLanguage } =
     useCodeLanguage();
 
-  const [code, setCode] = useState("");
-  const [paramNames, setParamNames] = useState<string[]>([]);
-  const [hasTopLevelCall, setHasTopLevelCall] = useState(false);
+  const session = useEditorSession({
+    currentLanguage: codeLanguage,
+    onLanguageRestored: setCodeLanguage,
+  });
+
   const [argsValid, setArgsValid] = useState(true);
-  const [restoredArgs, setRestoredArgs] = useState<unknown[] | undefined>(undefined);
-
-  const hasCode = code.trim().length > 0;
-  const showArgumentForm = paramNames.length > 0 && !hasTopLevelCall;
-  const canRun = hasCode && !!codeLanguage && (!showArgumentForm || argsValid);
   const argFormRef = useRef<ArgumentFormHandle>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<CodeEditorHandle>(null);
 
-  useEffect(() => {
-    const saved = loadEditorSession();
-    if (!saved) return;
-    setCodeLanguage(saved.codeLanguage);
-    setCode(saved.code);
-    setRestoredArgs(saved.args);
-    getCodeLanguageAdapter(saved.codeLanguage)
-      .analyzeUsage(saved.code)
-      .then((usage) => {
-        setParamNames(usage.paramNames);
-        setHasTopLevelCall(usage.hasTopLevelCall);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const hasCode = session.code.trim().length > 0;
+  const showArgumentForm = session.paramNames.length > 0 && !session.hasTopLevelCall;
+  const canRun = hasCode && !!codeLanguage && (!showArgumentForm || argsValid);
 
   const handleCodeLanguageChange = (lang: CodeLanguage) => {
     setCodeLanguage(lang);
-    setCode("");
-    setParamNames([]);
-    setHasTopLevelCall(false);
-    setRestoredArgs(undefined);
-    saveEditorSession({ code: "", codeLanguage: lang });
-    setTimeout(() => {
-      const cm = editorRef.current?.querySelector(".cm-content") as HTMLElement | null;
-      cm?.focus();
-    }, 0);
-  };
-
-  const handleCodeChange = (newCode: string) => {
-    setCode(newCode);
-    if (!codeLanguage) return;
-    saveEditorSession({ code: newCode, codeLanguage });
-    getCodeLanguageAdapter(codeLanguage)
-      .analyzeUsage(newCode)
-      .then((usage) => {
-        setParamNames(usage.paramNames);
-        setHasTopLevelCall(usage.hasTopLevelCall);
-      });
+    session.resetForLanguage(lang);
+    editorRef.current?.focus();
   };
 
   const handleRun = (args: unknown[]) => {
     if (!codeLanguage) return;
-    saveEditorSession({ code, codeLanguage, args });
-    const cleanCode = getCodeLanguageAdapter(codeLanguage).prepareForExecution(code);
-    const encoded = btoa(unescape(encodeURIComponent(cleanCode)));
-    const argsStr = args.length > 0 ? `&args=${encodeURIComponent(JSON.stringify(args))}` : "";
-    const langStr = codeLanguage === "python" ? `&lang=python` : "";
-    router.push(`/visualize/run?code=${encodeURIComponent(encoded)}${argsStr}${langStr}`);
+    session.persistForRun(args);
+    const cleanCode = getCodeLanguageAdapter(codeLanguage).prepareForExecution(session.code);
+    router.push(buildVisualizeRunUrl({ code: cleanCode, args, codeLanguage }));
   };
 
   return (
@@ -96,8 +58,8 @@ export function HomeEditor() {
           {showArgumentForm && (
             <ArgumentForm
               ref={argFormRef}
-              paramNames={paramNames}
-              defaultArgs={restoredArgs}
+              paramNames={session.paramNames}
+              defaultArgs={session.restoredArgs}
               onSubmit={handleRun}
               onValidityChange={setArgsValid}
             />
@@ -115,11 +77,12 @@ export function HomeEditor() {
         </div>
       </div>
 
-      <div className={styles.editorCard} ref={editorRef}>
+      <div className={styles.editorCard}>
         <div className={styles.editorBody}>
           <CodeEditor
-            value={code}
-            onChange={handleCodeChange}
+            ref={editorRef}
+            value={session.code}
+            onChange={session.onCodeChange}
             codeLanguage={codeLanguage ?? "javascript"}
           />
         </div>
@@ -129,14 +92,14 @@ export function HomeEditor() {
         <button
           type="button"
           className={styles.exampleButton}
-          onClick={() => handleCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].recursion)}
+          onClick={() => session.onCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].recursion)}
         >
           {t("editor.example1")}
         </button>
         <button
           type="button"
           className={styles.exampleButton}
-          onClick={() => handleCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].closure)}
+          onClick={() => session.onCodeChange(CODE_EXAMPLES[codeLanguage ?? "javascript"].closure)}
         >
           {t("editor.example2")}
         </button>
