@@ -13,6 +13,12 @@ interface VariablePanelProps {
   prevStep?: Step | undefined;
 }
 
+function getActiveFrameKey(step: Step | undefined): string | null {
+  if (!step || step.frames.length === 0) return null;
+  const lastIndex = step.frames.length - 1;
+  return `${lastIndex}:${step.frames[lastIndex].funcName}`;
+}
+
 function EmptyPanel({ title, message }: { title: string; message: string }) {
   return (
     <div className={styles.container}>
@@ -24,9 +30,7 @@ function EmptyPanel({ title, message }: { title: string; message: string }) {
 
 export function VariablePanel({ currentStep, prevStep }: VariablePanelProps) {
   const t = useTranslations("visualizer");
-  const activeFrameKey = currentStep?.frames.length
-    ? `${currentStep.frames.length - 1}:${currentStep.frames[currentStep.frames.length - 1].funcName}`
-    : null;
+  const activeFrameKey = getActiveFrameKey(currentStep);
   const activeFrameRef = useScrollActiveIntoView<HTMLDivElement>(activeFrameKey);
 
   if (!currentStep || currentStep.frames.length === 0) {

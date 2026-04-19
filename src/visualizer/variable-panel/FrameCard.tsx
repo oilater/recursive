@@ -11,6 +11,12 @@ function frameLabel(frame: Frame): string {
   return isEntryFrame(frame) ? ENTRY_LABEL : frame.funcName;
 }
 
+function getFrameCardClass(isActive: boolean, isRoot: boolean): string {
+  if (isActive) return styles.frameCardActive;
+  if (isRoot) return styles.frameCardRoot;
+  return styles.frameCard;
+}
+
 interface FrameCardProps {
   frame: Frame;
   depth: number;
@@ -24,11 +30,7 @@ export const FrameCard = forwardRef<HTMLDivElement, FrameCardProps>(function Fra
   ref,
 ) {
   const entries = Object.entries(frame.variables);
-  const cardClass = isActive
-    ? styles.frameCardActive
-    : isRoot
-      ? styles.frameCardRoot
-      : styles.frameCard;
+  const cardClass = getFrameCardClass(isActive, isRoot);
 
   return (
     <div className={cardClass} ref={ref}>
