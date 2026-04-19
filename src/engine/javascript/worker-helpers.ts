@@ -42,6 +42,26 @@ export function formatArgs(argsList: unknown[]): string {
 }
 
 /**
+ * Walk the call stack from `fromIdx` toward the root looking for the frame
+ * that lexically owns `varName` (based on each frame's `ownVarNames` list).
+ * Returns the owner's stack index, or -1 if no frame claims the name.
+ *
+ * __traceLine uses this to attribute writes to the correct lexical scope
+ * instead of always dumping them into the top frame.
+ */
+export function ownerFrameIndex(
+  stack: WorkerFrame[],
+  varName: string,
+  fromIdx: number,
+): number {
+  for (let i = fromIdx; i >= 0; i--) {
+    const owns = stack[i].ownVarNames;
+    if (owns && owns.indexOf(varName) !== -1) return i;
+  }
+  return -1;
+}
+
+/**
  * Shallow clone of a WorkerFrame with a fresh `variables` object.
  * Each variable value itself is copied by reference — the deep clone happens
  * at collection time in __traceLine, not here.

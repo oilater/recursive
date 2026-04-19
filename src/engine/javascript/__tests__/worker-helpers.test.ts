@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { TreeNode } from "@/algorithm/types";
-import { cloneFrame, formatArgs, type WorkerFrame } from "../worker-helpers";
+import { cloneFrame, formatArgs, ownerFrameIndex, type WorkerFrame } from "../worker-helpers";
 
 describe("formatArgs", () => {
   describe("primitives", () => {
@@ -131,5 +131,48 @@ describe("cloneFrame", () => {
     const clone = cloneFrame(makeFrame());
     expect(clone.nodeId).toBeUndefined();
     expect(clone.node).toBeUndefined();
+  });
+});
+
+describe("ownerFrameIndex", () => {
+  const frame = (funcName: string, ownVarNames?: string[]): WorkerFrame => ({
+    funcName,
+    variables: {},
+    ownVarNames,
+  });
+
+  it("returns the top frame index when the top frame owns the name", () => {
+    const stack = [frame("outer", ["a"]), frame("inner", ["x", "y"])];
+    expect(ownerFrameIndex(stack, "x", 1)).toBe(1);
+  });
+
+  it("walks up the stack when the top frame does not own the name", () => {
+    const stack = [frame("outer", ["a"]), frame("inner", ["x", "y"])];
+    expect(ownerFrameIndex(stack, "a", 1)).toBe(0);
+  });
+
+  it("returns -1 when no frame in the scope owns the name", () => {
+    const stack = [frame("outer", ["a"]), frame("inner", ["x", "y"])];
+    expect(ownerFrameIndex(stack, "unknown", 1)).toBe(-1);
+  });
+
+  it("skips frames whose ownVarNames is undefined", () => {
+    const stack = [frame("outer", ["a"]), frame("middle"), frame("inner", ["x"])];
+    expect(ownerFrameIndex(stack, "a", 2)).toBe(0);
+  });
+
+  it("ignores frames above fromIdx (does not search downward past the start)", () => {
+    const stack = [frame("outer", ["a"]), frame("inner", ["x"])];
+    // Searching from the outer frame should not discover `x` owned by inner.
+    expect(ownerFrameIndex(stack, "x", 0)).toBe(-1);
+  });
+
+  it("returns -1 when fromIdx is -1 (empty-stack edge)", () => {
+    expect(ownerFrameIndex([], "anything", -1)).toBe(-1);
+  });
+
+  it("returns the closest (innermost) owner when multiple frames claim the same name", () => {
+    const stack = [frame("outer", ["x"]), frame("inner", ["x"])];
+    expect(ownerFrameIndex(stack, "x", 1)).toBe(1);
   });
 });

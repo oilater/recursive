@@ -7,7 +7,7 @@ import type {
   JsWorkerOutboundMessage,
   JsWorkerConsoleEntry,
 } from "./worker-types";
-import { cloneFrame, formatArgs } from "./worker-helpers";
+import { cloneFrame, formatArgs, ownerFrameIndex } from "./worker-helpers";
 import type { WorkerFrame } from "./worker-helpers";
 
 // Security shims — must run before any call to `new Function(...)` that
@@ -111,14 +111,6 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
       return callStack.slice();
     }
 
-    function ownerFrameIndex(varName: string, fromIdx: number): number {
-      for (let i = fromIdx; i >= 0; i--) {
-        const owns = callStack[i].ownVarNames;
-        if (owns && owns.indexOf(varName) !== -1) return i;
-      }
-      return -1;
-    }
-
     function __traceLine(line: number, varsSnapshot: Record<string, unknown> | undefined): void {
       if (steps.length >= maxSteps) {
         throw new Error("Step limit exceeded (" + maxSteps + "). Try smaller input.");
@@ -139,7 +131,7 @@ self.onmessage = (e: MessageEvent<JsWorkerInboundMessage>) => {
       if (varsSnapshot) {
         for (const k in varsSnapshot) {
           if (!Object.prototype.hasOwnProperty.call(varsSnapshot, k)) continue;
-          let ownerIdx = ownerFrameIndex(k, topIdx);
+          let ownerIdx = ownerFrameIndex(callStack, k, topIdx);
           if (ownerIdx === -1) ownerIdx = topIdx;
           getOrClone(ownerIdx).variables[k] = deepClone(varsSnapshot[k]);
         }
