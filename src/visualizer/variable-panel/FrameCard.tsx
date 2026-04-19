@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type { Frame } from "@/algorithm";
 import { isEntryFrame } from "@/algorithm/frames";
 import { didChange } from "./diff";
-import { renderValue } from "./render";
+import { Value } from "./render";
 import * as styles from "./variable-panel.css";
 
 const ENTRY_LABEL = "global";
@@ -47,7 +47,7 @@ export const FrameCard = forwardRef<HTMLDivElement, FrameCardProps>(function Fra
             return (
               <div key={key} className={changed ? styles.rowChanged : styles.row}>
                 <span className={styles.varName}>{key}</span>
-                {renderValue(value, changed, prevFrame?.variables[key])}
+                <Value value={value} changed={changed} prevValue={prevFrame?.variables[key]} />
               </div>
             );
           })}

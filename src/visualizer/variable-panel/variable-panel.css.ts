@@ -170,6 +170,15 @@ export const varValue = style({
   wordBreak: "break-all",
 });
 
+export const varValueHighlighted = style([
+  varValue,
+  {
+    outline: "1.5px solid #fbbf24",
+    outlineOffset: "1px",
+    borderRadius: "4px",
+  },
+]);
+
 // ── Grid ──
 
 export const grid = style({
@@ -226,6 +235,15 @@ export const functionCard = style({
   overflow: "hidden",
   minWidth: "120px",
 });
+
+export const functionCardHighlighted = style([
+  functionCard,
+  {
+    outline: "1.5px solid #fbbf24",
+    outlineOffset: "1px",
+    borderRadius: "6px",
+  },
+]);
 
 export const functionCardHeader = style({
   display: "flex",
