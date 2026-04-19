@@ -4,7 +4,9 @@
 
 <img width="2400" height="1260" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
-코드를 붙여넣으면 실행 흐름을 단계별로 보여줍니다. 라인 하이라이팅, 변수 추적, 재귀 호출 트리까지 시각화합니다.
+> 🎉 **Recursive가 [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) (25K+ ⭐️)의 _Interactive Learning & Visualization_ 섹션에 소개됐어요!**
+
+코드를 붙여넣으면 실행 흐름을 단계별로 보여줘요. 라인 하이라이팅, 변수 추적, 재귀 호출 트리까지 시각화해요.
 
 [![사용해보기](https://img.shields.io/badge/%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EA%B8%B0-recursive.oilater.com-38bdf8?style=for-the-badge)](https://recursive.oilater.com)
 

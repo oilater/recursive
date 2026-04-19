@@ -2,6 +2,8 @@
 
 [한국어](./README.ko.md) | English
 
+> 🎉 **Recursive has been featured in [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) (25K+ ⭐️) — _Interactive Learning & Visualization_ section!**
+
 Paste your code and watch it execute step by step — with line highlighting, variable tracking, and call tree visualization.
 
 [![Try it out](https://img.shields.io/badge/Try%20it%20out-recursive.oilater.com-38bdf8?style=for-the-badge)](https://recursive.oilater.com)
