@@ -2,7 +2,7 @@
 
 [한국어](./README.ko.md) | English
 
-> 🎉 **Recursive has been featured in [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) (25K+ ⭐️) — _Interactive Learning & Visualization_ section!**
+> 🎉 **Recursive has been featured in [awesome-algorithms](https://github.com/tayllan/awesome-algorithms#interactive-learning--visualization) — _Interactive Learning & Visualization_ section!**
 
 # Why Recursive?
 
