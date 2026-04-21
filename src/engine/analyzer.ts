@@ -4,8 +4,10 @@ import { stripTypeScript } from "./strip-types";
 import type { AnalysisResult } from "./types";
 import { ENTRY_FUNC_NAME } from "./constants";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type AstNode = any;
+type AnyFunction =
+  | acorn.FunctionDeclaration
+  | acorn.FunctionExpression
+  | acorn.ArrowFunctionExpression;
 
 interface FuncInfo {
   name: string;
@@ -13,37 +15,41 @@ interface FuncInfo {
   startLine: number;
   endLine: number;
   isRecursive: boolean;
-  node: AstNode;
+  node: AnyFunction;
 }
 
-const lineOf = (node: AstNode): number => node?.loc?.start?.line ?? 0;
-const endLineOf = (node: AstNode): number => node?.loc?.end?.line ?? 0;
+const lineOf = (node: acorn.Node): number => node.loc?.start.line ?? 0;
+const endLineOf = (node: acorn.Node): number => node.loc?.end.line ?? 0;
 
-function extractParamNames(params: AstNode[]): string[] {
-  return (params ?? []).map((p: AstNode) => {
+function extractParamNames(params: acorn.Pattern[]): string[] {
+  return params.map((p) => {
     if (p.type === "Identifier") return p.name;
-    if (p.type === "AssignmentPattern" && p.left?.type === "Identifier") return p.left.name;
+    if (p.type === "AssignmentPattern" && p.left.type === "Identifier") return p.left.name;
     return "arg";
   });
 }
 
-function hasCallTo(node: AstNode, name: string): boolean {
+function isCallToName(call: acorn.CallExpression, name: string): boolean {
+  return call.callee.type === "Identifier" && call.callee.name === name;
+}
+
+function hasCallTo(node: acorn.AnyNode, name: string): boolean {
   let found = false;
   walk.simple(node, {
-    CallExpression(n: AstNode) {
-      if (n.callee?.name === name) found = true;
+    CallExpression(n) {
+      if (isCallToName(n, name)) found = true;
     },
   });
   return found;
 }
 
-function findAllFunctions(ast: AstNode): FuncInfo[] {
+function findAllFunctions(ast: acorn.AnyNode): FuncInfo[] {
   const declared: FuncInfo[] = [];
   const assigned: FuncInfo[] = [];
 
   walk.recursive(ast, null, {
-    FunctionDeclaration(node: AstNode, state, c) {
-      if (node.id?.name) {
+    FunctionDeclaration(node, state, c) {
+      if (node.id) {
         const name = node.id.name;
         declared.push({
           name,
@@ -56,10 +62,10 @@ function findAllFunctions(ast: AstNode): FuncInfo[] {
       }
       c(node.body, state);
     },
-    VariableDeclarator(decl: AstNode, state, c) {
+    VariableDeclarator(decl, state, c) {
       const init = decl.init;
       if (
-        decl.id?.type === "Identifier" &&
+        decl.id.type === "Identifier" &&
         init &&
         (init.type === "FunctionExpression" || init.type === "ArrowFunctionExpression")
       ) {
@@ -87,26 +93,26 @@ export interface AnalyzeCodeResult {
   strippedCode: string;
 }
 
-function hasTopLevelCallTo(ast: AstNode, funcName: string): boolean {
-  for (const stmt of ast.body ?? []) {
+function hasTopLevelCallTo(ast: acorn.Program, funcName: string): boolean {
+  for (const stmt of ast.body) {
     if (stmt.type === "FunctionDeclaration") continue;
     if (hasCallTo(stmt, funcName)) return true;
   }
   return false;
 }
 
-function collectTopLevelVarNames(funcNode: AstNode): string[] {
+function collectTopLevelVarNames(funcNode: AnyFunction): string[] {
   const names = new Set<string>();
-  if (funcNode.body?.type !== "BlockStatement") return [];
+  if (funcNode.body.type !== "BlockStatement") return [];
 
   walk.recursive(funcNode.body, null, {
-    FunctionDeclaration(node: AstNode) {
-      if (node.id?.name) names.add(node.id.name);
+    FunctionDeclaration(node) {
+      if (node.id) names.add(node.id.name);
     },
     FunctionExpression() {},
     ArrowFunctionExpression() {},
-    VariableDeclarator(node: AstNode, state, c) {
-      if (node.id?.type === "Identifier") names.add(node.id.name);
+    VariableDeclarator(node, state, c) {
+      if (node.id.type === "Identifier") names.add(node.id.name);
       if (node.init) c(node.init, state);
     },
   });
@@ -117,7 +123,7 @@ function collectTopLevelVarNames(funcNode: AstNode): string[] {
 export function analyzeCode(code: string): AnalyzeCodeResult {
   const strippedCode = stripTypeScript(code);
 
-  let originalAst: AstNode;
+  let originalAst: acorn.Program;
   try {
     originalAst = acorn.parse(strippedCode, {
       ecmaVersion: 2022,
@@ -137,7 +143,7 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
     ecmaVersion: 2022,
     sourceType: "script",
     locations: true,
-  }) as AstNode;
+  });
   const wrappedFunctions = findAllFunctions(wrappedAst);
   const entryFunc = wrappedFunctions.find((f) => f.name === ENTRY_FUNC_NAME);
 
