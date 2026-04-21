@@ -1,44 +1,11 @@
 import * as acorn from "acorn";
+import * as walk from "acorn-walk";
 import { stripTypeScript } from "./strip-types";
 import type { AnalysisResult } from "./types";
 import { ENTRY_FUNC_NAME } from "./constants";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
-
-function walkAst(node: AstNode, visitor: (n: AstNode) => boolean | void): void {
-  if (!node || typeof node !== "object") return;
-  if (visitor(node) === true) return; // true = stop
-  for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
-    const val = node[key];
-    if (!val || typeof val !== "object") continue;
-    for (const child of Array.isArray(val) ? val : [val]) {
-      if (child?.type) walkAst(child, visitor);
-    }
-  }
-}
-
-function findInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode | null {
-  let result: AstNode | null = null;
-  walkAst(node, (n) => {
-    if (predicate(n)) {
-      result = n;
-      return true;
-    }
-  });
-  return result;
-}
-
-function collectInAst(node: AstNode, predicate: (n: AstNode) => boolean): AstNode[] {
-  const results: AstNode[] = [];
-  walkAst(node, (n) => {
-    if (predicate(n)) results.push(n);
-  });
-  return results;
-}
-
-const lineOf = (node: AstNode): number => node?.loc?.start?.line ?? 0;
 
 interface FuncInfo {
   name: string;
@@ -49,6 +16,9 @@ interface FuncInfo {
   node: AstNode;
 }
 
+const lineOf = (node: AstNode): number => node?.loc?.start?.line ?? 0;
+const endLineOf = (node: AstNode): number => node?.loc?.end?.line ?? 0;
+
 function extractParamNames(params: AstNode[]): string[] {
   return (params ?? []).map((p: AstNode) => {
     if (p.type === "Identifier") return p.name;
@@ -57,48 +27,59 @@ function extractParamNames(params: AstNode[]): string[] {
   });
 }
 
+function hasCallTo(node: AstNode, name: string): boolean {
+  let found = false;
+  walk.simple(node, {
+    CallExpression(n: AstNode) {
+      if (n.callee?.name === name) found = true;
+    },
+  });
+  return found;
+}
+
 function findAllFunctions(ast: AstNode): FuncInfo[] {
-  const results: FuncInfo[] = [];
+  const declared: FuncInfo[] = [];
+  const assigned: FuncInfo[] = [];
 
-  for (const node of collectInAst(ast, (n) => n.type === "FunctionDeclaration" && !!n.id?.name)) {
-    const name = node.id.name;
-    results.push({
-      name,
-      params: extractParamNames(node.params),
-      startLine: lineOf(node),
-      endLine: node.loc?.end?.line ?? 0,
-      isRecursive: !!findInAst(
-        node.body,
-        (n) => n.type === "CallExpression" && n.callee?.name === name,
-      ),
-      node,
-    });
-  }
+  walk.recursive(ast, null, {
+    FunctionDeclaration(node: AstNode, state, c) {
+      if (node.id?.name) {
+        const name = node.id.name;
+        declared.push({
+          name,
+          params: extractParamNames(node.params),
+          startLine: lineOf(node),
+          endLine: endLineOf(node),
+          isRecursive: hasCallTo(node.body, name),
+          node,
+        });
+      }
+      c(node.body, state);
+    },
+    VariableDeclarator(decl: AstNode, state, c) {
+      const init = decl.init;
+      if (
+        decl.id?.type === "Identifier" &&
+        init &&
+        (init.type === "FunctionExpression" || init.type === "ArrowFunctionExpression")
+      ) {
+        const name = decl.id.name;
+        assigned.push({
+          name,
+          params: extractParamNames(init.params),
+          startLine: lineOf(decl),
+          endLine: endLineOf(decl),
+          isRecursive: hasCallTo(init.body, name),
+          node: init,
+        });
+        c(init.body, state);
+        return;
+      }
+      if (init) c(init, state);
+    },
+  });
 
-  for (const decl of collectInAst(
-    ast,
-    (n) =>
-      n.type === "VariableDeclarator" &&
-      n.id?.type === "Identifier" &&
-      n.init &&
-      (n.init.type === "FunctionExpression" || n.init.type === "ArrowFunctionExpression"),
-  )) {
-    const name = decl.id.name;
-    const funcNode = decl.init;
-    results.push({
-      name,
-      params: extractParamNames(funcNode.params),
-      startLine: lineOf(decl),
-      endLine: decl.loc?.end?.line ?? 0,
-      isRecursive: !!findInAst(
-        funcNode.body,
-        (n) => n.type === "CallExpression" && n.callee?.name === name,
-      ),
-      node: funcNode,
-    });
-  }
-
-  return results;
+  return [...declared, ...assigned];
 }
 
 export interface AnalyzeCodeResult {
@@ -109,16 +90,28 @@ export interface AnalyzeCodeResult {
 function hasTopLevelCallTo(ast: AstNode, funcName: string): boolean {
   for (const stmt of ast.body ?? []) {
     if (stmt.type === "FunctionDeclaration") continue;
-    const found = findInAst(
-      stmt,
-      (n) =>
-        n.type === "CallExpression" &&
-        n.callee?.type === "Identifier" &&
-        n.callee?.name === funcName,
-    );
-    if (found) return true;
+    if (hasCallTo(stmt, funcName)) return true;
   }
   return false;
+}
+
+function collectTopLevelVarNames(funcNode: AstNode): string[] {
+  const names = new Set<string>();
+  if (funcNode.body?.type !== "BlockStatement") return [];
+
+  walk.recursive(funcNode.body, null, {
+    FunctionDeclaration(node: AstNode) {
+      if (node.id?.name) names.add(node.id.name);
+    },
+    FunctionExpression() {},
+    ArrowFunctionExpression() {},
+    VariableDeclarator(node: AstNode, state, c) {
+      if (node.id?.type === "Identifier") names.add(node.id.name);
+      if (node.init) c(node.init, state);
+    },
+  });
+
+  return [...names];
 }
 
 export function analyzeCode(code: string): AnalyzeCodeResult {
@@ -171,30 +164,4 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
       userTopLevelFuncName: topLevelFunc?.name ?? null,
     },
   };
-}
-
-function collectTopLevelVarNames(funcNode: AstNode): string[] {
-  const names = new Set<string>();
-  if (funcNode.body?.type !== "BlockStatement") return [];
-  function walk(n: AstNode) {
-    if (!n || typeof n !== "object") return;
-    if (n.type === "FunctionDeclaration") {
-      if (n.id?.name) names.add(n.id.name);
-      return;
-    }
-    if (n.type === "FunctionExpression" || n.type === "ArrowFunctionExpression") return;
-    if (n.type === "VariableDeclarator" && n.id?.type === "Identifier") {
-      names.add(n.id.name);
-    }
-    for (const key of Object.keys(n)) {
-      if (["type", "start", "end", "loc"].includes(key)) continue;
-      const val = n[key];
-      if (val && typeof val === "object") {
-        if (Array.isArray(val)) for (const item of val) walk(item);
-        else walk(val);
-      }
-    }
-  }
-  for (const stmt of funcNode.body.body) walk(stmt);
-  return [...names];
 }

@@ -32,6 +32,7 @@
     "@vanilla-extract/recipes": "^0.5.7",
     "@vercel/analytics": "^2.0.1",
     "acorn": "^8.16.0",
+    "acorn-walk": "^8.3.5",
     "astring": "^1.9.0",
     "d3-hierarchy": "^3.1.2",
     "es-toolkit": "^1.45.1",
