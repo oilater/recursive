@@ -16,6 +16,7 @@ import {
   funcExpr,
   obj,
 } from "./ast-builders";
+import { FUNCTION_NODE_TYPES as FUNC_TYPES, extractParamNames } from "./ast-queries";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
@@ -32,8 +33,6 @@ const LOOP_TYPES = [
   "ForInStatement",
   "ForOfStatement",
 ];
-
-const FUNC_TYPES = ["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"];
 
 const SKIP_KEYS = new Set(["type", "start", "end", "loc"]);
 
@@ -267,14 +266,6 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
 }
 
 const isLoop = (n: AstNode): boolean => LOOP_TYPES.includes(n.type);
-
-function extractParamNames(params: AstNode[]): string[] {
-  return (params ?? []).map((p: AstNode) => {
-    if (p.type === "Identifier") return p.name;
-    if (p.type === "AssignmentPattern" && p.left?.type === "Identifier") return p.left.name;
-    return "arg";
-  });
-}
 
 function walkFuncBody(func: AstNode, visit: (n: AstNode) => void): void {
   if (func.body?.type !== "BlockStatement") return;
