@@ -101,21 +101,22 @@ function hasTopLevelCallTo(ast: acorn.Program, funcName: string): boolean {
   return false;
 }
 
-function collectTopLevelVarNames(funcNode: AnyFunction): string[] {
+function collectTopLevelVarNames(program: acorn.Program): string[] {
   const names = new Set<string>();
-  if (funcNode.body.type !== "BlockStatement") return [];
 
-  walk.recursive(funcNode.body, null, {
-    FunctionDeclaration(node) {
-      if (node.id) names.add(node.id.name);
-    },
-    FunctionExpression() {},
-    ArrowFunctionExpression() {},
-    VariableDeclarator(node, state, c) {
-      if (node.id.type === "Identifier") names.add(node.id.name);
-      if (node.init) c(node.init, state);
-    },
-  });
+  for (const stmt of program.body) {
+    walk.recursive(stmt, null, {
+      FunctionDeclaration(node) {
+        if (node.id) names.add(node.id.name);
+      },
+      FunctionExpression() {},
+      ArrowFunctionExpression() {},
+      VariableDeclarator(node, state, c) {
+        if (node.id.type === "Identifier") names.add(node.id.name);
+        if (node.init) c(node.init, state);
+      },
+    });
+  }
 
   return [...names];
 }
@@ -123,9 +124,9 @@ function collectTopLevelVarNames(funcNode: AnyFunction): string[] {
 export function analyzeCode(code: string): AnalyzeCodeResult {
   const strippedCode = stripTypeScript(code);
 
-  let originalAst: acorn.Program;
+  let ast: acorn.Program;
   try {
-    originalAst = acorn.parse(strippedCode, {
+    ast = acorn.parse(strippedCode, {
       ecmaVersion: 2022,
       sourceType: "script",
       locations: true,
@@ -134,33 +135,21 @@ export function analyzeCode(code: string): AnalyzeCodeResult {
     throw new Error(`Syntax error: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  const originalFunctions = findAllFunctions(originalAst);
+  const functions = findAllFunctions(ast);
+  const topLevelFunc = functions[0] ?? null;
+  const recursiveFunc = functions.find((f) => f.isRecursive) ?? null;
+  const entryOwnVarNames = collectTopLevelVarNames(ast);
 
-  const topLevelFunc = originalFunctions.length > 0 ? originalFunctions[0] : null;
   const returnRef = topLevelFunc ? `\nreturn ${topLevelFunc.name};` : "";
   const wrappedCode = `function ${ENTRY_FUNC_NAME}() {\n${strippedCode}${returnRef}\n}`;
-  const wrappedAst = acorn.parse(wrappedCode, {
-    ecmaVersion: 2022,
-    sourceType: "script",
-    locations: true,
-  });
-  const wrappedFunctions = findAllFunctions(wrappedAst);
-  const entryFunc = wrappedFunctions.find((f) => f.name === ENTRY_FUNC_NAME);
 
-  const recursiveFunc =
-    wrappedFunctions.find((f) => f.name !== ENTRY_FUNC_NAME && f.isRecursive) ?? null;
-
-  const userFacingParams = topLevelFunc ? topLevelFunc.params : [];
-  const hasTopLevelCall = topLevelFunc
-    ? hasTopLevelCallTo(originalAst, topLevelFunc.name)
-    : false;
-  const entryOwnVarNames = entryFunc ? collectTopLevelVarNames(entryFunc.node) : [];
+  const hasTopLevelCall = topLevelFunc ? hasTopLevelCallTo(ast, topLevelFunc.name) : false;
 
   return {
     strippedCode: wrappedCode,
     analysis: {
       entryFuncName: ENTRY_FUNC_NAME,
-      entryParamNames: userFacingParams,
+      entryParamNames: topLevelFunc?.params ?? [],
       entryOwnVarNames,
       recursiveFuncName: recursiveFunc?.name ?? null,
       recursiveParamNames: recursiveFunc?.params ?? [],
