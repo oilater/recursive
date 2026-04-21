@@ -3,11 +3,7 @@ import * as walk from "acorn-walk";
 import { stripTypeScript } from "./strip-types";
 import type { AnalysisResult } from "./types";
 import { ENTRY_FUNC_NAME } from "./constants";
-
-type AnyFunction =
-  | acorn.FunctionDeclaration
-  | acorn.FunctionExpression
-  | acorn.ArrowFunctionExpression;
+import { type AnyFunction, extractParamNames } from "./ast-queries";
 
 interface FuncInfo {
   name: string;
@@ -20,14 +16,6 @@ interface FuncInfo {
 
 const lineOf = (node: acorn.Node): number => node.loc?.start.line ?? 0;
 const endLineOf = (node: acorn.Node): number => node.loc?.end.line ?? 0;
-
-function extractParamNames(params: acorn.Pattern[]): string[] {
-  return params.map((p) => {
-    if (p.type === "Identifier") return p.name;
-    if (p.type === "AssignmentPattern" && p.left.type === "Identifier") return p.left.name;
-    return "arg";
-  });
-}
 
 function isCallToName(call: acorn.CallExpression, name: string): boolean {
   return call.callee.type === "Identifier" && call.callee.name === name;
