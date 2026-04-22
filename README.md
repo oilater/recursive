@@ -1,4 +1,4 @@
-<img width="2400" height="1050" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
+<img width="2400" height="1250" alt="og" src="https://github.com/user-attachments/assets/074c2b71-d776-4811-a012-d439209717fd" />
 
 [한국어](./README.ko.md) | English
 
