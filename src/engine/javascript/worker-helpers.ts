@@ -41,26 +41,11 @@ function formatArg(a: unknown): string {
   return String(a);
 }
 
-/**
- * Render a human-readable preview string for call-tree node labels.
- *
- * - Arrays longer than 8 items show the first 3 + `...(N)`
- * - Arrays whose first element is itself an array render as `[[...]](RxC)`
- * - Non-array objects are JSON-stringified and truncated to 20 chars
- * - Primitives use `String(x)`; `undefined` / `null` pass through verbatim
- */
 export function formatArgs(argsList: unknown[]): string {
   return argsList.map(formatArg).join(", ");
 }
 
-/**
- * Walk the call stack from `fromIdx` toward the root looking for the frame
- * that lexically owns `varName` (based on each frame's `ownVarNames` list).
- * Returns the owner's stack index, or -1 if no frame claims the name.
- *
- * __traceLine uses this to attribute writes to the correct lexical scope
- * instead of always dumping them into the top frame.
- */
+/** Attributes writes to the correct lexical scope instead of the top frame. */
 export function ownerFrameIndex(
   stack: WorkerFrame[],
   varName: string,
@@ -72,11 +57,7 @@ export function ownerFrameIndex(
   return -1;
 }
 
-/**
- * Shallow clone of a WorkerFrame with a fresh `variables` object.
- * Each variable value itself is copied by reference — the deep clone happens
- * at collection time in __traceLine, not here.
- */
+/** Shallow by design — values are deep-cloned later at collection time in __traceLine. */
 export function cloneFrame(frame: WorkerFrame): WorkerFrame {
   return { ...frame, variables: { ...frame.variables } };
 }
