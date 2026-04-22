@@ -13,6 +13,34 @@ export interface WorkerFrame extends Frame {
   node?: TreeNode;
 }
 
+const MAX_INLINE_ARRAY_LEN = 8;
+const ARRAY_PREVIEW_HEAD = 3;
+const MAX_OBJECT_JSON_LEN = 20;
+const OBJECT_TRUNCATE_AT = 17;
+
+function formatArray(a: unknown[]): string {
+  if (a.length > MAX_INLINE_ARRAY_LEN) {
+    return `[${a.slice(0, ARRAY_PREVIEW_HEAD).join(",")},...(${a.length})]`;
+  }
+  if (a.length > 0 && Array.isArray(a[0])) {
+    return `[[...]](${a.length}x${(a[0] as unknown[]).length})`;
+  }
+  return `[${a.join(",")}]`;
+}
+
+function formatObject(a: object): string {
+  const s = JSON.stringify(a);
+  return s.length > MAX_OBJECT_JSON_LEN ? `${s.slice(0, OBJECT_TRUNCATE_AT)}...` : s;
+}
+
+function formatArg(a: unknown): string {
+  if (a === undefined) return "undefined";
+  if (a === null) return "null";
+  if (Array.isArray(a)) return formatArray(a);
+  if (typeof a === "object") return formatObject(a);
+  return String(a);
+}
+
 /**
  * Render a human-readable preview string for call-tree node labels.
  *
@@ -22,23 +50,7 @@ export interface WorkerFrame extends Frame {
  * - Primitives use `String(x)`; `undefined` / `null` pass through verbatim
  */
 export function formatArgs(argsList: unknown[]): string {
-  return argsList
-    .map((a: unknown): string => {
-      if (a === undefined) return "undefined";
-      if (a === null) return "null";
-      if (Array.isArray(a)) {
-        if (a.length > 8) return "[" + a.slice(0, 3).join(",") + ",...(" + a.length + ")]";
-        if (a.length > 0 && Array.isArray(a[0]))
-          return "[[...]](" + a.length + "x" + (a[0] as unknown[]).length + ")";
-        return "[" + a.join(",") + "]";
-      }
-      if (typeof a === "object") {
-        const s = JSON.stringify(a);
-        return s.length > 20 ? s.slice(0, 17) + "..." : s;
-      }
-      return String(a);
-    })
-    .join(", ");
+  return argsList.map(formatArg).join(", ");
 }
 
 /**
@@ -55,8 +67,7 @@ export function ownerFrameIndex(
   fromIdx: number,
 ): number {
   for (let i = fromIdx; i >= 0; i--) {
-    const owns = stack[i].ownVarNames;
-    if (owns && owns.indexOf(varName) !== -1) return i;
+    if (stack[i].ownVarNames?.includes(varName)) return i;
   }
   return -1;
 }
@@ -67,20 +78,5 @@ export function ownerFrameIndex(
  * at collection time in __traceLine, not here.
  */
 export function cloneFrame(frame: WorkerFrame): WorkerFrame {
-  const copy: WorkerFrame = {
-    funcName: frame.funcName,
-    variables: {},
-    ownVarNames: frame.ownVarNames,
-    lastLine: frame.lastLine,
-  };
-  for (const k in frame.variables) {
-    if (Object.prototype.hasOwnProperty.call(frame.variables, k)) {
-      copy.variables[k] = frame.variables[k];
-    }
-  }
-  if (frame.nodeId) {
-    copy.nodeId = frame.nodeId;
-    copy.node = frame.node;
-  }
-  return copy;
+  return { ...frame, variables: { ...frame.variables } };
 }
