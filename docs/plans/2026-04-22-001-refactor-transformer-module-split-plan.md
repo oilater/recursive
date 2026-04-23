@@ -1,7 +1,7 @@
 ---
 title: "refactor: Split transformer.ts into role-separated modules"
 type: refactor
-status: active
+status: completed
 date: 2026-04-22
 ---
 
@@ -161,7 +161,7 @@ Orchestrator는 emission + return-wrapping + scope + traversal을 모두 조합 
 
 ## Implementation Units
 
-- [ ] **Unit 1: Extract AST traversal primitives**
+- [x] **Unit 1: Extract AST traversal primitives**
 
 **Goal:** AST 순회 프리미티브를 독립 모듈로 분리.
 
@@ -197,7 +197,7 @@ Orchestrator는 emission + return-wrapping + scope + traversal을 모두 조합 
 
 ---
 
-- [ ] **Unit 2: Extract scope and naming queries**
+- [x] **Unit 2: Extract scope and naming queries**
 
 **Goal:** 변수/함수 이름 수집과 결정 로직을 독립 모듈로 분리.
 
@@ -234,7 +234,7 @@ Orchestrator는 emission + return-wrapping + scope + traversal을 모두 조합 
 
 ---
 
-- [ ] **Unit 3: Extract AST emission builders**
+- [x] **Unit 3: Extract AST emission builders**
 
 **Goal:** 변환된 AST 노드를 만들어내는 emission 레이어 분리.
 
@@ -270,7 +270,7 @@ Orchestrator는 emission + return-wrapping + scope + traversal을 모두 조합 
 
 ---
 
-- [ ] **Unit 4: Extract return-statement wrapping**
+- [x] **Unit 4: Extract return-statement wrapping**
 
 **Goal:** 리턴문을 감지하고 `__traceLine` + `__ret` 구조로 래핑하는 로직을 독립 모듈로 분리.
 
@@ -308,7 +308,7 @@ Orchestrator는 emission + return-wrapping + scope + traversal을 모두 조합 
 
 ---
 
-- [ ] **Unit 5: Orchestrator cleanup and final verification**
+- [x] **Unit 5: Orchestrator cleanup and final verification**
 
 **Goal:** `transformer/index.ts`에 남은 것이 오케스트레이션 책임만인지 확인하고, import 블록을 정리하고, 전체 회귀 검사를 실행.
 
