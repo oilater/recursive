@@ -1,32 +1,26 @@
 import * as acorn from "acorn";
 import { generate } from "astring";
 import type { AnalysisResult } from "../types";
-import { ENTRY_FUNC_NAME, TRACE_LINE, CREATE_PROXY, GUARD } from "../constants";
-import {
-  id,
-  literal,
-  call,
-  assign,
-  member,
-  expr,
-  block,
-  varDecl,
-  tryCatch,
-  ret,
-  funcExpr,
-  obj,
-} from "../ast-builders";
+import { ENTRY_FUNC_NAME, CREATE_PROXY } from "../constants";
+import { id, literal, block, varDecl, ret } from "../ast-builders";
 import { FUNCTION_NODE_TYPES as FUNC_TYPES, extractParamNames } from "../ast-queries";
-import { walkChildren, walkFuncBody } from "./traversal";
+import { walkChildren } from "./traversal";
 import {
   type ParentInfo,
   collectUserFuncNames,
-  collectVarNamesInFuncs,
   collectOwnVarNames,
   collectVisibleVarNames,
   determineFuncName,
   shouldWrapReturn,
 } from "./scope";
+import {
+  markSynthetic,
+  traceLineCall,
+  paramArrayLiteral,
+  closureCaptureExpr,
+  proxyReassignment,
+  guardCall,
+} from "./emission";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
@@ -217,77 +211,6 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
 
 const isLoop = (n: AstNode): boolean => LOOP_TYPES.includes(n.type);
 
-function markSynthetic(node: AstNode): AstNode {
-  node.__synthetic = true;
-  return node;
-}
-
-function captureVarsExpr(varNames: string[]): AstNode {
-  const tryBlocks = varNames.map((name) =>
-    tryCatch(
-      [expr(assign(member(id("__v"), id(name)), id(name)))],
-      [expr(assign(member(id("__v"), id(name)), literal("-")))],
-    ),
-  );
-  return markSynthetic(
-    call(funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])), []),
-  );
-}
-
-function traceLineCall(line: number, varNames: string[]): AstNode {
-  return markSynthetic(expr(call(id(TRACE_LINE), [literal(line), captureVarsExpr(varNames)])));
-}
-
-function paramArrayLiteral(paramNames: string[]): AstNode {
-  return markSynthetic({
-    type: "ArrayExpression",
-    elements: paramNames.map((p) => literal(p)),
-    start: 0,
-    end: 0,
-  });
-}
-
-function closureCaptureExpr(enclosingFuncs: AstNode[]): AstNode {
-  const closureNames = collectVarNamesInFuncs(enclosingFuncs, {
-    skipEntryParams: true,
-    skipEntryBody: true,
-  });
-
-  if (closureNames.size === 0) return markSynthetic(literal(null));
-
-  const tryBlocks = [...closureNames].map((name) =>
-    tryCatch(
-      [expr(assign(member(id("__v"), id(name)), id(name)))],
-      [],
-    ),
-  );
-  return markSynthetic(
-    funcExpr([], block([varDecl("__v", obj()), ...tryBlocks, ret(id("__v"))])),
-  );
-}
-
-function proxyReassignment(
-  funcName: string,
-  paramNames: string[],
-  ownVars: string[],
-  enclosingFuncs: AstNode[],
-): AstNode {
-  return markSynthetic(
-    expr(
-      assign(
-        id(funcName),
-        call(id(CREATE_PROXY), [
-          id(funcName),
-          literal(funcName),
-          paramArrayLiteral(paramNames),
-          paramArrayLiteral(ownVars),
-          closureCaptureExpr(enclosingFuncs),
-        ]),
-      ),
-    ),
-  );
-}
-
 function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[]): void {
   const params = node.params || [];
   const paramNames = extractParamNames(params);
@@ -317,6 +240,3 @@ function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[])
   node.__synthetic = true;
 }
 
-function guardCall(): AstNode {
-  return markSynthetic(expr(call(id(GUARD))));
-}
