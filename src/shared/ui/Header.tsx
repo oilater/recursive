@@ -5,7 +5,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { LocaleToggle } from "./LocaleToggle";
 import { LogoIcon, MenuIcon, GlobeIcon } from "./icons";
 import { Link } from "@/i18n/navigation";
-import type { Locale } from "@/i18n/config";
+import { type Locale, locales, LOCALE_LABELS } from "@/i18n/config";
+import { switchLocalePath } from "@/shared/lib/locale-switch";
 import * as styles from "./header.css";
 
 interface HeaderProps {
@@ -22,15 +23,10 @@ export function Header({ left, center, right }: HeaderProps) {
 
   const switchLocale = (target: Locale) => {
     setMenuOpen(false);
-    if (target !== locale) {
-      const url = new URL(window.location.href);
-      if (/^\/(ko|en)(\/|$)/.test(url.pathname)) {
-        url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
-      } else {
-        url.pathname = `/${target}${url.pathname}`;
-      }
-      window.location.href = url.toString();
-    }
+    if (target === locale) return;
+    const url = new URL(window.location.href);
+    url.pathname = switchLocalePath(url.pathname, target);
+    window.location.href = url.toString();
   };
 
   useEffect(
@@ -119,18 +115,15 @@ export function Header({ left, center, right }: HeaderProps) {
             <div className={styles.mobileMenuDivider} />
             <div className={styles.mobileLocaleRow}>
               <GlobeIcon size={16} />
-              <button
-                onClick={() => switchLocale("ko")}
-                className={`${styles.mobileLocaleButton} ${locale === "ko" ? styles.mobileLocaleActive : ""}`}
-              >
-                KO
-              </button>
-              <button
-                onClick={() => switchLocale("en")}
-                className={`${styles.mobileLocaleButton} ${locale === "en" ? styles.mobileLocaleActive : ""}`}
-              >
-                EN
-              </button>
+              {locales.map((code) => (
+                <button
+                  key={code}
+                  onClick={() => switchLocale(code)}
+                  className={`${styles.mobileLocaleButton} ${locale === code ? styles.mobileLocaleActive : ""}`}
+                >
+                  {LOCALE_LABELS[code]}
+                </button>
+              ))}
             </div>
           </div>
         )}

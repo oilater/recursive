@@ -2,14 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
-import type { Locale } from "@/i18n/config";
+import { type Locale, locales, defaultLocale, LOCALE_LABELS } from "@/i18n/config";
+import { switchLocalePath } from "@/shared/lib/locale-switch";
 import { GlobeIcon } from "./icons";
 import * as styles from "./locale-toggle.css";
 
-const LOCALES: { code: Locale; label: string }[] = [
-  { code: "ko", label: "KO" },
-  { code: "en", label: "EN" },
-];
+const LOCALES: { code: Locale; label: string }[] = locales.map((code) => ({
+  code,
+  label: LOCALE_LABELS[code],
+}));
 
 export function LocaleToggle() {
   const locale = useLocale() as Locale;
@@ -30,18 +31,15 @@ export function LocaleToggle() {
 
   const switchTo = (target: Locale) => {
     setOpen(false);
-    if (target !== locale) {
-      const url = new URL(window.location.href);
-      if (/^\/(ko|en)(\/|$)/.test(url.pathname)) {
-        url.pathname = url.pathname.replace(/^\/(ko|en)/, `/${target}`);
-      } else {
-        url.pathname = `/${target}${url.pathname}`;
-      }
-      window.location.href = url.toString();
-    }
+    if (target === locale) return;
+    const url = new URL(window.location.href);
+    url.pathname = switchLocalePath(url.pathname, target);
+    window.location.href = url.toString();
   };
 
-  const current = LOCALES.find((l) => l.code === locale)!;
+  const current =
+    LOCALES.find((l) => l.code === locale) ??
+    LOCALES.find((l) => l.code === defaultLocale)!;
 
   return (
     <div ref={ref} style={{ position: "relative" }}>

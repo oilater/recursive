@@ -1,0 +1,162 @@
+{
+  "home": {
+    "subtitle": "コードの実行を1ステップずつ見て、アルゴリズムを直感的に学ぼう。",
+    "docsGuide": "始めましょう →",
+    "langNote": "JavaScriptとTypeScriptに対応しています。",
+    "playground": "Playground",
+    "playgroundDesc": "アルゴリズムのコードを貼り付けたり、自分で書いたりできます。",
+    "customCardTitle": "ここにコードを書いてみよう",
+    "customCardDesc": "JS / TSに対応。関数とパラメータは自動で検出されます。",
+    "issues": "Issues & フィードバック",
+    "algorithms": "アルゴリズム",
+    "algorithmsDesc": "もっと多くのアルゴリズムを近日追加予定です ✨",
+    "sorting": "ソート",
+    "sortingSub": "さまざまなソートアルゴリズムの動きをステップごとに見てみよう。",
+    "recursion": "再帰 & バックトラッキング",
+    "recursionSub": "再帰呼び出しの流れをツリーで可視化します。",
+    "docs": "Docs"
+  },
+  "visualizer": {
+    "backToList": "一覧へ",
+    "running": "実行中...",
+    "apply": "適用",
+    "pressPlay": "再生ボタンを押して始めよう",
+    "jumpToStart": "最初へ",
+    "stepBackward": "1ステップ戻る",
+    "play": "再生",
+    "pause": "一時停止",
+    "stepForward": "1ステップ進む",
+    "jumpToEnd": "最後へ",
+    "variablesEmpty": "ステップを実行すると変数が表示されます"
+  },
+  "run": {
+    "backToEditor": "エディタに戻る"
+  },
+  "custom": {
+    "hint": "💡 JS / TSのコードを貼り付ければ、関数とパラメータを自動で検出します。値を入力して実行してみよう！",
+    "langLabel": "対応言語",
+    "langList": "JavaScript, TypeScript",
+    "run": "▶ 実行",
+    "running": "実行中..."
+  },
+  "editor": {
+    "defaultLang": "デフォルト",
+    "setDefault": "デフォルトに設定",
+    "loading": "エディタを読み込み中...",
+    "placeholder": "アルゴリズムのコードを貼り付けるか、自分で書いてみよう",
+    "inputPlaceholder": "値を入力",
+    "example1": "例 1",
+    "example2": "例 2"
+  },
+  "difficulty": {
+    "easy": "易しい",
+    "medium": "普通",
+    "hard": "難しい"
+  },
+  "algorithm": {
+    "bubble-sort": {
+      "name": "バブルソート",
+      "description": "隣り合う要素を比較しながらソートします"
+    },
+    "selection-sort": {
+      "name": "選択ソート",
+      "description": "最小の要素を見つけて先頭に移動します"
+    },
+    "insertion-sort": {
+      "name": "挿入ソート",
+      "description": "各要素を正しい位置に挿入します"
+    },
+    "quick-sort": {
+      "name": "クイックソート",
+      "description": "ピボットを基準に分割し、再帰的にソートします"
+    },
+    "merge-sort": {
+      "name": "マージソート",
+      "description": "半分に分割し、順序を保ちながら統合します"
+    },
+    "permutations": {
+      "name": "順列",
+      "description": "n個からr個を順序を考慮して選びます"
+    },
+    "combinations": {
+      "name": "組み合わせ",
+      "description": "n個からr個を順序を考慮せずに選びます"
+    },
+    "subsets": {
+      "name": "部分集合",
+      "description": "与えられた配列のすべての部分集合を求めます"
+    }
+  },
+  "docs": {
+    "title": "ドキュメント",
+    "subtitle": "Recursiveでできることと、その使い方。",
+    "featuresTitle": "機能",
+    "feat1Title": "パラメータの自動検出",
+    "feat1Desc": "コードを貼り付けるだけで、関数のパラメータ入力欄が自動で表示されます。",
+    "feat2Title": "再帰呼び出しツリー",
+    "feat2Desc": "再帰関数があれば、呼び出しの流れをツリーで描画します。呼び出しと戻りの順序が一目でわかります。",
+    "feat3Title": "1行ずつの実行",
+    "feat3Desc": "現在の行がハイライトされます。手動でステップ実行も、自動再生も可能。ブレークポイントは不要です。",
+    "feat4Title": "変数のトラッキング",
+    "feat4Desc": "各ステップで変数の値が表示されます。配列はセル形式で表示され、変更された値はハイライトされます。",
+    "feat5Title": "関数でも、ただのコードでもOK",
+    "feat5Desc": "単一の関数はもちろん、関数を含まないただのコードでも動作します。",
+    "langTitle": "対応言語",
+    "pythonTitle": "Python",
+    "pythonDesc": "標準ライブラリをそのまま使えます。collections (Counter, defaultdict)、functools (@cache, @lru_cache)、itertools — すべて動作します。",
+    "jsTitle": "JavaScript / TypeScript",
+    "jsDesc": "TypeScriptの型は自動で除去されます。Math、JSON、Arrayメソッドなどの組み込みAPIはそのまま使えます。",
+    "usageTitle": "使い方",
+    "step1": "言語を選択(Python または JS/TS)",
+    "step2": "コードを入力するか貼り付け",
+    "step3": "関数が検出されると、パラメータ入力欄が表示されます。値を入力してください。",
+    "step4": "▶ 実行 を押す",
+    "step5": "1行ずつステップ実行するか、自動再生で。パネル内で変数の変化を観察できます。",
+    "presetTitle": "プリセットアルゴリズム",
+    "presetDesc": "アルゴリズム学習ページには、ソート(バブル、選択、挿入、クイック、マージ)と再帰(順列、組み合わせ、部分集合)のプリセットがあります。試してみてください。",
+    "examplesTitle": "試してみよう",
+    "embedTitle": "埋め込み",
+    "embedDesc1": "ブログやObsidianに貼り付けると、ビジュアライゼーションが表示されます。",
+    "embedDesc2": "Notionでは /embed と入力し、下のURLを貼り付けてください。",
+    "embedDesc3": "プリセットページで Embed ボタンを押すと、コードをコピーできます。",
+    "heroTitle": "30秒でわかるRecursive",
+    "heroStar": "役に立ったら<link>GitHub ⭐</link>をいただけると嬉しいです!",
+    "heroSponsor": "<link>スポンサー</link>のご支援は、JavaやC++など、より多くの言語サポートにつながります。",
+    "tip1Title": "アルゴリズムの解答コードをそのまま貼り付け",
+    "tip1Desc": "解答コードを関数ごとそのまま貼り付けるだけ。コメントもOK、パラメータは自動で検出されます。入力値を埋めて実行を押してください。",
+    "tip1InputExample": "入力例",
+    "tip1RunExample": "ライブプレビュー",
+    "tip1Hint": "ボタンを押してみてください。実際のアプリでは入力値も変更できます。",
+    "tip2Title": "関数のないただのコードでも動作します",
+    "tip2Desc": "関数で囲まれていないコードでも問題なく実行できます。パラメータの入力は不要 — そのまま ▶ 実行 を押してください。",
+    "tip3Title": "ブログやNotionに埋め込み",
+    "tip3Desc": "ブログ、Notion、Obsidianなど、iframeに対応する場所であればどこでも実行画面を埋め込めます。実行画面の上部にある Embed ボタンをクリックすると、iframeコードをコピーできます。高さの調整も可能で、Notionでは /embed を使ってURLを貼り付けるだけです。",
+    "tip4Title": "PythonとJavaScriptに対応",
+    "tip4Python": "Pythonは標準ライブラリ(collections、functools、itertoolsなど)を自由に使えます。",
+    "tip4Js": "JavaScript / TypeScriptの型は自動で除去されます。Math、JSON、Arrayメソッドなどの組み込みAPIはすべて動作します。",
+    "limitsTitle": "未対応の機能",
+    "limit6": "Java、C、C++などはブラウザで直接実行できず、別途サーバーが必要です。現在このプロジェクトはサーバーなしで動作しているため、これらの言語はまだ対応していません。",
+    "limit7": "複数行入力(競技プログラミングサイトのようなstdin形式の入力など)には対応していません。値は関数のパラメータとしてのみ渡せます。",
+    "limit1": "非同期コード(setTimeout、Promise、async/await)にはまだ対応していません。",
+    "limit2": "JavaScriptのclass構文はまだ動作しません。",
+    "limit3": "再帰呼び出しは最大1,000回、実行ステップは最大10,000回までです。",
+    "limit4": "Pythonは標準ライブラリのみ対応。numpy、pandasなどは使えません。",
+    "limit5": "非常に大きな入力では実行が停止することがあります。テストサイズは適度に保ってください。",
+    "tip6Title": "フィードバックはいつでも歓迎",
+    "tip6Desc": "機能リクエストやバグ報告はいつでも歓迎します。<link>GitHub Issues</link>に投稿してください。PRでの直接コントリビュートも大歓迎です。",
+    "tip7Title": "スポンサーシップはいつでも歓迎",
+    "tip7Desc": "<link>スポンサー</link>のご支援は、JavaやC++など、より多くの言語サポートにつながります。",
+    "changelogTitle": "更新履歴",
+    "changelogDesc": "GitHub Issuesをもとに機能を改善しています。<link>すべてのIssueを見る →</link>",
+    "changelog1": "再帰呼び出しツリーのマウスドラッグによるパン操作",
+    "changelog2": "Python対応",
+    "changelog3": "埋め込み対応(ブログ、Notion、Obsidianなど)",
+    "changelog4": "i18n対応(韓国語 / 英語)",
+    "changelog5": "Docsページの追加",
+    "changelog6": "関数呼び出しをスタックフレームとして可視化"
+  },
+  "metadata": {
+    "title": "Recursive — アルゴリズムを追跡しよう",
+    "description": "コードの実行を1ステップずつ見守ろう — 行のハイライト、変数のトラッキング、呼び出しツリーの可視化。"
+  }
+}
