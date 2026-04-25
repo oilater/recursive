@@ -1,5 +1,5 @@
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
-import { createOnigurumaEngine } from "shiki/engine/oniguruma";
+import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 type SupportedLang = "javascript" | "python";
 type SupportedTheme = "github-dark";
@@ -14,7 +14,7 @@ export function getHighlighter(): Promise<HighlighterCore> {
         import("shiki/langs/javascript.mjs"),
         import("shiki/langs/python.mjs"),
       ],
-      engine: createOnigurumaEngine(import("shiki/wasm")),
+      engine: createJavaScriptRegexEngine(),
     });
   }
   return highlighterPromise;
