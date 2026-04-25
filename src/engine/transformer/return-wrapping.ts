@@ -1,12 +1,35 @@
 import { ENTRY_FUNC_NAME } from "../constants";
 import { FUNCTION_NODE_TYPES as FUNC_TYPES } from "../ast-queries";
 import { id, block, varDecl, ret } from "../ast-builders";
-import { walkChildren } from "./traversal";
-import { collectVisibleVarNames, shouldWrapReturn } from "./scope";
+import { walkChildren, SKIP_KEYS } from "./traversal";
+import { collectVisibleVarNames } from "./scope";
 import { markSynthetic, traceLineCall } from "./emission";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
+
+function hasUserFunctionCall(node: AstNode, userFuncs: Set<string>): boolean {
+  if (!node || typeof node !== "object") return false;
+  if (
+    node.type === "CallExpression" &&
+    !node.__synthetic &&
+    node.callee?.type === "Identifier" &&
+    userFuncs.has(node.callee.name)
+  ) {
+    return true;
+  }
+  if (FUNC_TYPES.includes(node.type)) return false;
+  let found = false;
+  walkChildren(node, (child) => {
+    if (found) return;
+    if (hasUserFunctionCall(child, userFuncs)) found = true;
+  });
+  return found;
+}
+
+function shouldWrapReturn(retStmt: AstNode, userFuncs: Set<string>): boolean {
+  return !!retStmt.argument && hasUserFunctionCall(retStmt.argument, userFuncs);
+}
 
 function wrapReturn(retStmt: AstNode, visibleVars: string[]): AstNode {
   const line = retStmt.loc?.start?.line ?? 0;
@@ -27,7 +50,7 @@ function wrapReturnsIn(node: AstNode, visibleVars: string[], userFuncs: Set<stri
   if (!node || typeof node !== "object" || node.__synthetic) return;
   if (FUNC_TYPES.includes(node.type)) return;
   for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
+    if (SKIP_KEYS.has(key)) continue;
     const val = node[key];
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {

@@ -87,25 +87,3 @@ export function determineFuncName(
   return `<anon@${line}:${col}>`;
 }
 
-function hasUserFunctionCall(node: AstNode, userFuncs: Set<string>): boolean {
-  if (!node || typeof node !== "object") return false;
-  if (
-    node.type === "CallExpression" &&
-    !node.__synthetic &&
-    node.callee?.type === "Identifier" &&
-    userFuncs.has(node.callee.name)
-  ) {
-    return true;
-  }
-  if (FUNC_TYPES.includes(node.type)) return false;
-  let found = false;
-  walkChildren(node, (child) => {
-    if (found) return;
-    if (hasUserFunctionCall(child, userFuncs)) found = true;
-  });
-  return found;
-}
-
-export function shouldWrapReturn(retStmt: AstNode, userFuncs: Set<string>): boolean {
-  return !!retStmt.argument && hasUserFunctionCall(retStmt.argument, userFuncs);
-}

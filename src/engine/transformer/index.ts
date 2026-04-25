@@ -4,6 +4,7 @@ import type { AnalysisResult } from "../types";
 import { ENTRY_FUNC_NAME, CREATE_PROXY } from "../constants";
 import { id, literal, block, ret } from "../ast-builders";
 import { FUNCTION_NODE_TYPES as FUNC_TYPES, extractParamNames } from "../ast-queries";
+import { SKIP_KEYS, isLoop } from "./traversal";
 import {
   type ParentInfo,
   collectUserFuncNames,
@@ -12,6 +13,7 @@ import {
   determineFuncName,
 } from "./scope";
 import {
+  markSynthetic,
   traceLineCall,
   paramArrayLiteral,
   closureCaptureExpr,
@@ -22,14 +24,6 @@ import { wrapAllReturns } from "./return-wrapping";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
-
-const LOOP_TYPES = [
-  "ForStatement",
-  "WhileStatement",
-  "DoWhileStatement",
-  "ForInStatement",
-  "ForOfStatement",
-];
 
 export function transformCode(strippedCode: string, _analysis: AnalysisResult): string {
   const ast = acorn.parse(strippedCode, {
@@ -74,7 +68,7 @@ function walkAndTransform(
   }
 
   for (const key of Object.keys(node)) {
-    if (["type", "start", "end", "loc"].includes(key)) continue;
+    if (SKIP_KEYS.has(key)) continue;
     const val = node[key];
     if (val && typeof val === "object") {
       if (Array.isArray(val)) {
@@ -142,8 +136,6 @@ function transformBlockBody(node: AstNode, enclosingFuncs: AstNode[]): void {
   node.body = newBody;
 }
 
-const isLoop = (n: AstNode): boolean => LOOP_TYPES.includes(n.type);
-
 function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[]): void {
   const params = node.params || [];
   const paramNames = extractParamNames(params);
@@ -170,6 +162,6 @@ function wrapInPlace(node: AstNode, funcName: string, enclosingFuncs: AstNode[])
     closureCaptureExpr(enclosingFuncs),
   ];
   node.optional = false;
-  node.__synthetic = true;
+  markSynthetic(node);
 }
 

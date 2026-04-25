@@ -3,7 +3,17 @@ import { FUNCTION_NODE_TYPES as FUNC_TYPES } from "../ast-queries";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AstNode = any;
 
-const SKIP_KEYS = new Set(["type", "start", "end", "loc"]);
+export const SKIP_KEYS = new Set(["type", "start", "end", "loc"]);
+
+export const LOOP_TYPES = [
+  "ForStatement",
+  "WhileStatement",
+  "DoWhileStatement",
+  "ForInStatement",
+  "ForOfStatement",
+] as const;
+
+export const isLoop = (n: AstNode): boolean => LOOP_TYPES.includes(n.type);
 
 export function walkChildren(node: AstNode, visit: (child: AstNode) => void): void {
   for (const key of Object.keys(node)) {
