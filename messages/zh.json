@@ -1,0 +1,162 @@
+{
+  "home": {
+    "subtitle": "看着你的代码一步步运行，直观地学习算法。",
+    "docsGuide": "开始使用 →",
+    "langNote": "支持 JavaScript 和 TypeScript。",
+    "playground": "Playground",
+    "playgroundDesc": "粘贴算法代码，或自己动手写。",
+    "customCardTitle": "在这里编写你的代码",
+    "customCardDesc": "支持 JS / TS。函数和参数会自动识别。",
+    "issues": "Issues 与反馈",
+    "algorithms": "算法",
+    "algorithmsDesc": "更多算法即将推出 ✨",
+    "sorting": "排序",
+    "sortingSub": "一步步探索各种排序算法的工作原理。",
+    "recursion": "递归与回溯",
+    "recursionSub": "将递归调用流程可视化为一棵树。",
+    "docs": "文档"
+  },
+  "visualizer": {
+    "backToList": "列表",
+    "running": "运行中...",
+    "apply": "应用",
+    "pressPlay": "按下播放键开始",
+    "jumpToStart": "跳到开头",
+    "stepBackward": "上一步",
+    "play": "播放",
+    "pause": "暂停",
+    "stepForward": "下一步",
+    "jumpToEnd": "跳到结尾",
+    "variablesEmpty": "执行一步以查看变量"
+  },
+  "run": {
+    "backToEditor": "返回编辑器"
+  },
+  "custom": {
+    "hint": "💡 粘贴 JS / TS 代码，我们会自动识别函数和参数。输入数值后即可运行!",
+    "langLabel": "支持语言",
+    "langList": "JavaScript, TypeScript",
+    "run": "▶ 运行",
+    "running": "运行中..."
+  },
+  "editor": {
+    "defaultLang": "默认",
+    "setDefault": "设为默认",
+    "loading": "正在加载编辑器...",
+    "placeholder": "粘贴你的算法代码，或自己动手写",
+    "inputPlaceholder": "请输入值",
+    "example1": "示例 1",
+    "example2": "示例 2"
+  },
+  "difficulty": {
+    "easy": "简单",
+    "medium": "中等",
+    "hard": "困难"
+  },
+  "algorithm": {
+    "bubble-sort": {
+      "name": "冒泡排序",
+      "description": "通过比较相邻元素进行排序"
+    },
+    "selection-sort": {
+      "name": "选择排序",
+      "description": "找到最小元素并将其移到前面"
+    },
+    "insertion-sort": {
+      "name": "插入排序",
+      "description": "将每个元素插入到正确的位置"
+    },
+    "quick-sort": {
+      "name": "快速排序",
+      "description": "围绕基准值进行划分并递归排序"
+    },
+    "merge-sort": {
+      "name": "归并排序",
+      "description": "对半分割后再按序合并"
+    },
+    "permutations": {
+      "name": "排列",
+      "description": "从 n 个元素中按顺序选出 r 个"
+    },
+    "combinations": {
+      "name": "组合",
+      "description": "从 n 个元素中无序地选出 r 个"
+    },
+    "subsets": {
+      "name": "子集",
+      "description": "找出给定数组的所有子集"
+    }
+  },
+  "docs": {
+    "title": "文档",
+    "subtitle": "Recursive 能做什么以及如何使用。",
+    "featuresTitle": "功能",
+    "feat1Title": "自动识别参数",
+    "feat1Desc": "粘贴代码后，函数参数的输入框会自动出现。",
+    "feat2Title": "递归调用树",
+    "feat2Desc": "如果存在递归函数，调用流程会以树状图绘制。一眼看清调用与返回的顺序。",
+    "feat3Title": "逐行执行",
+    "feat3Desc": "当前执行行会高亮显示。可以手动逐步执行，也可以自动播放。无需断点。",
+    "feat4Title": "变量追踪",
+    "feat4Desc": "每一步都会显示变量的值。数组以单元格形式呈现，发生变化的值会被高亮。",
+    "feat5Title": "函数或纯代码",
+    "feat5Desc": "单个函数可以运行，没有任何函数的纯代码也同样可以。",
+    "langTitle": "支持的语言",
+    "pythonTitle": "Python",
+    "pythonDesc": "标准库可完整使用。collections (Counter, defaultdict)、functools (@cache, @lru_cache)、itertools 全部都能用。",
+    "jsTitle": "JavaScript / TypeScript",
+    "jsDesc": "TypeScript 类型会被自动剥离。Math、JSON、Array 方法等内置 API 开箱即用。",
+    "usageTitle": "使用方法",
+    "step1": "选择语言(Python 或 JS/TS)",
+    "step2": "输入或粘贴你的代码",
+    "step3": "如果检测到函数，参数输入框就会出现。填入值即可。",
+    "step4": "点击 ▶ 运行",
+    "step5": "逐行执行或自动播放。在面板中观察变量的变化。",
+    "presetTitle": "预设算法",
+    "presetDesc": "算法学习页面提供了排序(冒泡、选择、插入、快速、归并)和递归(排列、组合、子集)的预设。来试试看吧。",
+    "examplesTitle": "试一试",
+    "embedTitle": "嵌入",
+    "embedDesc1": "把它粘贴到你的博客或 Obsidian，可视化效果就会显示出来。",
+    "embedDesc2": "在 Notion 中输入 /embed 然后粘贴下面的 URL。",
+    "embedDesc3": "在任意预设页面，点击 Embed 按钮即可复制代码。",
+    "heroTitle": "30 秒了解 Recursive",
+    "heroStar": "如果对你有帮助，欢迎送上一个 <link>GitHub ⭐</link>!",
+    "heroSponsor": "你的<link>赞助</link>将帮助我们支持更多语言，比如 Java 和 C++。",
+    "tip1Title": "原样粘贴你的算法解答",
+    "tip1Desc": "把你的解答代码连同函数一起粘贴进来即可。注释没问题，参数会自动识别。填入输入值后点击运行。",
+    "tip1InputExample": "输入示例",
+    "tip1RunExample": "实时预览",
+    "tip1Hint": "试试按下按钮。在实际应用中，你可以修改输入值。",
+    "tip2Title": "没有函数的纯代码也可以",
+    "tip2Desc": "没有外层函数包裹的代码也能正常运行。无需参数输入，直接点击 ▶ 运行即可。",
+    "tip3Title": "嵌入到博客或 Notion",
+    "tip3Desc": "你可以把执行视图嵌入到博客、Notion、Obsidian，或任何支持 iframe 的地方。点击执行视图顶部的 Embed 按钮即可复制 iframe 代码。还可以调整高度，在 Notion 中只需使用 /embed 并粘贴 URL 即可。",
+    "tip4Title": "支持 Python 和 JavaScript",
+    "tip4Python": "Python 可自由使用标准库(collections、functools、itertools 等)。",
+    "tip4Js": "JavaScript / TypeScript 类型会自动剥离。Math、JSON、Array 方法等内置 API 全部可用。",
+    "limitsTitle": "尚不支持",
+    "limit6": "Java、C、C++ 等语言无法直接在浏览器中运行，需要单独的服务器。由于该项目目前在无服务器环境下运行，因此暂不支持这些语言。",
+    "limit7": "不支持多行输入(例如算法竞赛网站那种 stdin 形式的输入)。值只能通过函数参数传递。",
+    "limit1": "暂不支持异步代码(setTimeout、Promise、async/await)。",
+    "limit2": "暂不支持 JavaScript 的 class 语法。",
+    "limit3": "递归调用最多 1,000 次，执行步骤最多 10,000 步。",
+    "limit4": "Python 仅支持标准库。不支持 numpy、pandas 等。",
+    "limit5": "输入过大可能导致执行中断。请保持测试规模合理。",
+    "tip6Title": "我们随时欢迎反馈",
+    "tip6Desc": "随时欢迎功能建议和 bug 反馈。请到 <link>GitHub Issues</link> 留言。也欢迎直接通过 PR 贡献代码。",
+    "tip7Title": "我们随时欢迎赞助",
+    "tip7Desc": "你的<link>赞助</link>将帮助我们支持更多语言，比如 Java 和 C++。",
+    "changelogTitle": "更新日志",
+    "changelogDesc": "我们根据 GitHub Issues 持续改进功能。<link>查看所有 issues →</link>",
+    "changelog1": "递归调用树支持鼠标拖拽平移",
+    "changelog2": "支持 Python",
+    "changelog3": "支持嵌入(博客、Notion、Obsidian 等)",
+    "changelog4": "支持 i18n(韩语 / 英语)",
+    "changelog5": "新增文档页面",
+    "changelog6": "将函数调用可视化为栈帧"
+  },
+  "metadata": {
+    "title": "Recursive — 追踪你的算法",
+    "description": "看着你的代码一步步运行 —— 行高亮、变量追踪以及调用树可视化。"
+  }
+}

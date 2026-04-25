@@ -1,6 +1,7 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import { Header } from "@/shared/ui";
 import { highlightCode } from "@/shared/lib/shiki";
+import { type Locale, defaultLocale } from "@/i18n/config";
 import * as styles from "./docs.css";
 
 const SITE = "https://recursive.oilater.com";
@@ -49,6 +50,57 @@ function bubbleSort(arr) {
   return arr;
 }`;
 
+const BUBBLE_SORT_JA = `// 配列を昇順にソートして返す
+//
+// 解き方
+// 隣接する2つの要素を比較し、大きい方を後ろへ送る。
+// 1周ごとに最大値が末尾に確定する。
+// 時間計算量: O(n^2)
+
+function bubbleSort(arr) {
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - 1 - i; j++) {
+      // 前の方が大きければ交換
+      if (arr[j] > arr[j + 1]) {
+        const temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+  return arr;
+}`;
+
+const BUBBLE_SORT_ZH = `// 将数组按升序排序并返回
+//
+// 解题思路
+// 比较相邻两个元素，将较大的元素往后移。
+// 每完成一轮，最大值就固定到末尾。
+// 时间复杂度: O(n^2)
+
+function bubbleSort(arr) {
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = 0; j < n - 1 - i; j++) {
+      // 如果前面更大则交换
+      if (arr[j] > arr[j + 1]) {
+        const temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+    }
+  }
+  return arr;
+}`;
+
+const BUBBLE_SORT_BY_LOCALE: Record<Locale, string> = {
+  ko: BUBBLE_SORT_KO,
+  en: BUBBLE_SORT_EN,
+  ja: BUBBLE_SORT_JA,
+  zh: BUBBLE_SORT_ZH,
+};
+
 const PLAIN_JS = `const arr = [5, 3, 8, 1, 2];
 let total = 0;
 for (let i = 0; i < arr.length; i++) {
@@ -60,7 +112,10 @@ export default async function DocsPage() {
   const t = await getTranslations("docs");
   const locale = await getLocale();
 
-  const bubbleSortCode = locale === "ko" ? BUBBLE_SORT_KO : BUBBLE_SORT_EN;
+  const bubbleSortCode =
+    locale in BUBBLE_SORT_BY_LOCALE
+      ? BUBBLE_SORT_BY_LOCALE[locale as Locale]
+      : BUBBLE_SORT_BY_LOCALE[defaultLocale];
   const [bubbleHtml, plainJsHtml] = await Promise.all([
     highlightCode(bubbleSortCode, "javascript"),
     highlightCode(PLAIN_JS, "javascript"),

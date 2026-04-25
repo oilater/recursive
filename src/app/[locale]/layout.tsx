@@ -8,6 +8,14 @@ import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
 import { routing } from "@/i18n/routing";
+import { type Locale, locales, defaultLocale } from "@/i18n/config";
+
+const OG_LOCALE_MAP: Record<Locale, string> = {
+  ko: "ko_KR",
+  en: "en_US",
+  ja: "ja_JP",
+  zh: "zh_CN",
+};
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -53,7 +61,10 @@ export async function generateMetadata({
     authors: [{ name: "oilater", url: "https://github.com/oilater" }],
     openGraph: {
       type: "website",
-      locale: locale === "ko" ? "ko_KR" : "en_US",
+      locale:
+        locale in OG_LOCALE_MAP
+          ? OG_LOCALE_MAP[locale as Locale]
+          : OG_LOCALE_MAP[defaultLocale],
       url: SITE_URL,
       siteName: SITE_NAME,
       title: t("title"),
@@ -69,10 +80,12 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     alternates: {
       canonical: SITE_URL,
-      languages: {
-        ko: SITE_URL,
-        en: `${SITE_URL}/en`,
-      },
+      languages: Object.fromEntries(
+        locales.map((code) => [
+          code,
+          code === defaultLocale ? SITE_URL : `${SITE_URL}/${code}`,
+        ]),
+      ),
     },
   };
 }
