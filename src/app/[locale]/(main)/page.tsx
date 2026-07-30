@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Header } from "@/shared/ui";
 import { Link } from "@/i18n/navigation";
-import { HomeEditor } from "./HomeEditor";
+import { HomeEditorLoader } from "./HomeEditorLoader";
 import * as styles from "./home.css";
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
         </Link>
       </div>
 
-      <HomeEditor />
+      <HomeEditorLoader />
     </main>
   );
 }

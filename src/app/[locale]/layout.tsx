@@ -20,11 +20,16 @@ const OG_LOCALE_MAP: Record<Locale, string> = {
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["700"],
+  style: ["normal"],
+  display: "optional",
+  preload: true,
 });
 
 const SITE_URL = "https://recursive-ochre.vercel.app";
