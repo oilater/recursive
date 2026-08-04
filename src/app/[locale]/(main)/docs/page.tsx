@@ -1,4 +1,4 @@
-import { getTranslations, getLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Header } from "@/shared/ui";
 import { highlightCode } from "@/shared/lib/shiki";
 import { type Locale, defaultLocale } from "@/i18n/config";
@@ -108,9 +108,10 @@ for (let i = 0; i < arr.length; i++) {
 }
 console.log(total);`;
 
-export default async function DocsPage() {
+export default async function DocsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("docs");
-  const locale = await getLocale();
 
   const bubbleSortCode =
     locale in BUBBLE_SORT_BY_LOCALE

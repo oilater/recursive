@@ -1,4 +1,6 @@
+import { use } from "react";
 import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { getCardDataByCategory } from "@/algorithm";
 import { initializeAlgorithms } from "@/algorithm/presets";
 import { AlgorithmCard } from "@/algorithm/ui/AlgorithmCard";
@@ -12,7 +14,9 @@ const SECTIONS = [
   { category: "recursion" as const, titleKey: "recursion" as const, subKey: "recursionSub" as const },
 ];
 
-export default function AlgorithmsPage() {
+export default function AlgorithmsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
   const t = useTranslations("home");
 
   return (

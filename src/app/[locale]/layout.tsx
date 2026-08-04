@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
-import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "@/shared/styles/global.css";
 import { routing } from "@/i18n/routing";
 import { type Locale, locales, defaultLocale } from "@/i18n/config";
@@ -40,6 +39,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: "#0f0f13",
 };
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params,
@@ -111,6 +114,18 @@ export default async function LocaleLayout({
       <head>
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "var l=document.createElement('link');l.rel='stylesheet';l.href='/fonts/pretendard/pretendardvariable-dynamic-subset.css';l.media='print';l.onload=function(){this.media='all'};document.head.appendChild(l);",
+          }}
+        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="/fonts/pretendard/pretendardvariable-dynamic-subset.css"
+          />
+        </noscript>
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <NextIntlClientProvider>

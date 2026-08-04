@@ -1,10 +1,14 @@
+import { use } from "react";
 import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { Header } from "@/shared/ui";
 import { Link } from "@/i18n/navigation";
 import { HomeEditorLoader } from "./HomeEditorLoader";
 import * as styles from "./home.css";
 
-export default function Home() {
+export default function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
   const t = useTranslations();
 
   return (
